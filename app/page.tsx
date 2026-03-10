@@ -4,6 +4,9 @@ import HomeFooter from '../components/home/HomeFooter'
 import HomeHeader from '../components/home/HomeHeader'
 import type { Location } from '../components/home/LocationCard'
 import { getSiteSettings } from '../lib/site-settings'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { SELECTED_LOCATION_COOKIE } from '@/lib/selected-location'
 
 const FALLBACK_LOCATIONS: Location[] = [
   { id: 1,  title: 'Cebu',            slug: 'cebu',            logo_url: null, description: null },
@@ -46,6 +49,11 @@ async function getLocations(): Promise<Location[]> {
 }
 
 export default async function Home() {
+  const cookieStore = await cookies()
+  const locationCookie = cookieStore.get(SELECTED_LOCATION_COOKIE)?.value
+  if (locationCookie) {
+    redirect(`/${locationCookie}`)
+  }
   const [settings, locations] = await Promise.all([getSiteSettings(), getLocations()])
 
   return (
