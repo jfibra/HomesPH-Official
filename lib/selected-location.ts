@@ -5,3 +5,7 @@ export function serializeSelectedLocationCookie(slug: string) {
   const encoded = encodeURIComponent(slug)
   return `${SELECTED_LOCATION_COOKIE}=${encoded}; path=/; max-age=${SELECTED_LOCATION_COOKIE_MAX_AGE}; sameSite=Lax`
 }
+
+export function clearSelectedLocationCookie() {
+  return `${SELECTED_LOCATION_COOKIE}=; path=/; max-age=0; sameSite=Lax`
+}

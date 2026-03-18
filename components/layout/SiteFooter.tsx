@@ -9,17 +9,21 @@ interface SocialLinks {
 }
 
 const DEFAULT_LINKS = [
-  { label: 'About Us', href: '/about' },
+  { label: 'Our Company', href: 'our-company' },
   { label: 'Privacy Policy', href: '/privacy-policy' },
   { label: 'Terms of Service', href: '/terms-and-conditions' },
 ]
 
 const EXPLORE_LINKS = [
-  { label: 'Home', href: '/' },
-  { label: 'Buy', href: '/buy' },
-  { label: 'Rent', href: '/rent' },
-  { label: 'News', href: '/news' },
-  { label: 'Contact Us', href: '/contact' },
+  { label: 'Buy Properties', href: '/buy' },
+  { label: 'Rent Properties', href: '/rent' },
+  { label: 'Projects', href: '/projects' },
+  { label: 'Developers', href: '/developers' },
+  { label: 'Locations', href: '/' },
+  { label: 'Our Company', href: '/our-company' },
+  { label: 'Developer Registration', href: '/registration/developer' },
+  { label: 'Broker Registration', href: '/registration/broker' },
+  { label: 'Login', href: '/login' },
 ]
 
 export default function SiteFooter({
