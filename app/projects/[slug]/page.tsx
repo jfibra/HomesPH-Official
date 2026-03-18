@@ -70,9 +70,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                       <p className="text-[10px] text-gray-500 uppercase tracking-wide">Unit Types</p>
                     </div>
                   )}
-                  {project.amenity_ids?.length > 0 && (
+                  {project.project_amenities?.length > 0 && (
                     <div className="bg-gray-50 rounded-xl p-3 text-center">
-                      <p className="text-lg font-bold text-gray-900">{project.project_amenities?.length ?? 0}</p>
+                      <p className="text-lg font-bold text-gray-900">{project.project_amenities.length}</p>
                       <p className="text-[10px] text-gray-500 uppercase tracking-wide">Amenities</p>
                     </div>
                   )}

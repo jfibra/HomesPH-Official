@@ -46,8 +46,8 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             {/* Gallery thumbnails */}
             {sortedGallery.length > 1 && (
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {sortedGallery.slice(1).map(g => (
-                  <div key={g.id} className="h-20 rounded-xl overflow-hidden bg-gray-100">
+                {sortedGallery.slice(1).map((g: any, i) => (
+                  <div key={i} className="h-20 rounded-xl overflow-hidden bg-gray-100">
                     <img src={g.image_url} alt={g.title ?? listing.title} className="h-full w-full object-cover hover:opacity-90 transition-opacity" />
                   </div>
                 ))}
@@ -105,9 +105,9 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                       <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Bathroom{unit.bathrooms !== 1 ? 's' : ''}</p>
                     </div>
                   )}
-                  {unit.has_parking != null && (
+                  {(unit as any).has_parking != null && (
                     <div className="bg-gray-50 rounded-xl p-3 text-center">
-                      <p className="font-bold text-gray-900 text-sm">{unit.has_parking ? 'Yes' : 'No'}</p>
+                      <p className="font-bold text-gray-900 text-sm">{(unit as any).has_parking ? 'Yes' : 'No'}</p>
                       <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Parking</p>
                     </div>
                   )}
@@ -159,7 +159,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
               <h2 className="text-base font-bold text-gray-900 mb-3">Location</h2>
               <p className="text-sm text-gray-600">
-                {[listing.barangay, listing.city_municipality, listing.province, listing.region].filter(Boolean).join(', ')}
+                {[(listing as any).barangay, (listing as any).city_municipality, (listing as any).province, (listing as any).region].filter(Boolean).join(', ')}
               </p>
               {/* Map placeholder */}
               <div className="mt-4 h-40 bg-gradient-to-br from-[#1428ae]/10 to-[#1428ae]/5 rounded-xl flex items-center justify-center">
@@ -211,82 +211,6 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         socialLinks={settings.socialLinks}
         brandName={settings.siteTitle}
       />
-    </div>
-  )
-}
-              {sortedGallery.length > 0
-                ? <img src={sortedGallery[0].image_url} alt={listing.title} className="h-full w-full object-cover" />
-                : <div className="h-full flex items-center justify-center text-sm text-gray-400">No image</div>}
-            </div>
-
-            {/* Gallery thumbnails */}
-            {sortedGallery.length > 1 && (
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {sortedGallery.slice(1).map((g: any) => (
-                  <div key={g.id} className="h-20 rounded-lg overflow-hidden bg-gray-100">
-                    <img src={g.image_url} alt={g.title ?? listing.title} className="h-full w-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Details */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-              <div className="flex items-start gap-3 flex-wrap">
-                <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${isRent ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'}`}>
-                  {isRent ? 'For Rent' : 'For Sale'}
-                </span>
-                {listing.is_featured && (
-                  <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">⭐ Featured</span>
-                )}
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900">{listing.title}</h1>
-              <p className="text-2xl font-bold text-[#1428ae]">
-                {fmt(listing.price) ?? 'Price on request'}{isRent ? ' / mo' : ''}
-                {listing.negotiable && <span className="ml-2 text-sm font-normal text-gray-500">(Negotiable)</span>}
-              </p>
-              {listing.description && (
-                <p className="text-sm text-gray-600 leading-relaxed">{listing.description}</p>
-              )}
-            </div>
-
-            {/* Project details */}
-            {listing.projects && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-3">
-                <h2 className="text-base font-bold text-gray-900">Project Details</h2>
-                <Link href={`/projects/${listing.projects.slug}`} className="font-semibold text-[#1428ae] hover:underline">
-                  {listing.projects.name}
-                </Link>
-                <p className="text-sm text-gray-500">
-                  {[listing.projects.city_municipality, listing.projects.province].filter(Boolean).join(', ')}
-                </p>
-              </div>
-            )}
-
-            {/* Amenities */}
-            {amenities.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <h2 className="text-base font-bold text-gray-900 mb-3">Amenities</h2>
-                <div className="flex flex-wrap gap-2">
-                  {amenities.map((a: any) => (
-                    <span key={a.id} className="px-3 py-1 rounded-full bg-[#1428ae]/8 text-[#1428ae] text-xs font-medium">{a.name}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right: Inquiry form */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-              <h2 className="text-base font-bold text-gray-900 mb-4">Send Inquiry</h2>
-              <InquiryForm listingId={listing.id} listingTitle={listing.title} />
-            </div>
-          </div>
-        </div>
-      </main>
-
-      <SiteFooter logoUrl={settings.logoUrl} contactEmail={settings.contactEmail} contactPhone={settings.contactPhone} socialLinks={settings.socialLinks} brandName={settings.siteTitle} />
     </div>
   )
 }

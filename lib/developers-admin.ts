@@ -161,11 +161,11 @@ export async function getDevelopers(): Promise<ManagedDeveloperRecord[]> {
       buildWithActive: () => admin
         .from('developers_profiles')
         .select('id,user_profile_id,developer_name,industry,website_url,description,logo_url,is_active,created_at,updated_at')
-        .order('created_at', { ascending: false }),
+        .order('created_at', { ascending: false }) as any,
       buildWithoutActive: () => admin
         .from('developers_profiles')
         .select('id,user_profile_id,developer_name,industry,website_url,description,logo_url,created_at,updated_at')
-        .order('created_at', { ascending: false }),
+        .order('created_at', { ascending: false }) as any,
     }),
     admin.from('projects').select('id,developer_id'),
   ])
@@ -185,7 +185,7 @@ export async function getDevelopers(): Promise<ManagedDeveloperRecord[]> {
     projectCounts.set(developerId, (projectCounts.get(developerId) ?? 0) + 1)
   }
 
-  return (data ?? []).map((developer) => ({
+  return (data ?? []).map((developer: DeveloperProfileRecord) => ({
     ...developer,
     is_active: Boolean(developer.is_active ?? true),
     projectsCount: projectCounts.get(developer.id) ?? 0,
@@ -201,12 +201,12 @@ export async function getDeveloperById(id: number): Promise<DeveloperDetailBundl
       .from('developers_profiles')
       .select('id,user_profile_id,developer_name,industry,website_url,description,logo_url,is_active,created_at,updated_at')
       .eq('id', id)
-      .maybeSingle(),
+      .maybeSingle() as any,
     buildWithoutActive: () => admin
       .from('developers_profiles')
       .select('id,user_profile_id,developer_name,industry,website_url,description,logo_url,created_at,updated_at')
       .eq('id', id)
-      .maybeSingle(),
+      .maybeSingle() as any,
   })
 
   if (developerResult.error) {
