@@ -10,3 +10,4 @@ node_modules/
 .DS_Store
 guidelines/
 app/template
+tsconfig.tsbuildinfo

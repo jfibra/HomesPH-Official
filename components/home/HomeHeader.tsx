@@ -21,8 +21,12 @@ interface HomeHeaderProps {
 
 // Home-specific nav: show company/link actions rather than global site nav
 const NAV_ITEMS: { label: string; href: string }[] = [
-  { label: 'Our Company', href: '/company' },
-  { label: 'List Property', href: '/list-property' },
+  { label: 'Our Company', href: '/our-company' },
+  { label: 'News', href: '/news' },
+  { label: 'Mortgage', href: '/mortgage' },
+  { label: 'Legal', href: '/legal' },
+  { label: 'Tourism', href: '/tourism' },
+  { label: 'Restaurant', href: '/restaurant' },
 ]
 
 export default function HomeHeader({
@@ -130,22 +134,24 @@ export default function HomeHeader({
               )}
             </Link>
 
-            {/* Desktop nav — Our Company + List Property for homepage (right aligned) */}
-            <nav className="hidden md:flex flex-1 items-center justify-end gap-4">
-              <Link
-                href="/company"
-                className="text-sm font-medium text-gray-700 hover:text-[#1428ae] transition-colors group"
-              >
-                Our Company
-                <span className="absolute -bottom-0.5 left-0 h-0.5 w-0 bg-[#f59e0b] rounded-full transition-all duration-200 group-hover:w-full" />
-              </Link>
+            {/* LocationSwitcher removed per request */}
 
-              <Link
-                href="/list-property"
-                className="text-sm font-semibold px-4 py-2 rounded-lg bg-[#1428ae] text-white hover:bg-[#0f1f8a] transition-colors shadow-sm shadow-[#1428ae]/30"
-              >
-                List Property
-              </Link>
+            <nav className="hidden md:flex flex-1 items-center justify-end gap-6">
+              {NAV_ITEMS.map((item) => {
+                const isActive = pathname === item.href
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`relative text-sm font-medium transition-colors group ${
+                      isActive ? 'text-[#1428ae]' : 'text-gray-700 hover:text-[#1428ae]'
+                    }`}
+                  >
+                    {item.label}
+                    <span className="absolute -bottom-0.5 left-0 h-0.5 w-0 bg-[#f59e0b] rounded-full transition-all duration-200 group-hover:w-full" />
+                  </Link>
+                )
+              })}
             </nav>
 
             {/* Mobile hamburger */}

@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { Facebook, Twitter, Mail, Phone, Menu, X, MapPin } from 'lucide-react'
 import RegisterModal from '../auth/RegisterModal'
+import { clearSelectedLocationCookie } from '@/lib/selected-location'
+import LocationSwitcher from '@/components/home/LocationSwitcher'
 
 interface SocialLinks {
   facebook?: string
@@ -13,11 +15,14 @@ interface SocialLinks {
   [key: string]: string | undefined
 }
 
-const NAV_ITEMS: { label: string; href: string }[] = [
-  { label: 'Home', href: '/' },
+const NAV_ITEMS: { label: string; href: string; clearLocation?: boolean }[] = [
+  { label: 'Home', href: '/', clearLocation: true },
   { label: 'Buy', href: '/buy' },
   { label: 'Rent', href: '/rent' },
-  { label: 'Contact Us', href: '/contact' },
+  { label: 'Projects', href: '/projects' },
+  { label: 'Developers', href: '/developers' },
+  { label: 'Locations', href: '/', clearLocation: true },
+  { label: 'Our Company', href: '/our-company' },
 ]
 
 export default function SiteHeader({
@@ -37,6 +42,9 @@ export default function SiteHeader({
   const [open, setOpen] = useState(false)
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const pathname = usePathname()
+  const handleHomeClick = () => {
+    document.cookie = clearSelectedLocationCookie()
+  }
 
   useEffect(() => {
     function onScroll() { setScrolled(window.scrollY > 8) }
@@ -91,6 +99,7 @@ export default function SiteHeader({
                   <Twitter size={14} />
                 </a>
               )}
+              <LocationSwitcher variant="dark" />
             </div>
           </div>
         </div>
@@ -102,7 +111,7 @@ export default function SiteHeader({
           <div className="flex items-center h-[72px] gap-6">
 
             {/* Logo */}
-            <Link href="/" className="shrink-0">
+            <Link href="/" className="shrink-0" onClick={handleHomeClick}>
               {logoUrl ? (
                 <img src={logoUrl} alt={logoText} className="h-10 w-auto" />
               ) : (
@@ -116,8 +125,9 @@ export default function SiteHeader({
                 const isActive = pathname === item.href
                 return (
                   <Link
-                    key={item.href}
+                    key={item.href + item.label}
                     href={item.href}
+                    onClick={item.clearLocation ? handleHomeClick : undefined}
                     className={`relative px-3.5 py-2 text-sm font-semibold rounded-lg transition-colors duration-150 group ${
                       isActive ? 'text-[#1428ae] bg-[#1428ae]/5' : 'text-gray-600 hover:text-[#1428ae] hover:bg-[#1428ae]/5'
                     }`}
@@ -172,7 +182,7 @@ export default function SiteHeader({
       >
         {/* Sidebar header */}
         <div className="flex items-center justify-between px-5 h-[72px] border-b border-gray-100 shrink-0">
-          <Link href="/" onClick={() => setOpen(false)} className="shrink-0">
+          <Link href="/" onClick={() => { setOpen(false); handleHomeClick() }} className="shrink-0">
             {logoUrl ? (
               <img src={logoUrl} alt={logoText} className="h-9 w-auto" />
             ) : (
@@ -194,9 +204,14 @@ export default function SiteHeader({
             const isActive = pathname === item.href
             return (
               <Link
-                key={item.href}
+                key={item.href + item.label}
                 href={item.href}
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false)
+                  if (item.clearLocation) {
+                    handleHomeClick()
+                  }
+                }}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
                   isActive ? 'bg-amber-50 text-amber-700' : 'text-gray-700 hover:bg-[#1428ae]/5 hover:text-[#1428ae]'
                 }`}

@@ -1,4 +1,5 @@
 import { ChevronDown } from 'lucide-react'
+import HomeSearchBar from './HomeSearchBar'
 
 const BG = 'https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/bg_elements'
 
@@ -16,7 +17,7 @@ export default function HomeHero({
   counts = { cities: '10+', free: '100%' },
 }: HeroProps) {
   return (
-    <section id="hero" className="relative overflow-hidden bg-gradient-to-r from-[#1428ae] to-[#0f1f8a] py-8 md:py-10">
+    <section id="hero" className="relative overflow-hidden bg-gradient-to-r from-[#1428ae] to-[#0f1f8a] py-10 md:py-14">
       <img
         src={`${BG}/ph-map.png`}
         alt=""
@@ -52,6 +53,9 @@ export default function HomeHero({
             </a>
           </div>
         </div>
+
+        {/* ── Search bar ── */}
+        <HomeSearchBar />
       </div>
     </section>
   )

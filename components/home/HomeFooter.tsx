@@ -7,7 +7,7 @@ export default function HomeFooter({
   contactEmail = 'info@homesph.com',
   contactPhone = '+63 912 345 6789',
   links = [
-    { label: 'About Us', href: '/about' },
+    { label: 'Our Company', href: '/our-company' },
     { label: 'Privacy Policy', href: '/privacy-policy' },
     { label: 'Terms and Conditions', href: '/terms-and-conditions' },
   ],
