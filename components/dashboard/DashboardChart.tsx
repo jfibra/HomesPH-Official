@@ -7,7 +7,7 @@ import {
 import { cn } from '@/lib/utils'
 
 interface ChartData {
-  [key: string]: string | number
+  [key: string]: any
 }
 
 interface Props {

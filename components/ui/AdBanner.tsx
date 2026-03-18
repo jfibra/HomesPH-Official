@@ -61,7 +61,7 @@ export default function AdBanner({ id = '14', sizes = ['320x50', '728x90', '970x
   return (
     <section className={cn("flex justify-center items-center", className)}>
       {sizes.map((s) => (
-         <div key={s}>{renderIframe(s as keyof typeof dims)}</div>
+        <div key={s}>{renderIframe(s as keyof typeof dims)}</div>
       ))}
     </section>
   )
