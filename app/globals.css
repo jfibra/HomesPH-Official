@@ -1,6 +1,51 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-track {
+  display: flex;
+  animation: marquee-scroll 40s linear infinite;
+}
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
+/* ── News page animations ─────────────────────────────────── */
+@keyframes news-fade-in-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes news-slide-in-left {
+  from { opacity: 0; transform: translateX(-18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes news-slide-in-right {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes breaking-flash {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+.news-hero-anim {
+  animation: news-fade-in-up 0.7s cubic-bezier(.22,1,.36,1) both;
+}
+.news-card-anim {
+  animation: news-fade-in-up 0.55s cubic-bezier(.22,1,.36,1) both;
+}
+.news-sidebar-left {
+  animation: news-slide-in-left 0.6s cubic-bezier(.22,1,.36,1) both;
+}
+.news-sidebar-right {
+  animation: news-slide-in-right 0.6s cubic-bezier(.22,1,.36,1) both;
+}
+.breaking-badge {
+  animation: breaking-flash 1.4s ease-in-out infinite;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {

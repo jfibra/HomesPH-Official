@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Facebook, Twitter, Menu, X, Mail, Phone } from 'lucide-react'
+import { Facebook, Twitter, Menu, X, Mail, Phone, Search } from 'lucide-react'
 
 interface SocialLinks {
   facebook?: string
@@ -121,38 +121,46 @@ export default function HomeHeader({
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-[72px] gap-6">
+          <div className="flex items-center h-24 gap-8">
 
             {/* Logo */}
-            <Link href="/" className="shrink-0">
+            <Link href="/" className="shrink-0 group">
               {logoUrl ? (
                 // show provided logo
-                <img src={logoUrl} alt="HomesPH" className="h-10 w-auto" />
+                <img src={logoUrl} alt="HomesPH" className="h-12 w-auto drop-shadow-md transition-transform group-hover:scale-105" />
               ) : (
                 // fallback to simple text brand when no logo provided
-                <span className="text-lg font-semibold text-gray-900">HomesPH</span>
+                <span className="text-2xl font-bold text-gray-900 drop-shadow-sm">HomesPH</span>
               )}
             </Link>
 
             {/* LocationSwitcher removed per request */}
 
-            <nav className="hidden md:flex flex-1 items-center justify-end gap-6">
+            <nav className="hidden md:flex flex-1 items-center justify-center gap-2">
               {NAV_ITEMS.map((item) => {
                 const isActive = pathname === item.href
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`relative text-sm font-medium transition-colors group ${
-                      isActive ? 'text-[#1428ae]' : 'text-gray-700 hover:text-[#1428ae]'
+                    className={`relative px-4 py-2.5 text-base font-bold rounded-xl transition-all duration-150 group ${
+                      isActive 
+                        ? 'text-[#0c1f4a] bg-[#fff7ed]' 
+                        : 'text-slate-600 hover:text-[#0c1f4a] hover:bg-[#fff7ed]'
                     }`}
                   >
                     {item.label}
-                    <span className="absolute -bottom-0.5 left-0 h-0.5 w-0 bg-[#f59e0b] rounded-full transition-all duration-200 group-hover:w-full" />
                   </Link>
                 )
               })}
             </nav>
+
+            {/* Search Icon — desktop */}
+            <div className="hidden md:flex items-center gap-6 shrink-0">
+               <button className="text-slate-600 hover:text-[#0c1f4a] transition-colors cursor-pointer">
+                  <Search size={24} />
+               </button>
+            </div>
 
             {/* Mobile hamburger */}
             <button
