@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -60,6 +61,31 @@ export default function DashboardTopbar({ onMenuToggle }: Props) {
   const [createOpen, setCreateOpen] = useState(false)
   const [userOpen,   setUserOpen]   = useState(false)
   const user = useDashboardUser()
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Live clock
+  const [now, setNow] = useState<Date>(() => new Date())
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    const tick = () => setNow(new Date())
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setUserOpen(false)
+      }
+    }
+    if (userOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [userOpen])
 
   const pathname = usePathname()
   const role     = user.roleSegment
@@ -77,7 +103,34 @@ export default function DashboardTopbar({ onMenuToggle }: Props) {
   function closeAll() { setNotifOpen(false); setCreateOpen(false); setUserOpen(false) }
 
   return (
-    <header className="h-14 bg-white border-b border-slate-200 flex items-center px-4 sm:px-6 gap-3 shrink-0 z-20">
+    <div className="flex flex-col w-full shrink-0 z-20">
+      {/* Top info bar */}
+      <div className="w-full bg-[#1428ae] border-b border-[#0f1f8a] hidden sm:block">
+        <div className="flex items-center justify-between px-4 sm:px-6 h-8 text-[11px] sm:text-xs text-white/90 font-medium tracking-wide">
+          <div>
+            {new Date(now).toLocaleDateString("en-PH", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              timeZone: "Asia/Manila",
+            })}
+          </div>
+          <div aria-live="polite" className="font-mono font-medium tracking-wider">
+            {mounted
+              ? new Date(now).toLocaleTimeString("en-PH", {
+                hour: "numeric",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true,
+                timeZone: "Asia/Manila",
+              })
+              : ""}
+          </div>
+        </div>
+      </div>
+
+      <header className="h-16 bg-white border-b border-slate-200 flex items-center px-4 sm:px-6 gap-3 shadow-sm">
 
       {/* Mobile menu toggle */}
       <button
@@ -177,43 +230,94 @@ export default function DashboardTopbar({ onMenuToggle }: Props) {
       </div>
 
       {/* User menu */}
-      <div className="relative">
+      <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => { closeAll(); setUserOpen(v => !v) }}
-          className="flex items-center gap-2 pl-1 pr-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+          className="flex items-center gap-3 px-2 sm:px-3 py-1.5 sm:py-2 rounded-full hover:bg-slate-50 transition-all group outline-none"
         >
-          <Avatar className="w-7 h-7 border border-slate-200">
-            <AvatarImage src={user.profileImageUrl ?? undefined} alt={user.fullName} />
-            <AvatarFallback className="bg-[#1428ae] text-white text-xs font-black">{initials}</AvatarFallback>
-          </Avatar>
-          <ChevronDown size={13} className="text-slate-400 hidden sm:block" />
+          {/* Avatar */}
+          <div className="relative">
+            {user.profileImageUrl ? (
+              <Image
+                src={user.profileImageUrl}
+                alt={user.fullName}
+                width={36}
+                height={36}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-slate-200 group-hover:border-[#1428ae] transition-all"
+              />
+            ) : (
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-[#1428ae] to-[#0f1f8a] text-white flex items-center justify-center font-bold text-sm border-2 border-slate-200 group-hover:border-[#fdc700] transition-all">
+                {initials}
+              </div>
+            )}
+            {/* Online indicator */}
+            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-emerald-500 rounded-full border-2 border-white"></div>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-2">
+            <span className="text-sm font-semibold text-slate-700 group-hover:text-[#1428ae]">{user.fullName}</span>
+            <ChevronDown size={14} className={cn("text-slate-400 transition-transform", userOpen && "rotate-180")} />
+          </div>
         </button>
+
         {userOpen && (
           <>
-            <div className="fixed inset-0 z-40" onClick={() => setUserOpen(false)} />
-            <div className="absolute right-0 top-full mt-2 z-50 w-52 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <p className="text-sm font-bold text-slate-900">{user.fullName}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{user.email}</p>
-                <p className="text-[11px] text-slate-400 mt-1">{meta?.label ?? 'User'}</p>
+            <div className="fixed inset-0 z-40 sm:hidden" onClick={() => setUserOpen(false)} />
+            <div className="absolute right-0 top-full mt-2 z-50 w-72 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="px-5 py-4 bg-gradient-to-r from-[#1428ae] to-[#0f1f8a] text-white">
+                <div className="flex items-center gap-3">
+                  {user.profileImageUrl ? (
+                    <Image
+                      src={user.profileImageUrl}
+                      alt={user.fullName}
+                      width={48}
+                      height={48}
+                      className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm text-white flex items-center justify-center font-bold text-base border-2 border-white/30">
+                      {initials}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-base truncate">{user.fullName}</p>
+                    <p className="text-xs text-white/80 truncate mb-1">{user.email}</p>
+                    <span className="inline-block px-2 py-0.5 bg-[#fdc700] text-[#1428ae] text-[10px] font-bold uppercase tracking-wider rounded-full">
+                      {meta?.label ?? 'User'}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div className="py-1">
-                <Link href="/dashboard/profile" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                  <User size={14} className="text-slate-400" />
-                  Profile
+              
+              <div className="py-2">
+                <Link
+                  href="/dashboard/profile"
+                  onClick={() => setUserOpen(false)}
+                  className="w-full flex items-center gap-3 px-5 py-3 text-slate-700 hover:bg-slate-50 transition-colors group"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-[#1428ae] group-hover:text-white transition-colors">
+                    <User size={16} />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-semibold text-slate-900">My Profile</p>
+                    <p className="text-xs text-slate-500">View and edit your profile</p>
+                  </div>
                 </Link>
-                <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                  <Settings size={14} className="text-slate-400" />
-                  Settings
-                </button>
-                <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                  <Bell size={14} className="text-slate-400" />
-                  Notifications
-                </button>
-                <div className="my-1 mx-2 border-t border-slate-100" />
-                <LogoutButton className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
-                  <LogOut size={14} />
-                  Logout
+
+                <div className="my-1 px-3">
+                  <div className="h-px bg-slate-100"></div>
+                </div>
+
+                <LogoutButton
+                  className="w-full flex items-center gap-3 px-5 py-3 text-slate-700 hover:bg-rose-50 transition-colors group text-left"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-rose-500 group-hover:text-white transition-colors">
+                    <LogOut size={16} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-slate-900 group-hover:text-rose-600">Logout</p>
+                    <p className="text-xs text-slate-500">Sign out of your account</p>
+                  </div>
                 </LogoutButton>
               </div>
             </div>
@@ -221,5 +325,6 @@ export default function DashboardTopbar({ onMenuToggle }: Props) {
         )}
       </div>
     </header>
+    </div>
   )
 }

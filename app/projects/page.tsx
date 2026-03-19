@@ -97,80 +97,79 @@ export default async function ProjectsPage(
               </p>
               {/* Status pills */}
               <div className="hidden sm:flex gap-2">
-            {statuses.map(s => (
-              <Link
-                key={s}
-                href={`/projects?status=${encodeURIComponent(s)}`}
-                className={`text-xs px-3 py-1.5 rounded-full border text-gray-600 font-medium transition-colors hover:bg-[#1428ae]/5 hover:border-[#1428ae]/20 ${sp.status === s ? 'bg-[#1428ae] text-white border-[#1428ae]' : 'bg-white border-gray-200'}`}
-              >
-                {s}
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* â”€â”€ Projects Grid â”€â”€ */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map(p => (
-            <Link
-              key={p.id}
-              href={`/projects/${p.slug}`}
-              className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all overflow-hidden"
-            >
-              <div className="relative h-52 bg-gray-100 overflow-hidden">
-                <img
-                  src={p.main_image_url ?? `https://picsum.photos/seed/${p.slug}/900/600`}
-                  alt={p.name}
-                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute top-3 left-3 flex gap-2 flex-wrap">
-                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                    p.status === 'Ready for Occupancy' ? 'bg-green-600 text-white' :
-                    p.status === 'Pre-Selling' ? 'bg-amber-500 text-white' :
-                    'bg-blue-600 text-white'
-                  }`}>
-                    {p.status}
-                  </span>
-                  {p.is_featured && (
-                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/90 text-amber-700">â­ Featured</span>
-                  )}
-                </div>
-                <div className="absolute bottom-3 right-3">
-                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/90 text-gray-700">
-                    {p.project_type}
-                  </span>
-                </div>
+                {statuses.map(s => (
+                  <Link
+                    key={s}
+                    href={`/projects?status=${encodeURIComponent(s)}`}
+                    className={`text-xs px-3 py-1.5 rounded-full border text-gray-600 font-medium transition-colors hover:bg-[#1428ae]/5 hover:border-[#1428ae]/20 ${sp.status === s ? 'bg-[#1428ae] text-white border-[#1428ae]' : 'bg-white border-gray-200'}`}
+                  >
+                    {s}
+                  </Link>
+                ))}
               </div>
-              <div className="p-5">
-                <p className="text-xs text-gray-400 mb-1">{p.city_municipality}, {p.province}</p>
-                <h3 className="font-bold text-gray-900 text-base leading-snug group-hover:text-[#1428ae] transition-colors">
-                  {p.name}
-                </h3>
-                <p className="text-xs text-gray-500 mt-1">{p.developers_profiles?.developer_name}</p>
-                <div className="flex items-center justify-between mt-3">
-                  <p className="text-[#1428ae] font-bold text-sm">
-                    {fmtRange(p.price_range_min, p.price_range_max)}
-                  </p>
-                  <p className="text-xs text-gray-400">{p.project_units?.length ?? p.project_units?.length ?? 0} units</p>
-                </div>
-                {p.project_amenities?.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-3">
-                    {p.project_amenities.slice(0, 3).map((pa: any) => (
-                      <span key={pa.amenities.id} className="text-[10px] px-2 py-0.5 bg-gray-50 text-gray-500 rounded-full border border-gray-100">
-                        {pa.amenities.name}
+            </div>
+
+            {/* â”€â”€ Projects Grid â”€â”€ */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.map(p => (
+                <Link
+                  key={p.id}
+                  href={`/projects/${p.slug}`}
+                  className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all overflow-hidden"
+                >
+                  <div className="relative h-52 bg-gray-100 overflow-hidden">
+                    <img
+                      src={p.main_image_url ?? `https://picsum.photos/seed/${p.slug}/900/600`}
+                      alt={p.name}
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-3 left-3 flex gap-2 flex-wrap">
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${p.status === 'Ready for Occupancy' ? 'bg-green-600 text-white' :
+                          p.status === 'Pre-Selling' ? 'bg-amber-500 text-white' :
+                            'bg-blue-600 text-white'
+                        }`}>
+                        {p.status}
                       </span>
-                    ))}
-                    {p.project_amenities.length > 3 && (
-                      <span className="text-[10px] px-2 py-0.5 bg-gray-50 text-gray-500 rounded-full border border-gray-100">
-                        +{p.project_amenities.length - 3} more
+                      {p.is_featured && (
+                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/90 text-amber-700">â­ Featured</span>
+                      )}
+                    </div>
+                    <div className="absolute bottom-3 right-3">
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/90 text-gray-700">
+                        {p.project_type}
                       </span>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <p className="text-xs text-gray-400 mb-1">{p.city_municipality}, {p.province}</p>
+                    <h3 className="font-bold text-gray-900 text-base leading-snug group-hover:text-[#1428ae] transition-colors">
+                      {p.name}
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1">{p.developers_profiles?.developer_name}</p>
+                    <div className="flex items-center justify-between mt-3">
+                      <p className="text-[#1428ae] font-bold text-sm">
+                        {fmtRange(p.price_range_min, p.price_range_max)}
+                      </p>
+                      <p className="text-xs text-gray-400">{p.project_units?.length ?? p.project_units?.length ?? 0} units</p>
+                    </div>
+                    {p.project_amenities?.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-3">
+                        {p.project_amenities.slice(0, 3).map((pa: any) => (
+                          <span key={pa.amenities.id} className="text-[10px] px-2 py-0.5 bg-gray-50 text-gray-500 rounded-full border border-gray-100">
+                            {pa.amenities.name}
+                          </span>
+                        ))}
+                        {p.project_amenities.length > 3 && (
+                          <span className="text-[10px] px-2 py-0.5 bg-gray-50 text-gray-500 rounded-full border border-gray-100">
+                            +{p.project_amenities.length - 3} more
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
-            </Link>
-          ))}
-        </div>
+                </Link>
+              ))}
+            </div>
 
             {projects.length === 0 && (
               <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center shadow-sm">

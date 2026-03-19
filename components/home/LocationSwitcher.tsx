@@ -35,7 +35,7 @@ export default function LocationSwitcher({ variant = 'light' }: { variant?: 'lig
     <div className="relative">
       <button
         onClick={() => setOpen((s) => !s)}
-        className={`text-xs px-2.5 py-1 rounded-md border transition-colors ${
+        className={`uppercase font-bold text-xs px-2.5 py-1 rounded-md border transition-colors ${
           isDark
             ? 'border-white/20 bg-white/10 text-blue-100 hover:bg-white/20 hover:text-white'
             : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
@@ -51,7 +51,7 @@ export default function LocationSwitcher({ variant = 'light' }: { variant?: 'lig
               <button
                 key={l.slug}
                 onClick={() => handleSelect(l.slug)}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 uppercase font-semibold"
               >
                 {l.title}
               </button>
