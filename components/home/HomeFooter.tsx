@@ -1,7 +1,15 @@
 import Link from 'next/link'
-import { Facebook, Instagram, Mail, Phone } from 'lucide-react'
+import {
+  SolidFacebookIcon,
+  SolidInstagramIcon,
+  SolidMailIcon,
+  SolidMapPinIcon,
+  SolidPhoneIcon,
+} from '../layout/FooterIcons'
 
 const LOGO = 'https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/homesph/logo.png'
+const FOOTER_LOGO_URL =
+  'https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/homesph/whiteLogo.png'
 
 export default function HomeFooter({
   contactEmail = 'info@homesph.com',
@@ -19,6 +27,7 @@ export default function HomeFooter({
   logoUrl?: string
 }) {
   const year = new Date().getFullYear()
+  const resolvedLogoUrl = logoUrl?.includes('whiteLogo.png') ? logoUrl : FOOTER_LOGO_URL
 
   return (
     <footer className="bg-[#052539] text-slate-100">
@@ -29,7 +38,7 @@ export default function HomeFooter({
 
           {/* Col 1: Brand */}
           <div className="space-y-5">
-            <img src={logoUrl} alt="HomesPH" className="h-10 w-auto filter brightness-0 invert" />
+            <img src={resolvedLogoUrl} alt="HomesPH" className="h-10 w-auto object-contain" />
             <p className="text-slate-300 text-sm leading-relaxed max-w-xs">
               Your trusted partner in finding the perfect home.
               Connecting Filipinos with quality properties nationwide.
@@ -42,7 +51,7 @@ export default function HomeFooter({
                 aria-label="Facebook"
                 className="w-9 h-9 rounded-md bg-white text-[#052539] hover:bg-amber-500 hover:text-white transition-colors flex items-center justify-center shadow-sm"
               >
-                <Facebook size={15} />
+                <SolidFacebookIcon className="h-[18px] w-[18px]" />
               </a>
               <a
                 href="https://instagram.com"
@@ -51,7 +60,7 @@ export default function HomeFooter({
                 aria-label="Instagram"
                 className="w-9 h-9 rounded-md bg-white text-[#052539] hover:bg-amber-500 hover:text-white transition-colors flex items-center justify-center shadow-sm"
               >
-                <Instagram size={15} />
+                <SolidInstagramIcon className="h-[18px] w-[18px]" />
               </a>
             </div>
           </div>
@@ -73,23 +82,21 @@ export default function HomeFooter({
             <h4 className="text-sm font-bold tracking-widest uppercase text-white">Contact Us</h4>
             <div className="space-y-3 text-slate-300">
               <a href={`tel:${contactPhone}`} className="flex items-start gap-3">
-                <Phone size={16} className="mt-1 text-amber-400" />
+                <SolidPhoneIcon className="mt-1 h-4 w-4 text-amber-400" />
                 <div>
                   <div className="font-medium text-white">{contactPhone}</div>
                   <div className="text-xs">Mon-Sat 9AM-6PM</div>
                 </div>
               </a>
               <a href={`mailto:${contactEmail}`} className="flex items-start gap-3">
-                <Mail size={16} className="mt-1 text-amber-400" />
+                <SolidMailIcon className="mt-1 h-4 w-4 text-amber-400" />
                 <div>
                   <div className="font-medium text-white">{contactEmail}</div>
                   <div className="text-xs">We reply within 24hrs</div>
                 </div>
               </a>
               <div className="flex items-start gap-3">
-                <svg className="mt-1 text-amber-400" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="currentColor" />
-                </svg>
+                <SolidMapPinIcon className="mt-1 h-4 w-4 text-amber-400" />
                 <div>
                   <div className="font-medium text-white">Cebu City, Philippines</div>
                   <div className="text-xs">Serving nationwide</div>
