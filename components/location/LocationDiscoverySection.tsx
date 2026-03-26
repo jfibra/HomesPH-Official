@@ -15,11 +15,11 @@ import {
 import LocationPopularSearchesCarousel from './LocationPopularSearchesCarousel'
 
 const DISCOVERY_SECTION_CONTAINER_CLASS =
-  'mx-auto w-full max-w-[1600px] px-6 pt-[46px] sm:px-8 sm:pt-[58px] lg:px-10 lg:pt-[70px]'
+  'mx-auto w-full max-w-[1600px] px-6 pt-[38px] sm:px-8 sm:pt-[46px] lg:px-10 lg:pt-[56px]'
 const DISCOVERY_SECTION_HEADING_ALIGNMENT_CLASS =
   'mx-auto w-full max-w-[1200px]'
 const POPULAR_SEARCHES_BREAKOUT_CLASS =
-  'mx-auto w-[calc(100vw-20px)] max-w-[1880px] pb-[46px] sm:w-[calc(100vw-28px)] sm:pb-[58px] lg:w-[calc(100vw-48px)] lg:pb-[70px] xl:w-[calc(100vw-64px)] 2xl:w-[calc(100vw-80px)]'
+  'mx-auto w-[calc(100vw-20px)] max-w-[1880px] pb-[24px] sm:w-[calc(100vw-28px)] sm:pb-[32px] lg:w-[calc(100vw-48px)] lg:pb-[38px] xl:w-[calc(100vw-64px)] 2xl:w-[calc(100vw-80px)]'
 
 interface LocationDiscoverySectionProps {
   locationName: string

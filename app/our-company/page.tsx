@@ -1,5 +1,6 @@
 import HomeFooter from '@/components/home/HomeFooter'
 import HomeHeader from '@/components/home/HomeHeader'
+import { GENERAL_NAV_ITEMS } from '@/lib/general-nav'
 import { getSiteSettings } from '@/lib/site-settings'
 
 const INTEGRATIONS = [
@@ -25,6 +26,7 @@ export default async function OurCompanyPage() {
         contactEmail={settings.contactEmail}
         contactPhone={settings.contactPhone}
         socialLinks={settings.socialLinks}
+        navItems={GENERAL_NAV_ITEMS}
       />
 
       <main className="space-y-20 px-4 pb-20">

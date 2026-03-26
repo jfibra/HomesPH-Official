@@ -3,12 +3,8 @@
 import Link from 'next/link'
 import {
   ArrowRight,
-  BarChart3,
-  Building2,
   ChevronLeft,
   ChevronRight,
-  Users,
-  type LucideIcon,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
@@ -18,6 +14,7 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel'
 import { MOCK_NEWS } from '@/lib/mock-data'
+import { buildNewsHref } from '@/lib/news-navigation'
 
 interface LocationNewsBusinessSectionProps {
   locationName: string
@@ -28,12 +25,12 @@ type NewsArticle = (typeof MOCK_NEWS)[number]
 
 interface BusinessFeature {
   description: string
-  icon: LucideIcon
+  iconSrc: string
   title: string
 }
 
 const SECTION_CONTAINER_CLASS =
-  'mx-auto w-full max-w-[1600px] px-6 py-[28px] sm:px-8 sm:py-[36px] lg:px-10 lg:py-[44px]'
+  'mx-auto w-full max-w-[1600px] px-6 pb-[28px] pt-[18px] sm:px-8 sm:pb-[34px] sm:pt-[22px] lg:px-10 lg:pb-[40px] lg:pt-[26px]'
 const SECTION_HEADING_ALIGNMENT_CLASS = 'mx-auto w-full max-w-[1200px]'
 const NEWS_CARD_WIDTH_CLASS =
   'basis-[84%] sm:basis-[48%] lg:basis-[31.5%] xl:basis-[24.5%] 2xl:basis-[19.5%]'
@@ -48,19 +45,22 @@ const BUSINESS_FEATURES: BusinessFeature[] = [
     title: 'Manage Listings Easily',
     description:
       'Powerful dashboard to add, edit, and track all your property listings in one place.',
-    icon: Building2,
+    iconSrc:
+      'https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/homesph/listingIcon.png',
   },
   {
     title: 'Team Collaboration',
     description:
       'Add agents, manage teams, and collaborate seamlessly with your entire organization.',
-    icon: Users,
+    iconSrc:
+      'https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/homesph/collabIcon.png',
   },
   {
     title: 'Advanced Analytics',
     description:
       'Track leads, monitor performance, and make data-driven decisions to grow faster.',
-    icon: BarChart3,
+    iconSrc:
+      'https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/homesph/Analytics%20icon.png',
   },
 ]
 
@@ -158,7 +158,7 @@ function LatestNewsCard({
 }) {
   return (
     <Link
-      href={`/news?location=${encodeURIComponent(locationName)}`}
+      href={buildNewsHref(locationName)}
       className="group flex h-full min-w-0 flex-col overflow-hidden rounded-[24px] border border-[#e4ecf8] bg-white shadow-[0_14px_30px_rgba(15,39,78,0.06)] transition-[transform,box-shadow,border-color] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:border-[#d8e2f1] hover:shadow-[0_22px_44px_rgba(15,39,78,0.08)]"
     >
       <div className="relative h-[214px] overflow-hidden bg-[#e9eff8]">
@@ -184,15 +184,12 @@ function LatestNewsCard({
         </div>
       </div>
 
-      <div className="flex min-h-[168px] flex-1 flex-col px-[16px] pb-[16px] pt-[14px] sm:px-[18px] sm:pb-[18px]">
+      <div className="flex min-h-[122px] flex-1 flex-col px-[16px] pb-[16px] pt-[14px] sm:px-[18px] sm:pb-[18px]">
         <h3 className="line-clamp-2 text-[18px] font-semibold leading-[1.22] tracking-[-0.03em] text-[#0f274e] transition-colors duration-300 group-hover:text-[#2140d8]">
           {article.title}
         </h3>
-        <p className="mt-[10px] line-clamp-3 text-[14px] leading-[1.55] tracking-[-0.015em] text-[#41597f]">
-          {article.excerpt}
-        </p>
 
-        <span className="mt-auto inline-flex items-center gap-[7px] pt-[18px] text-[12px] font-semibold uppercase tracking-[0.08em] text-[#2140d8]">
+        <span className="mt-auto inline-flex items-center gap-[7px] pt-[16px] text-[12px] font-semibold uppercase tracking-[0.08em] text-[#2140d8]">
           <span>Read More</span>
           <ArrowRight size={14} strokeWidth={2.2} />
         </span>
@@ -203,16 +200,23 @@ function LatestNewsCard({
 
 function BusinessFeatureCard({
   description,
-  icon: Icon,
+  iconSrc,
   title,
 }: BusinessFeature) {
   return (
     <article className="rounded-[24px] border border-[#edf2fa] bg-[#f5f8fc] px-[24px] py-[28px] text-center sm:px-[28px] sm:py-[32px]">
-      <div className="mx-auto flex h-[88px] w-[88px] items-center justify-center rounded-[26px] bg-transparent text-[#173260]">
-        <Icon size={42} strokeWidth={1.7} />
+      <div className="mx-auto flex h-[112px] w-[112px] items-center justify-center rounded-[30px] bg-transparent sm:h-[120px] sm:w-[120px]">
+        <img
+          src={iconSrc}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+          className="h-[72px] w-[72px] object-contain sm:h-[78px] sm:w-[78px]"
+        />
       </div>
 
-      <h3 className="mt-[22px] text-[26px] font-semibold leading-[1.04] tracking-[-0.045em] text-[#0f274e]">
+      <h3 className="mt-[14px] text-[26px] font-semibold leading-[1.04] tracking-[-0.045em] text-[#0f274e]">
         {title}
       </h3>
       <p className="mx-auto mt-[14px] max-w-[320px] text-[15px] leading-[1.6] tracking-[-0.02em] text-[#41597f]">
@@ -306,8 +310,8 @@ export default function LocationNewsBusinessSection({
         </div>
 
         <div className="pt-[56px] sm:pt-[68px]">
-          <div className="relative">
-            <div className={SECTION_HEADING_ALIGNMENT_CLASS}>
+          <div className={`${SECTION_HEADING_ALIGNMENT_CLASS} relative`}>
+            <div>
               <NewsBusinessSectionHeading
                 id="location-business-growth-heading"
                 prefix="Grow Your"
@@ -329,7 +333,7 @@ export default function LocationNewsBusinessSection({
             </div>
           </div>
 
-          <div className="mt-[24px] grid grid-cols-1 gap-[16px] xl:grid-cols-3 xl:gap-[18px]">
+          <div className={`${SECTION_HEADING_ALIGNMENT_CLASS} mt-[24px] grid grid-cols-1 gap-[16px] xl:grid-cols-3 xl:gap-[18px]`}>
             {BUSINESS_FEATURES.map((feature) => (
               <BusinessFeatureCard key={feature.title} {...feature} />
             ))}

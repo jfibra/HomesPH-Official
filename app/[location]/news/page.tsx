@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import SiteHeader from '@/components/layout/SiteHeader'
 import SiteFooter from '@/components/layout/SiteFooter'
 import { NewsLocationPicker } from '@/components/news/NewsLocationPicker'
@@ -8,8 +7,7 @@ import { getSiteSettings } from '@/lib/site-settings'
 import { SELECTED_LOCATION_COOKIE } from '@/lib/selected-location'
 import { MOCK_NEWS } from '@/lib/mock-data'
 import AdBanner from '@/components/ui/AdBanner'
-import { GENERAL_NAV_ITEMS } from '@/lib/general-nav'
-import { buildNewsHref } from '@/lib/news-navigation'
+import { formatLocationForNews } from '@/lib/news-navigation'
 
 interface Article {
   id: number | string
@@ -323,17 +321,14 @@ async function getArticles(location?: string): Promise<ArticleCollection> {
 }
 
 export default async function NewsPage({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ location?: string }>
+  params: Promise<{ location: string }>
 }) {
-  const { location: queryLocation } = await searchParams
-  if (queryLocation && queryLocation !== 'All') {
-    redirect(buildNewsHref(queryLocation))
-  }
+  const { location: routeLocation } = await params
   const cookieStore = await cookies()
   const cookieLocation = cookieStore.get(SELECTED_LOCATION_COOKIE)?.value
-  const manualLocation = queryLocation && queryLocation !== 'All' ? decodeURIComponent(queryLocation) : undefined
+  const manualLocation = routeLocation && routeLocation !== 'All' ? formatLocationForNews(routeLocation) : undefined
   const savedLocation = cookieLocation ? decodeURIComponent(cookieLocation) : undefined
   const focusedLocation = manualLocation ?? savedLocation
 
@@ -396,7 +391,7 @@ export default async function NewsPage({
 
   const focusSummary = effectiveFocusedLocation
     ? manualLocation
-      ? `Showing a manual news focus for ${effectiveFocusedLocation}. Your saved location stays available in the picker.`
+      ? `Showing a local news focus for ${effectiveFocusedLocation}.`
       : `Using your saved location, ${effectiveFocusedLocation}, as the main news desk for this page.`
     : 'Showing a nationwide feed. Pick a location to turn the first desk into a local-market front page.'
 
@@ -407,7 +402,6 @@ export default async function NewsPage({
         contactEmail={settings.contactEmail}
         contactPhone={settings.contactPhone}
         socialLinks={settings.socialLinks}
-        navItems={GENERAL_NAV_ITEMS}
       />
 
       {liveArticles.length > 0 && (
