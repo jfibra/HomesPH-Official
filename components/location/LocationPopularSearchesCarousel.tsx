@@ -210,31 +210,7 @@ export default function LocationPopularSearchesCarousel({
 
   return (
     <div className="w-full min-w-0 bg-transparent">
-      <div className="relative bg-transparent px-[2px] py-[6px] sm:py-[8px]">
-        <Carousel
-          setApi={setCarouselApi}
-          opts={{
-            align: 'start',
-            dragFree: true,
-            loop: panels.length > 1,
-            skipSnaps: false,
-          }}
-          className="w-full cursor-grab active:cursor-grabbing select-none"
-        >
-          <CarouselContent className="-ml-[18px]">
-            {panels.map((panel) => (
-              <CarouselItem
-                key={panel.id}
-                className={`pl-[18px] ${PANEL_WIDTH_CLASSES[panel.layout]}`}
-              >
-                <PopularLocationPanel panel={panel} />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
-
-      <div className="mt-[18px] flex items-center justify-between gap-4">
+      <div className="mb-[18px] flex items-center justify-between gap-4">
         <div className="flex items-center gap-[14px]">
           <div className="flex items-center gap-[10px] text-[11px] font-medium uppercase tracking-[0.18em] text-[#173260]/76">
             <span>{formatCounterValue(Math.min(activeSnap + 1, snapCount))}</span>
@@ -266,6 +242,30 @@ export default function LocationPopularSearchesCarousel({
             <ChevronRight size={18} strokeWidth={2.1} />
           </button>
         </div>
+      </div>
+
+      <div className="relative bg-transparent px-[2px] py-[6px] sm:py-[8px]">
+        <Carousel
+          setApi={setCarouselApi}
+          opts={{
+            align: 'start',
+            dragFree: true,
+            loop: panels.length > 1,
+            skipSnaps: false,
+          }}
+          className="w-full cursor-grab active:cursor-grabbing select-none"
+        >
+          <CarouselContent className="-ml-[18px]">
+            {panels.map((panel) => (
+              <CarouselItem
+                key={panel.id}
+                className={`pl-[18px] ${PANEL_WIDTH_CLASSES[panel.layout]}`}
+              >
+                <PopularLocationPanel panel={panel} />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
       </div>
     </div>
   )

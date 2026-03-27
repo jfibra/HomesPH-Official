@@ -13,6 +13,7 @@ import {
 } from '@/lib/mock-data'
 import { getSiteLocations } from '@/lib/db-queries'
 import AdBanner from '@/components/ui/AdBanner'
+import { GENERAL_NAV_ITEMS } from '@/lib/general-nav'
 
 const fmt = (n: number) => `₱ ${n.toLocaleString()}`
 
@@ -36,6 +37,7 @@ export default async function Home() {
         contactEmail={settings.contactEmail}
         contactPhone={settings.contactPhone}
         socialLinks={settings.socialLinks}
+        navItems={GENERAL_NAV_ITEMS}
       />
 
       {/* ── Choose a Location ── */}

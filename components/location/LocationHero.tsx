@@ -1,21 +1,15 @@
 import Link from 'next/link'
 import { Outfit } from 'next/font/google'
 import LocationHeroControls from './LocationHeroControls'
+import LocationHeroNav from './LocationHeroNav'
 import LocationHeroScrollCue from './LocationHeroScrollCue'
+import { buildContextHomeHref, buildNewsHref } from '@/lib/news-navigation'
+import ResetLocationLink from '@/components/layout/ResetLocationLink'
 
 const outfit = Outfit({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
 })
-
-const HERO_NAV_ITEMS = [
-  { label: 'Our Company', href: '/our-company' },
-  { label: 'News', href: '/news' },
-  { label: 'Mortgage', href: '/mortgage' },
-  { label: 'Legal', href: '/legal' },
-  { label: 'Tourism', href: '/tourism' },
-  { label: 'Restaurant', href: '/restaurant' },
-]
 
 const HERO_BACKGROUND_IMAGE =
   'https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/homesph/heroBackground1.jpg'
@@ -46,6 +40,15 @@ export default function LocationHero({
 }: LocationHeroProps) {
   const resolvedHeroImage = HERO_BACKGROUND_IMAGE
   const resolvedLogoUrl = logoUrl?.includes('whiteLogo.png') ? logoUrl : HERO_LOGO_URL
+  const homeHref = buildContextHomeHref(locationSlug)
+  const heroNavItems = [
+    { label: 'Home', href: homeHref },
+    { label: 'Buy', href: `/buy?location=${encodeURIComponent(locationSlug)}` },
+    { label: 'Rent', href: `/rent?location=${encodeURIComponent(locationSlug)}` },
+    { label: 'Projects', href: `/projects?location=${encodeURIComponent(locationSlug)}` },
+    { label: 'News', href: buildNewsHref(locationName) },
+    { label: 'Contact Us', href: '/contact-us' },
+  ]
 
   return (
     <section className={`${outfit.className} relative isolate w-full overflow-hidden bg-[#1c4f89] text-white`}>
@@ -60,7 +63,7 @@ export default function LocationHero({
 
       <div className="relative mx-auto flex min-h-[690px] max-w-[1280px] flex-col px-6 pb-[56px] pt-[22px] sm:px-8 lg:px-10">
         <div className="relative flex min-h-[48px] items-center justify-between gap-6">
-          <Link href="/" className="shrink-0">
+          <ResetLocationLink href="/" className="shrink-0">
             {resolvedLogoUrl ? (
               <img
                 src={resolvedLogoUrl}
@@ -74,15 +77,9 @@ export default function LocationHero({
                 Homes<span className="font-normal text-white/84">.ph</span>
               </span>
             )}
-          </Link>
+          </ResetLocationLink>
 
-          <nav className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-[40px] text-[15px] font-medium tracking-[-0.025em] text-white/96 lg:flex">
-            {HERO_NAV_ITEMS.map((item) => (
-              <Link key={item.href} href={item.href} className="transition hover:text-white">
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          <LocationHeroNav items={heroNavItems} />
 
           <div className="ml-auto flex items-center justify-end gap-[28px]">
             <Link

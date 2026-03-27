@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronDown, Mic, Search } from 'lucide-react'
 import type { HeroMode } from './LocationHeroControls'
 
@@ -24,6 +24,12 @@ const MANUAL_SEGMENT_TRANSITION =
 
 const MODE_PANEL_TRANSITION =
   'motion-reduce:animate-none motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 duration-300'
+
+const AI_OUTLINE_SHELL =
+  'ai-search-outline-shell relative isolate overflow-hidden rounded-[14px] p-[1.5px] shadow-[0_10px_40px_rgba(0,0,0,0.03)] sm:rounded-[16px]'
+
+const GUIDED_PROMPT_TRANSITION =
+  'transition-[opacity,transform,width,margin] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)]'
 
 const MANUAL_PROPERTY_OPTIONS = [
   { value: 'residential', label: 'Residential' },
@@ -76,6 +82,33 @@ const AI_PROMPT_SUGGESTIONS_BY_SLUG: Record<string, string[]> = {
   ],
 }
 
+const AI_GUIDED_PROMPTS_BY_SLUG: Record<string, string[]> = {
+  cebu: [
+    'Apartment in Cebu',
+    'Studio Apartment in Cebu',
+    'Apartment Near IT Park',
+    'Studio Condo in Mandaue',
+  ],
+  bgc: [
+    'Condo in BGC',
+    'Apartment Near Uptown',
+    'Studio Near High Street',
+    '2 Bedroom in Taguig',
+  ],
+  makati: [
+    'Condo in Makati',
+    'Apartment Near Ayala Avenue',
+    'Studio in Legazpi Village',
+    '1 Bedroom Near Salcedo',
+  ],
+  manila: [
+    'Apartment in Manila',
+    'Studio Near Taft',
+    'Condo in Ermita',
+    'Affordable Condo in Manila',
+  ],
+}
+
 function buildAiSuggestions(
   locationName: string,
   locationSlug: string,
@@ -92,6 +125,28 @@ function buildAiSuggestions(
 
   return [
     `Condominium in ${fallbackLabel}`,
+    `Studio Apartment in ${fallbackLabel}`,
+    `${quickLinkLabels.includes('projects') ? 'Projects' : 'Homes'} in ${fallbackLabel}`,
+    `1 Bedroom in ${fallbackLabel}`,
+  ]
+}
+
+function buildAiGuidedPrompts(
+  locationName: string,
+  locationSlug: string,
+  quickLinks: HeroQuickLink[]
+) {
+  const predefinedPrompts = AI_GUIDED_PROMPTS_BY_SLUG[locationSlug]
+
+  if (predefinedPrompts) {
+    return predefinedPrompts
+  }
+
+  const fallbackLabel = locationName.trim()
+  const quickLinkLabels = quickLinks.map((item) => item.label.toLowerCase())
+
+  return [
+    `Apartment in ${fallbackLabel}`,
     `Studio Apartment in ${fallbackLabel}`,
     `${quickLinkLabels.includes('projects') ? 'Projects' : 'Homes'} in ${fallbackLabel}`,
     `1 Bedroom in ${fallbackLabel}`,
@@ -152,12 +207,64 @@ export default function LocationHeroSearchCard({
 }: LocationHeroSearchCardProps) {
   const [manualListingType, setManualListingType] = useState<'sale' | 'rent'>('sale')
   const [aiQuery, setAiQuery] = useState('')
+  const [activePromptIndex, setActivePromptIndex] = useState(0)
+  const [typedPromptLength, setTypedPromptLength] = useState(0)
+  const [isDeletingPrompt, setIsDeletingPrompt] = useState(false)
   const isAiMode = mode === 'ai'
   const aiSuggestions = buildAiSuggestions(locationName, locationSlug, quickLinks)
-  const placeholder = isAiMode
-    ? `Try "Apartment in ${locationName}"`
-    : 'City, community or building'
+  const aiGuidedPrompts = buildAiGuidedPrompts(locationName, locationSlug, quickLinks)
+  const activeGuidedPrompt = aiGuidedPrompts[activePromptIndex] ?? aiGuidedPrompts[0] ?? ''
+  const animatedGuidedPrompt = `"${activeGuidedPrompt}"`
+  const visibleGuidedPrompt = animatedGuidedPrompt.slice(0, typedPromptLength)
+  const showGuidedPrompt = isAiMode && aiQuery.length === 0
+  const placeholder = isAiMode ? '' : 'City, community or building'
   const submitLabel = isAiMode ? 'Search with AI' : 'Search manually'
+
+  useEffect(() => {
+    setActivePromptIndex(0)
+    setTypedPromptLength(0)
+    setIsDeletingPrompt(false)
+  }, [locationSlug])
+
+  useEffect(() => {
+    if (!showGuidedPrompt) {
+      return
+    }
+
+    setTypedPromptLength(0)
+    setIsDeletingPrompt(false)
+  }, [showGuidedPrompt])
+
+  useEffect(() => {
+    if (!showGuidedPrompt || !animatedGuidedPrompt) {
+      return
+    }
+
+    let timeoutId: number
+
+    if (!isDeletingPrompt && typedPromptLength < animatedGuidedPrompt.length) {
+      timeoutId = window.setTimeout(() => {
+        setTypedPromptLength((currentLength) => currentLength + 1)
+      }, typedPromptLength === 0 ? 420 : 64)
+    } else if (!isDeletingPrompt && typedPromptLength === animatedGuidedPrompt.length) {
+      timeoutId = window.setTimeout(() => {
+        setIsDeletingPrompt(true)
+      }, 1600)
+    } else if (isDeletingPrompt && typedPromptLength > 0) {
+      timeoutId = window.setTimeout(() => {
+        setTypedPromptLength((currentLength) => currentLength - 1)
+      }, 32)
+    } else {
+      timeoutId = window.setTimeout(() => {
+        setIsDeletingPrompt(false)
+        setActivePromptIndex((currentIndex) => (currentIndex + 1) % aiGuidedPrompts.length)
+      }, 220)
+    }
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [aiGuidedPrompts.length, animatedGuidedPrompt, isDeletingPrompt, showGuidedPrompt, typedPromptLength])
 
   return (
     <form
@@ -172,33 +279,60 @@ export default function LocationHeroSearchCard({
       <div key={mode} className={`${MODE_PANEL_TRANSITION} xl:flex xl:h-full xl:flex-col xl:justify-center`}>
         {isAiMode ? (
           <div className="space-y-[14px] xl:space-y-[16px]">
-            <div className="grid h-[56px] grid-cols-[18px_minmax(0,1fr)_18px_44px] items-center gap-[12px] rounded-[15px] border border-[#3150f5] bg-white px-[16px] shadow-[0_0_0_1px_rgba(49,80,245,0.03)] sm:h-[58px] sm:grid-cols-[18px_minmax(0,1fr)_20px_46px] sm:px-[18px]">
-              <Search size={18} strokeWidth={2} className="shrink-0 text-[#173260]" />
-              <input
-                aria-label="Search properties"
-                name="q"
-                placeholder={placeholder}
-                type="search"
-                value={aiQuery}
-                onChange={(event) => setAiQuery(event.target.value)}
-                className={`min-w-0 border-0 bg-transparent text-[15px] leading-6 tracking-[-0.02em] text-[#173260] placeholder:text-[#42577c] focus:outline-none sm:text-[16px] ${CONTENT_TRANSITION}`}
-              />
+            <div className={AI_OUTLINE_SHELL}>
+              <div className="relative z-10 grid h-[60px] grid-cols-[18px_minmax(0,1fr)_18px_44px] items-center gap-[12px] rounded-[12.5px] bg-white px-[16px] sm:h-[65px] sm:grid-cols-[18px_minmax(0,1fr)_20px_46px] sm:rounded-[14.5px] sm:px-[18px]">
+                <Search size={20} strokeWidth={2} className="shrink-0 text-[#173260]" />
+                <div className="flex min-w-0 items-center">
+                  <span
+                    aria-hidden
+                    className={`overflow-hidden whitespace-nowrap text-[16px] leading-6 tracking-[-0.02em] text-[#42577c] sm:text-[18px] ${GUIDED_PROMPT_TRANSITION} ${showGuidedPrompt ? 'mr-[6px] w-[28px] opacity-100 sm:w-[32px]' : 'mr-0 w-0 opacity-0'}`}
+                  >
+                    Try
+                  </span>
 
-              <button
-                type="button"
-                aria-label="Voice search"
-                className="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center text-[#2140d8] transition hover:text-[#1b35b8] sm:h-[20px] sm:w-[20px]"
-              >
-                <Mic size={17} />
-              </button>
+                  <div className="relative min-w-0 flex-1">
+                    {showGuidedPrompt ? (
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center overflow-hidden"
+                      >
+                        <span
+                          className="inline-flex min-w-0 items-center truncate text-[16px] leading-6 tracking-[-0.02em] text-[#5f7295] sm:text-[18px]"
+                        >
+                          <span className="truncate">{visibleGuidedPrompt || '\u00A0'}</span>
+                          <span className="ai-guided-caret ml-[2px] inline-block h-[1.05em] w-px shrink-0 rounded-full bg-[#5f7295]/75" />
+                        </span>
+                      </span>
+                    ) : null}
 
-              <button
-                type="submit"
-                aria-label={submitLabel}
-                className={`inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[12px] bg-[#2140d8] text-white hover:bg-[#1b35b8] sm:h-[46px] sm:w-[46px] ${CONTENT_TRANSITION}`}
-              >
-                <AIActionGlyph />
-              </button>
+                    <input
+                      aria-label="Search properties"
+                      name="q"
+                      placeholder={placeholder}
+                      type="search"
+                      value={aiQuery}
+                      onChange={(event) => setAiQuery(event.target.value)}
+                      className={`relative z-10 min-w-0 w-full border-0 bg-transparent text-[16px] leading-6 tracking-[-0.02em] text-[#173260] focus:outline-none sm:text-[18px] ${CONTENT_TRANSITION}`}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  aria-label="Voice search"
+                  className="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center text-[#2140d8] transition hover:text-[#1b35b8] sm:h-[20px] sm:w-[20px]"
+                >
+                  <Mic size={20} />
+                </button>
+
+                <button
+                  type="submit"
+                  aria-label={submitLabel}
+                  className={`inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[12px] bg-[#2140d8] text-white shadow-[0_10px_24px_rgba(33,64,216,0.26)] hover:bg-[#1b35b8] sm:h-[46px] sm:w-[46px] ${CONTENT_TRANSITION}`}
+                >
+                  <AIActionGlyph />
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-[12px] min-[560px]:grid-cols-2 lg:grid-cols-4 xl:gap-[10px]">
@@ -207,7 +341,7 @@ export default function LocationHeroSearchCard({
                   key={suggestion}
                   type="button"
                   onClick={() => setAiQuery(suggestion)}
-                  className="inline-flex h-[40px] min-w-0 items-center justify-center rounded-[11px] border border-[#3150f5] bg-white px-[14px] text-center text-[13px] font-medium tracking-[-0.02em] text-[#2140d8] transition-[border-color,background-color,color,transform] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:border-[#2342df] hover:bg-[#f5f8ff] sm:text-[13.5px]"
+                  className="inline-flex h-[42px] min-w-0 items-center justify-center rounded-[10px] border border-[#1428AE] bg-white px-[22px] text-center text-[15px] font-medium tracking-[-0.02em] text-[#1428AE] transition-[border-color,background-color,color] duration-[200ms] ease-out hover:bg-[#f0f4ff]"
                 >
                   <span className="truncate">{suggestion}</span>
                 </button>

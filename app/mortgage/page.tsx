@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import { GENERAL_NAV_ITEMS } from '@/lib/general-nav'
 import { MORTGAGE_RATES } from '@/lib/mock-data'
 
 const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })
@@ -39,10 +40,16 @@ export default function MortgagePage() {
       <header className="bg-[#0c1f4a] py-4 px-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/" className="text-white font-extrabold text-xl tracking-tight">HomesPH</Link>
-          <nav className="hidden sm:flex items-center gap-4 text-sm text-white/70">
-            <Link href="/buy" className="hover:text-white transition-colors">Buy</Link>
-            <Link href="/rent" className="hover:text-white transition-colors">Rent</Link>
-            <Link href="/projects" className="hover:text-white transition-colors">Projects</Link>
+          <nav className="hidden sm:flex items-center gap-5 text-sm text-white/70">
+            {GENERAL_NAV_ITEMS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`transition-colors hover:text-white ${item.href === '/mortgage' ? 'text-white' : ''}`}
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
         </div>
       </header>

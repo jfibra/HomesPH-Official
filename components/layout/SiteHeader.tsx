@@ -5,8 +5,10 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { Facebook, Twitter, Mail, Phone, Menu, X, MapPin, Search } from 'lucide-react'
 import RegisterModal from '../auth/RegisterModal'
-import { clearSelectedLocationCookie } from '@/lib/selected-location'
 import LocationSwitcher from '@/components/home/LocationSwitcher'
+import { useSelectedLocation } from '@/hooks/use-selected-location'
+import { buildContextHomeHref, buildNewsHref } from '@/lib/news-navigation'
+import type { GeneralNavItem } from '@/lib/general-nav'
 
 interface SocialLinks {
   facebook?: string
@@ -15,14 +17,40 @@ interface SocialLinks {
   [key: string]: string | undefined
 }
 
-const NAV_ITEMS: { label: string; href: string; clearLocation?: boolean }[] = [
-  { label: 'Home', href: '/', clearLocation: true },
-  { label: 'Buy', href: '/buy' },
-  { label: 'Rent', href: '/rent' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'News', href: '/news' },
-  { label: 'Contact Us', href: '/contact-us' },
-]
+const STATIC_ROOT_SEGMENTS = new Set([
+  'buy',
+  'rent',
+  'projects',
+  'news',
+  'contact-us',
+  'login',
+  'registration',
+  'forgot-password',
+  'legal',
+  'developers',
+  'search',
+  'restaurant',
+  'tourism',
+  'our-company',
+  'mortgage',
+  'favorites',
+  'dashboard',
+])
+
+function getLocationContextFromPath(pathname: string) {
+  const segments = pathname.split('/').filter(Boolean)
+
+  if (segments.length === 0) return undefined
+  if (segments.length >= 2 && segments[1] === 'news' && !STATIC_ROOT_SEGMENTS.has(segments[0])) {
+    return decodeURIComponent(segments[0])
+  }
+  if (segments[0] === 'news' && segments[1]) return decodeURIComponent(segments[1])
+  if (segments.length === 1 && !STATIC_ROOT_SEGMENTS.has(segments[0])) {
+    return decodeURIComponent(segments[0])
+  }
+
+  return undefined
+}
 
 export default function SiteHeader({
   logoText = 'HomesPH',
@@ -30,19 +58,33 @@ export default function SiteHeader({
   contactEmail,
   contactPhone,
   socialLinks,
+  navItems,
 }: {
   logoText?: string
   logoUrl?: string
   contactEmail?: string
   contactPhone?: string
   socialLinks?: SocialLinks | string
+  navItems?: GeneralNavItem[]
 }) {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const pathname = usePathname()
-  const handleHomeClick = () => {
-    document.cookie = clearSelectedLocationCookie()
+  const { selectedLocation, clearSelectedLocation } = useSelectedLocation()
+  const locationContext = selectedLocation ?? getLocationContextFromPath(pathname)
+  const logoHref = '/'
+  const resolvedNavItems: GeneralNavItem[] = navItems ?? [
+    { label: 'Home', href: buildContextHomeHref(locationContext) },
+    { label: 'Buy', href: '/buy' },
+    { label: 'Rent', href: '/rent' },
+    { label: 'Projects', href: '/projects' },
+    { label: 'News', href: buildNewsHref(locationContext) },
+    { label: 'Contact Us', href: '/contact-us' },
+  ]
+
+  const handleLogoClick = () => {
+    clearSelectedLocation()
   }
 
   useEffect(() => {
@@ -110,7 +152,7 @@ export default function SiteHeader({
           <div className="flex items-center h-24 gap-8">
 
             {/* Logo */}
-            <Link href="/" className="shrink-0 group" onClick={handleHomeClick}>
+            <Link href={logoHref} className="shrink-0 group" onClick={handleLogoClick}>
               {logoUrl ? (
                 <img src={logoUrl} alt={logoText} className="h-12 w-auto drop-shadow-md transition-transform group-hover:scale-105" />
               ) : (
@@ -120,13 +162,12 @@ export default function SiteHeader({
 
             {/* Desktop nav — centered */}
             <nav className="hidden md:flex flex-1 items-center justify-center gap-2">
-              {NAV_ITEMS.map((item) => {
-                const isActive = pathname === item.href
+              {resolvedNavItems.map((item) => {
+                const isActive = pathname === item.href.split('?')[0]
                 return (
                   <Link
                     key={item.href + item.label}
                     href={item.href}
-                    onClick={item.clearLocation ? handleHomeClick : undefined}
                     className={`relative px-4 py-2.5 text-base font-bold rounded-xl transition-all duration-150 group ${isActive
                       ? 'text-[#0c1f4a] bg-[#fff7ed]'
                       : 'text-slate-600 hover:text-[#0c1f4a] hover:bg-[#fff7ed]'
@@ -181,7 +222,7 @@ export default function SiteHeader({
       >
         {/* Sidebar header */}
         <div className="flex items-center justify-between px-5 h-[72px] border-b border-gray-100 shrink-0">
-          <Link href="/" onClick={() => { setOpen(false); handleHomeClick() }} className="shrink-0">
+          <Link href={logoHref} onClick={() => { setOpen(false); handleLogoClick() }} className="shrink-0">
             {logoUrl ? (
               <img src={logoUrl} alt={logoText} className="h-9 w-auto" />
             ) : (
@@ -199,17 +240,14 @@ export default function SiteHeader({
 
         {/* Nav links */}
         <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
-          {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href
+          {resolvedNavItems.map((item) => {
+            const isActive = pathname === item.href.split('?')[0]
             return (
               <Link
                 key={item.href + item.label}
                 href={item.href}
                 onClick={() => {
                   setOpen(false)
-                  if (item.clearLocation) {
-                    handleHomeClick()
-                  }
                 }}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${isActive ? 'bg-amber-50 text-amber-700' : 'text-gray-700 hover:bg-[#1428ae]/5 hover:text-[#1428ae]'
                   }`}
