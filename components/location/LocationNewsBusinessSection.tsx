@@ -15,6 +15,12 @@ import {
 } from '@/components/ui/carousel'
 import { MOCK_NEWS } from '@/lib/mock-data'
 import { buildNewsHref } from '@/lib/news-navigation'
+import {
+  LOCATION_EDITORIAL_BREAKOUT_CLASS,
+  LOCATION_EDITORIAL_CONTENT_SHELL_CLASS,
+  LOCATION_EDITORIAL_TITLE_SHELL_CLASS,
+  LOCATION_PAGE_SHELL_CLASS,
+} from './location-page-layout'
 
 interface LocationNewsBusinessSectionProps {
   locationName: string
@@ -30,8 +36,8 @@ interface BusinessFeature {
 }
 
 const SECTION_CONTAINER_CLASS =
-  'mx-auto w-full max-w-[1600px] px-6 pb-[28px] pt-[18px] sm:px-8 sm:pb-[34px] sm:pt-[22px] lg:px-10 lg:pb-[40px] lg:pt-[26px]'
-const SECTION_HEADING_ALIGNMENT_CLASS = 'mx-auto w-full max-w-[1200px]'
+  `${LOCATION_PAGE_SHELL_CLASS} pb-[28px] pt-[18px] sm:pb-[34px] sm:pt-[22px] lg:pb-[40px] lg:pt-[26px]`
+const SECTION_HEADING_ALIGNMENT_CLASS = 'w-full'
 const NEWS_CARD_WIDTH_CLASS =
   'basis-[84%] sm:basis-[48%] lg:basis-[31.5%] xl:basis-[24.5%] 2xl:basis-[19.5%]'
 const NEWS_DATE_FORMATTER = new Intl.DateTimeFormat('en-US', {
@@ -259,54 +265,60 @@ export default function LocationNewsBusinessSection({
       className="bg-white"
     >
       <div className={SECTION_CONTAINER_CLASS}>
-        <div className="relative">
-          <div className={SECTION_HEADING_ALIGNMENT_CLASS}>
-            <NewsBusinessSectionHeading
-              id="location-latest-news-heading"
-              prefix="Homes.ph"
-              accent="Latest News"
-            />
-          </div>
+        <div className={LOCATION_EDITORIAL_BREAKOUT_CLASS}>
+          <div className={LOCATION_EDITORIAL_TITLE_SHELL_CLASS}>
+            <div className="relative">
+              <div className={SECTION_HEADING_ALIGNMENT_CLASS}>
+                <NewsBusinessSectionHeading
+                  id="location-latest-news-heading"
+                  prefix="Homes.ph"
+                  accent="Latest News"
+                />
+              </div>
 
-          <div className="mt-[18px] flex items-center justify-end gap-[8px] sm:absolute sm:right-0 sm:top-0 sm:mt-0">
-            <CarouselControlButton
-              direction="prev"
-              disabled={!canScrollPrev}
-              onClick={() => carouselApi?.scrollPrev()}
-            />
-            <CarouselControlButton
-              direction="next"
-              disabled={!canScrollNext}
-              onClick={() => carouselApi?.scrollNext()}
-            />
+              <div className="mt-[18px] flex items-center justify-end gap-[8px] sm:absolute sm:right-0 sm:top-0 sm:mt-0">
+                <CarouselControlButton
+                  direction="prev"
+                  disabled={!canScrollPrev}
+                  onClick={() => carouselApi?.scrollPrev()}
+                />
+                <CarouselControlButton
+                  direction="next"
+                  disabled={!canScrollNext}
+                  onClick={() => carouselApi?.scrollNext()}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mt-[24px] sm:mt-[28px]">
-          <Carousel
-            setApi={setCarouselApi}
-            opts={{
-              align: 'start',
-              dragFree: true,
-              loop: false,
-              skipSnaps: false,
-            }}
-            className="w-full cursor-grab select-none active:cursor-grabbing"
-          >
-            <CarouselContent className="-ml-[18px]">
-              {articles.map((article) => (
-                <CarouselItem
-                  key={article.id}
-                  className={`pl-[18px] ${NEWS_CARD_WIDTH_CLASS}`}
-                >
-                  <LatestNewsCard
-                    article={article}
-                    locationName={locationName}
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
+        <div className={`mt-[24px] sm:mt-[28px] ${LOCATION_EDITORIAL_BREAKOUT_CLASS}`}>
+          <div className={LOCATION_EDITORIAL_CONTENT_SHELL_CLASS}>
+            <Carousel
+              setApi={setCarouselApi}
+              opts={{
+                align: 'start',
+                dragFree: true,
+                loop: false,
+                skipSnaps: false,
+              }}
+              className="w-full cursor-grab select-none active:cursor-grabbing"
+            >
+              <CarouselContent className="-ml-[18px]">
+                {articles.map((article) => (
+                  <CarouselItem
+                    key={article.id}
+                    className={`pl-[18px] ${NEWS_CARD_WIDTH_CLASS}`}
+                  >
+                    <LatestNewsCard
+                      article={article}
+                      locationName={locationName}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+          </div>
         </div>
 
         <div className="pt-[56px] sm:pt-[68px]">
