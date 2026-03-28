@@ -1,5 +1,5 @@
 export const LOCATION_PAGE_SHELL_CLASS =
-  'mx-auto w-full max-w-[1440px] px-6 sm:px-8 lg:px-10'
+  'mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 xl:px-10'
 
 export const LOCATION_EDITORIAL_TITLE_SHELL_CLASS =
   'mx-auto w-full xl:max-w-[980px] 2xl:max-w-[1365px]'
