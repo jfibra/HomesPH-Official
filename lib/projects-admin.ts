@@ -384,6 +384,45 @@ export async function removeProjectUnit(projectId: number, unitId: number) {
   if (error) throw new Error(error.message)
 }
 
+/**
+ * Save a project unit without the admin access guard.
+ * ONLY call this after verifying project ownership in the calling action.
+ */
+export async function saveProjectUnitInternal(projectId: number, unitId: number | null, input: ProjectUnitInput) {
+  const admin = createAdminSupabaseClient()
+  const payload = { project_id: projectId, ...sanitizeUnitInput(input) }
+
+  if (unitId) {
+    const { data, error } = await admin
+      .from('project_units')
+      .update(payload)
+      .eq('id', unitId)
+      .eq('project_id', projectId)
+      .select('*')
+      .single<ProjectUnitRecord>()
+    if (error) throw new Error(error.message)
+    return data
+  }
+
+  const { data, error } = await admin
+    .from('project_units')
+    .insert(payload)
+    .select('*')
+    .single<ProjectUnitRecord>()
+  if (error) throw new Error(error.message)
+  return data
+}
+
+/**
+ * Remove a project unit without the admin access guard.
+ * ONLY call this after verifying project ownership in the calling action.
+ */
+export async function removeProjectUnitInternal(projectId: number, unitId: number) {
+  const admin = createAdminSupabaseClient()
+  const { error } = await admin.from('project_units').delete().eq('id', unitId).eq('project_id', projectId)
+  if (error) throw new Error(error.message)
+}
+
 export async function updateProjectAmenities(projectId: number, amenityIds: number[]) {
   await requireProjectsAccess('manage')
   const admin = createAdminSupabaseClient()

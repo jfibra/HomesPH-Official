@@ -298,7 +298,7 @@ export const DASHBOARD_MODULE_ACTION_SUPPORT: Record<DashboardModuleKey, Dashboa
   'saved-projects': { view: true, create: false, edit: false, delete: false, manage: false },
   'referral-leads': { view: true, create: false, edit: false, delete: false, manage: false },
   referrals: { view: true, create: false, edit: false, delete: false, manage: false },
-  units: { view: true, create: false, edit: false, delete: false, manage: false },
+  units: { view: true, create: true, edit: true, delete: true, manage: false },
 }
 
 export function getSupportedDashboardActions(moduleKey: DashboardModuleKey): DashboardActionPermissions {

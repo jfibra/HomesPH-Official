@@ -40,8 +40,10 @@ interface ActionResult<T = undefined> {
 
 function revalidateProjectSurfaces(id?: number) {
   revalidatePath('/dashboard/projects')
+  revalidatePath('/dashboard/developer/projects')
   if (id) {
     revalidatePath(`/dashboard/projects/${id}`)
+    revalidatePath(`/dashboard/developer/projects/${id}`)
   }
 }
 
