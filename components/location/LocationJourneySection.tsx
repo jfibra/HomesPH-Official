@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { LOCATION_PAGE_SHELL_CLASS } from './location-page-layout'
 
 interface LocationJourneySectionProps {
   locationName: string
@@ -18,9 +19,9 @@ interface JourneyStep {
 }
 
 const JOURNEY_SECTION_CONTAINER_CLASS =
-  'mx-auto w-full max-w-[1600px] px-6 pb-[24px] pt-[14px] sm:px-8 sm:pb-[30px] sm:pt-[18px] lg:px-10 lg:pb-[34px] lg:pt-[22px]'
+  `${LOCATION_PAGE_SHELL_CLASS} pb-[24px] pt-[14px] sm:pb-[30px] sm:pt-[18px] lg:pb-[34px] lg:pt-[22px]`
 const JOURNEY_SECTION_CONTENT_ALIGNMENT_CLASS =
-  'mx-auto w-full max-w-[1200px]'
+  'w-full'
 
 function buildJourneySteps(locationName: string, locationSlug: string): JourneyStep[] {
   return [

@@ -1,25 +1,24 @@
 import Link from 'next/link'
 import type { LucideIcon } from 'lucide-react'
 import {
-  BriefcaseBusiness,
-  Building,
   Building2,
-  Hotel,
   House,
   Landmark,
   LandPlot,
   LayoutGrid,
-  Store,
-  Warehouse,
 } from 'lucide-react'
 import LocationPopularSearchesCarousel from './LocationPopularSearchesCarousel'
+import {
+  LOCATION_EDITORIAL_BREAKOUT_CLASS,
+  LOCATION_EDITORIAL_CONTENT_SHELL_CLASS,
+  LOCATION_EDITORIAL_TITLE_SHELL_CLASS,
+  LOCATION_PAGE_SHELL_CLASS,
+} from './location-page-layout'
 
 const DISCOVERY_SECTION_CONTAINER_CLASS =
-  'mx-auto w-full max-w-[1600px] px-6 pt-[38px] sm:px-8 sm:pt-[46px] lg:px-10 lg:pt-[56px]'
+  `${LOCATION_PAGE_SHELL_CLASS} pt-[38px] sm:pt-[46px] lg:pt-[56px] pb-[24px] sm:pb-[32px] lg:pb-[38px]`
 const DISCOVERY_SECTION_HEADING_ALIGNMENT_CLASS =
-  'mx-auto w-full max-w-[1200px]'
-const POPULAR_SEARCHES_BREAKOUT_CLASS =
-  'mx-auto w-[calc(100vw-20px)] max-w-[1880px] pb-[24px] sm:w-[calc(100vw-28px)] sm:pb-[32px] lg:w-[calc(100vw-48px)] lg:pb-[38px] xl:w-[calc(100vw-64px)] 2xl:w-[calc(100vw-80px)]'
+  'w-full'
 
 interface LocationDiscoverySectionProps {
   locationName: string
@@ -45,24 +44,19 @@ const PROPERTY_TYPE_SHORTCUTS: PropertyTypeShortcut[] = [
   { icon: House, label: 'House', query: 'house' },
   { icon: Building2, label: 'Condo', query: 'condo' },
   { icon: LayoutGrid, label: 'Townhouse', query: 'townhouse' },
-  { icon: Landmark, label: 'Villa', query: 'villa' },
   { icon: LandPlot, label: 'Land', query: 'land' },
-  { icon: BriefcaseBusiness, label: 'Office', query: 'office' },
-  { icon: Store, label: 'Shop', query: 'shop' },
-  { icon: Warehouse, label: 'Warehouse', query: 'warehouse' },
-  { icon: Hotel, label: 'Hotel', query: 'hotel' },
-  { icon: Building, label: 'Building', query: 'building' },
+  { icon: Landmark, label: 'Villa', query: 'villa' },
 ]
 
 const POPULAR_SEARCH_EDITORIAL_ORDER: PopularLocationReference[] = [
   { slug: 'cebu', title: 'Cebu' },
   { slug: 'manila', title: 'Manila' },
   { slug: 'davao', title: 'Davao' },
+  { slug: 'bacolod', title: 'Bacolod' },
+  { slug: 'pampanga', title: 'Pampanga' },
   { slug: 'bgc', title: 'BGC' },
   { slug: 'palawan', title: 'Palawan' },
   { slug: 'dumaguete', title: 'Dumaguete' },
-  { slug: 'bacolod', title: 'Bacolod' },
-  { slug: 'pampanga', title: 'Pampanga' },
   { slug: 'cavite', title: 'Cavite' },
   { slug: 'bohol', title: 'Bohol' },
   { slug: 'iloilo', title: 'Iloilo' },
@@ -163,14 +157,14 @@ function PropertyTypeShortcutItem({
   return (
     <Link
       href={href}
-      className="group flex flex-col items-center gap-[10px] rounded-[18px] px-[4px] py-[2px] text-center outline-none"
+      className="group flex flex-col items-center gap-[14px] rounded-[24px] px-[10px] py-[8px] text-center outline-none"
     >
       <span
-        className="flex h-[48px] w-[48px] items-center justify-center rounded-[14px] border border-[#e7eef9] bg-[linear-gradient(180deg,#fbfdff_0%,#f1f6ff_100%)] text-[#2140d8] shadow-[inset_0_1px_0_rgba(255,255,255,0.88)] transition-[transform,border-color,background-color,color] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-[2px] group-hover:border-[#d5e0f8] group-hover:bg-[#f7faff] group-hover:text-[#173260] group-focus-visible:border-[#cbd9fb] group-focus-visible:ring-2 group-focus-visible:ring-[#2140d8]/20"
+        className="flex h-[82px] w-[82px] items-center justify-center rounded-[22px] border border-[#d9e5fb] bg-[linear-gradient(180deg,#fcfdff_0%,#edf4ff_100%)] text-[#2140d8] shadow-[inset_0_1px_0_rgba(255,255,255,0.94),0_14px_30px_rgba(20,40,174,0.08)] transition-[transform,border-color,background-color,color,box-shadow] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-[4px] group-hover:border-[#c7d8fb] group-hover:bg-[#f5f9ff] group-hover:text-[#173260] group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.96),0_18px_34px_rgba(20,40,174,0.12)] group-focus-visible:border-[#cbd9fb] group-focus-visible:ring-2 group-focus-visible:ring-[#2140d8]/20 sm:h-[92px] sm:w-[92px]"
       >
-        <Icon size={18} strokeWidth={2} />
+        <Icon size={30} strokeWidth={2} className="sm:size-[34px]" />
       </span>
-      <span className="text-[12px] font-medium leading-none tracking-[-0.02em] text-[#173260] sm:text-[13px]">
+      <span className="text-[15px] font-semibold leading-none tracking-[-0.02em] text-[#173260] sm:text-[17px]">
         {label}
       </span>
     </Link>
@@ -196,7 +190,7 @@ export default function LocationDiscoverySection({
               <DiscoverySectionHeading prefix="Explore by" accent="Property Type" />
             </div>
 
-            <div className="mt-[24px] grid grid-cols-5 gap-x-[14px] gap-y-[18px] sm:mt-[28px] sm:gap-x-[18px] lg:grid-cols-10 lg:gap-x-[20px]">
+            <div className="mx-auto mt-[28px] grid max-w-[1180px] grid-cols-2 gap-x-[26px] gap-y-[26px] sm:mt-[32px] sm:grid-cols-3 sm:gap-x-[30px] sm:gap-y-[30px] lg:grid-cols-5 lg:gap-x-[42px] lg:gap-y-[34px]">
               {PROPERTY_TYPE_SHORTCUTS.map((item) => (
                 <PropertyTypeShortcutItem
                   key={item.label}
@@ -209,20 +203,24 @@ export default function LocationDiscoverySection({
           </div>
 
           <div className="mt-[42px] sm:mt-[52px]">
-            <div className={DISCOVERY_SECTION_HEADING_ALIGNMENT_CLASS}>
-              <DiscoverySectionHeading
-                prefix="Philippine Real Estate"
-                accent="Popular Searches"
-              />
+            <div className={LOCATION_EDITORIAL_BREAKOUT_CLASS}>
+              <div className={LOCATION_EDITORIAL_TITLE_SHELL_CLASS}>
+                <div className={DISCOVERY_SECTION_HEADING_ALIGNMENT_CLASS}>
+                  <DiscoverySectionHeading
+                    prefix="Philippine Real Estate"
+                    accent="Popular Searches"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={`mt-[22px] min-w-0 sm:mt-[26px] ${LOCATION_EDITORIAL_BREAKOUT_CLASS}`}>
+            <div className={`${LOCATION_EDITORIAL_CONTENT_SHELL_CLASS} min-w-0`}>
+              <LocationPopularSearchesCarousel cards={popularLocationCards} />
             </div>
           </div>
         </div>
-      </div>
-
-      <div
-        className={`mt-[22px] min-w-0 sm:mt-[26px] ${POPULAR_SEARCHES_BREAKOUT_CLASS}`}
-      >
-        <LocationPopularSearchesCarousel cards={popularLocationCards} />
       </div>
     </section>
   )
