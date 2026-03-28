@@ -3,13 +3,15 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import SiteHeader from '@/components/layout/SiteHeader'
 import SiteFooter from '@/components/layout/SiteFooter'
-import { NewsLocationPicker } from '@/components/news/NewsLocationPicker'
 import { getSiteSettings } from '@/lib/site-settings'
 import { SELECTED_LOCATION_COOKIE } from '@/lib/selected-location'
 import { MOCK_NEWS } from '@/lib/mock-data'
 import AdBanner from '@/components/ui/AdBanner'
 import { GENERAL_NAV_ITEMS } from '@/lib/general-nav'
 import { buildNewsHref } from '@/lib/news-navigation'
+import { RealEstateNewsSection } from '@/components/news/RealEstateNewsSection'
+import { OFWNewsSection } from '@/components/news/OFWNewsSection'
+import { PhilippineTourismSection } from '@/components/news/PhilippineTourismSection'
 
 interface Article {
   id: number | string
@@ -280,6 +282,154 @@ function ProfessionalStoryCard({ article, compact = false }: { article: Article;
   )
 }
 
+function LeftColumn({ leadStory, localLatest }: { leadStory?: Article; localLatest: Article[] }) {
+  return (
+    <div className="space-y-0">
+      {leadStory ? (
+        <Link
+          href={`/news/${leadStory.slug}`}
+          className="group block overflow-hidden mb-6"
+        >
+          <div className="relative h-[185px] overflow-hidden rounded-[20px]">
+            <StoryImage article={leadStory} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          </div>
+          <div className="bg-gray-50 px-0 py-3">
+            <p className="text-left line-clamp-2 text-sm font-bold transition-colors group-hover:text-[#1428ae]" style={{ fontFamily: 'Outfit', color: '#002143' }}>
+              {leadStory.title}
+            </p>
+          </div>
+        </Link>
+      ) : null}
+
+      <div className="space-y-4">
+        {localLatest.slice(0, 5).map((article, index) => (
+          <div key={article.id}>
+            <Link href={`/news/${article.slug}`} className="group block">
+              <p className="text-left line-clamp-2 text-base font-bold transition-colors group-hover:text-[#1428ae]" style={{ fontFamily: 'Outfit', color: '#002143' }}>
+                {article.title}
+              </p>
+            </Link>
+            {index < 4 && <div className="mb-[15px] border-b border-gray-300"></div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function MiddleColumn({ leadStory, leadRest = [] }: { leadStory?: Article; leadRest?: Article[] }) {
+  const textArticle = leadRest[0]
+  const gridArticles = leadRest.slice(1, 4)
+
+  return (
+    <div className="space-y-0">
+      {leadStory ? (
+        <Link href={`/news/${leadStory.slug}`} className="group block overflow-hidden">
+          <div className="relative h-[330px] overflow-hidden rounded-[20px]">
+            <StoryImage article={leadStory} className="h-full w-full object-cover opacity-95 transition-transform duration-700 group-hover:scale-105" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="absolute left-4 top-4">
+              {leadStory.is_live ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-white">
+                  <span className="inline-block h-2 w-2 rounded-full bg-white"></span>
+                  Live Updates
+                </span>
+              ) : null}
+            </div>
+          </div>
+          <div className="bg-gray-50 pt-[20px] px-0 pb-6">
+            <h2 className="text-left text-xl font-extrabold leading-tight" style={{ fontFamily: 'Outfit', color: '#002143' }}>
+              {leadStory.title}
+            </h2>
+          </div>
+        </Link>
+      ) : null}
+
+      <div className="mt-[15px] mb-3"></div>
+
+      {textArticle ? (
+        <Link href={`/news/${textArticle.slug}`} className="group block">
+          <h3 className="text-left text-lg font-extrabold leading-tight transition-colors group-hover:text-[#1428ae]" style={{ fontFamily: 'Outfit', color: '#002143' }}>
+            {textArticle.title}
+          </h3>
+        </Link>
+      ) : null}
+
+      {gridArticles.length > 0 ? (
+        <div className="space-y-4">
+          <div className="grid gap-3 grid-cols-3">
+            {gridArticles.map(article => (
+              <div key={article.id} className="space-y-2">
+                <Link href={`/news/${article.slug}`} className="group block">
+                  <div className="relative h-24 overflow-hidden rounded-[8px]">
+                    <StoryImage article={article} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  </div>
+                  <p className="text-left line-clamp-2 text-xs font-bold transition-colors group-hover:text-[#1428ae]" style={{ fontFamily: 'Outfit', color: '#002143' }}>
+                    {article.title}
+                  </p>
+                </Link>
+                <Link href={`/news/${article.slug}`} className="inline-block text-xs font-bold transition-colors hover:text-[#0c1f4a]" style={{ color: '#1428AE' }}>
+                  READ MORE
+                </Link>
+              </div>
+            ))}
+          </div>
+          <Link href="#" className="inline-block text-sm font-bold transition-colors hover:text-[#0c1f4a]" style={{ color: '#1428AE' }}>
+            READ MORE
+          </Link>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function RightColumn({ leadRest }: { leadRest: Article[] }) {
+  const featured = leadRest[3]
+  const catchUpItems = leadRest.slice(4, 8)
+
+  return (
+    <div className="space-y-0">
+      {featured ? (
+        <Link
+          href={`/news/${featured.slug}`}
+          className="group block overflow-hidden mb-6"
+        >
+          <div className="relative h-[185px] overflow-hidden rounded-[20px]">
+            <StoryImage article={featured} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          </div>
+          <div className="bg-gray-50 px-0 py-3">
+            <p className="text-left line-clamp-2 text-sm font-bold transition-colors group-hover:text-[#1428ae]" style={{ fontFamily: 'Outfit', color: '#002143' }}>
+              {featured.title}
+            </p>
+          </div>
+        </Link>
+      ) : null}
+
+      <div>
+        <p className="text-left text-sm font-bold mb-4" style={{ fontFamily: 'Outfit', color: '#002143' }}>Catch up on today's news</p>
+        <div className="space-y-0">
+          {catchUpItems.map((article, index) => (
+            <div key={article.id}>
+              <Link href={`/news/${article.slug}`} className="group flex gap-3">
+                <div className="h-14 w-16 shrink-0 overflow-hidden rounded-[8px] bg-gray-200">
+                  <StoryImage article={article} className="h-full w-full object-cover" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-left line-clamp-2 text-xs font-bold transition-colors group-hover:text-[#1428ae]" style={{ fontFamily: 'Outfit', color: '#002143' }}>
+                    {article.title}
+                  </p>
+                  <p className="mt-0.5 text-xs line-clamp-1 text-left" style={{ fontFamily: 'Outfit', color: '#666666' }}>{getExcerpt(article).substring(0, 40)}...</p>
+                </div>
+              </Link>
+              {index < 3 && <div className="my-[7.5px] border-b border-gray-300"></div>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 async function fetchArticleCollection(location?: string, page = 1, limit = 40): Promise<ArticleCollection> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
   const url = new URL('/api/articles', baseUrl)
@@ -352,16 +502,8 @@ export default async function NewsPage({
 
   const [leadStory, ...leadRest] = leadFeed
   const localLatest = leadRest.slice(0, 5)
-  const liveArticles = allArticles.filter(article => article.is_live).slice(0, 10)
   const tickerTitles = allArticles.slice(0, 12).map(article => article.title)
   const tickerDuped = [...tickerTitles, ...tickerTitles]
-
-  const locationOptions = uniqueStrings([
-    ...allArticles.map(article => article.location),
-    ...allArticles.map(article => article.city),
-    manualLocation,
-    savedLocation,
-  ])
 
   const categoryGroups = groupArticles(allArticles, article => article.category)
     .sort((a, b) => b.items.length - a.items.length || a.key.localeCompare(b.key))
@@ -394,11 +536,7 @@ export default async function NewsPage({
   ])
   const moreStories = allArticles.filter(article => !reservedIds.has(String(article.id))).slice(0, 48)
 
-  const focusSummary = effectiveFocusedLocation
-    ? manualLocation
-      ? `Showing a manual news focus for ${effectiveFocusedLocation}. Your saved location stays available in the picker.`
-      : `Using your saved location, ${effectiveFocusedLocation}, as the main news desk for this page.`
-    : 'Showing a nationwide feed. Pick a location to turn the first desk into a local-market front page.'
+  
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -410,30 +548,15 @@ export default async function NewsPage({
         navItems={GENERAL_NAV_ITEMS}
       />
 
-      {liveArticles.length > 0 && (
-        <div className="flex items-center overflow-hidden bg-red-600 py-2 text-white">
-          <span className="breaking-badge mx-3 shrink-0 rounded-sm bg-white px-3 py-1 text-[10px] font-black uppercase tracking-widest text-red-600">
-            Breaking
-          </span>
-          <div className="ticker-track">
-            {[...liveArticles, ...liveArticles].map((article, index) => (
-              <span key={`${article.id}-${index}`} className="inline-block shrink-0 px-6 text-sm font-medium">
-                {article.title}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="overflow-hidden border-b border-gray-800 bg-gray-950 py-2.5 text-sm text-white">
+      <div className="overflow-hidden border-b border-gray-200 bg-white py-3 text-sm text-gray-900 shadow-sm">
         <div className="flex items-stretch">
-          <span className="flex shrink-0 items-center bg-amber-400 px-5 text-[11px] font-black uppercase tracking-widest text-gray-950">
-            News Feed
+          <span className="flex shrink-0 items-center bg-gradient-to-r from-blue-600 to-blue-700 px-5 text-[11px] font-black uppercase tracking-widest text-white">
+            Latest
           </span>
           <div className="ticker-track flex-1">
             {tickerDuped.map((title, index) => (
-              <span key={`${title}-${index}`} className="inline-block shrink-0 px-8 text-gray-300 transition-colors hover:text-white">
-                <span className="mr-2 text-amber-400">&#9670;</span>
+              <span key={`${title}-${index}`} className="inline-block shrink-0 px-6 text-sm font-medium text-gray-700 hover:text-blue-600">
+                <span className="mr-2 font-bold text-blue-600">•</span>
                 {title}
               </span>
             ))}
@@ -441,47 +564,8 @@ export default async function NewsPage({
         </div>
       </div>
 
-      <section className="bg-[#0c1f4a] px-4 py-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr] lg:items-end">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.3em] text-amber-400">Insights and Updates</p>
-              <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white md:text-5xl">
-                Real Estate News
-                {effectiveFocusedLocation ? ` for ${effectiveFocusedLocation}` : ''}
-              </h1>
-                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-white/70 md:text-base">
-                {focusSummary}
-              </p>
-              <NewsLocationPicker locations={locationOptions} active={effectiveFocusedLocation} />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-                <p className="text-[11px] font-black uppercase tracking-widest text-white/50">Focused Stories</p>
-                <p className="mt-2 text-3xl font-extrabold text-white">{leadFeed.length}</p>
-                <p className="mt-1 text-xs text-white/60">Latest desk in the active market.</p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-                <p className="text-[11px] font-black uppercase tracking-widest text-white/50">Categories</p>
-                <p className="mt-2 text-3xl font-extrabold text-white">{categoryGroups.length}</p>
-                <p className="mt-1 text-xs text-white/60">Shelves built from article categories.</p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-                <p className="text-[11px] font-black uppercase tracking-widest text-white/50">Regions</p>
-                <p className="mt-2 text-3xl font-extrabold text-white">{provinceGroups.length + (effectiveFocusedLocation ? 1 : 0)}</p>
-                <p className="mt-1 text-xs text-white/60">Location desks available right now.</p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm sm:col-span-3 lg:col-span-1 xl:col-span-3">
-                <p className="text-[11px] font-black uppercase tracking-widest text-white/50">Feed Coverage</p>
-                <p className="mt-2 text-3xl font-extrabold text-white">{allFeed.total.toLocaleString()}</p>
-                <p className="mt-1 text-xs text-white/60">Articles detected from the paginated upstream feed.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <main className="mx-auto max-w-7xl px-4 py-8">
+      <main className="w-full">
+        <div className="mx-auto w-full px-[230px] py-8">
         {allArticles.length === 0 ? (
           <div className="py-28 text-center text-gray-400">
             <p className="text-2xl font-extrabold text-gray-700">No articles found</p>
@@ -490,92 +574,32 @@ export default async function NewsPage({
         ) : (
           <>
             {/* MAIN 3-COLUMN GRID */}
-            <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr_1fr]">
-              {/* LEFT COLUMN: FEATURED + LIST */}
-              <div className="space-y-4">
-                <div className="rounded-[20px] border border-gray-200 bg-white p-5 shadow-sm shadow-gray-200/50">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#1428ae]">Featured Story</p>
-                  {leadStory ? (
-                    <div className="mt-4">
-                      <ProfessionalStoryCard article={leadStory} compact />
-                    </div>
-                  ) : null}
-                </div>
-
-                <div className="rounded-[20px] border border-gray-200 bg-white p-5 shadow-sm shadow-gray-200/50">
-                  <p className="mb-4 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Latest Items</p>
-                  <div className="space-y-3">
-                    {localLatest.slice(0, 4).map(article => (
-                      <CompactStory key={article.id} article={article} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* CENTER COLUMN: LARGE HERO + 3 FEATURED */}
-              <div className="space-y-4">
-                {leadStory ? (
-                  <Link href={`/news/${leadStory.slug}`} className="group block overflow-hidden rounded-[20px] bg-gray-950 shadow-lg shadow-gray-200/30">
-                    <div className="relative aspect-[16/9] overflow-hidden">
-                      <StoryImage article={leadStory} className="h-full w-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-105" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
-                      <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-                        {leadStory.is_live ? (
-                          <span className="rounded-full bg-red-600 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white">Live</span>
-                        ) : null}
-                      </div>
-                      <div className="absolute inset-x-0 bottom-0 p-5">
-                        <MetaRow article={leadStory} />
-                        <h2 className="mt-2 line-clamp-2 text-xl font-extrabold leading-tight text-white md:text-2xl">
-                          {leadStory.title}
-                        </h2>
-                      </div>
-                    </div>
-                  </Link>
-                ) : null}
-
-                <div className="grid gap-3 md:grid-cols-2">
-                  {leadRest.slice(0, 3).map(article => (
-                    <Link key={article.id} href={`/news/${article.slug}`} className="group block overflow-hidden rounded-[16px] bg-gray-100">
-                      <div className="relative aspect-video overflow-hidden">
-                        <StoryImage article={article} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                        <div className="absolute inset-x-0 bottom-0 p-3">
-                          <p className="line-clamp-2 text-sm font-bold leading-tight text-white">{article.title}</p>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* RIGHT COLUMN: CATCH-UP + 4 ITEMS */}
-              <div className="space-y-4">
-                <div className="rounded-[20px] border border-gray-200 bg-white p-5 shadow-sm shadow-gray-200/50">
-                  <p className="mb-4 text-[10px] font-black uppercase tracking-[0.3em] text-red-500">Catch-Up</p>
-                  <div className="space-y-3">
-                    {leadRest.slice(3, 7).map(article => (
-                      <Link key={article.id} href={`/news/${article.slug}`} className="group flex gap-3 rounded-[14px] border border-gray-100 p-3 transition-all duration-200 hover:shadow-md hover:shadow-gray-200/50">
-                        <div className="h-16 w-20 shrink-0 overflow-hidden rounded-[12px] bg-gray-200">
-                          <StoryImage article={article} className="h-full w-full object-cover" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="line-clamp-2 text-sm font-bold text-gray-950 transition-colors group-hover:text-[#1428ae]">
-                            {article.title}
-                          </p>
-                          <p className="mt-1 text-[11px] text-gray-500">{timeAgo(article.published_at)}</p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+            <div className="flex justify-center">
+              <div className="grid gap-8 grid-cols-[295px_620px_295px]">
+              <LeftColumn leadStory={leadStory} localLatest={localLatest} />
+              <MiddleColumn leadStory={leadStory} leadRest={leadRest} />
+              <RightColumn leadRest={leadRest} />
               </div>
             </div>
 
             <div className="mt-8">
               <AdBanner />
             </div>
+          </>
+        )}
+        </div>
 
+        {/* Carousel Sections using new components - FULL WIDTH */}
+        <div className="mt-6 space-y-[40px] -mx-[230px] px-[230px]">
+          <RealEstateNewsSection articles={allArticles} />
+          <OFWNewsSection articles={allArticles} />
+          <PhilippineTourismSection />
+        </div>
+
+        {/* Continue with more content inside main padding */}
+        <div className="mx-auto w-full px-[230px]">
+          {allArticles.length > 0 && (
+            <>
             {/* MORE NEWS GRID */}
             <section className="mt-12">
               <h3 className="mb-6 text-2xl font-extrabold text-gray-950">More News</h3>
@@ -715,6 +739,7 @@ export default async function NewsPage({
             </section>
           </>
         )}
+        </div>
       </main>
 
       <div className="mt-10">
