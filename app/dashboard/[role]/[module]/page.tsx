@@ -14,7 +14,8 @@ import { getInquiries, getInquiryListings, getInquiryProjects } from '@/lib/inqu
 import { getListingDeveloperOptions, getListingProjectOptions, getListingUnitOptions } from '@/lib/listings-admin'
 import { getLeadAgents, getLeadAnalytics, getLeadProjects, getLeads, getLeadUsers } from '@/lib/leads-admin'
 import { getDeveloperOptions } from '@/lib/projects-admin'
-import { getRoleListings, getRoleProjects, getRoleSavedListings, getRoleSavedProjects, getRoleUnits } from '@/lib/role-dashboard-data'
+import { getRoleListings, getRoleProjects, getRoleSavedListings, getRoleSavedProjects, getRoleUnits, getDeveloperProfileIds } from '@/lib/role-dashboard-data'
+import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 
 interface RoleModulePageProps {
@@ -45,7 +46,14 @@ export default async function DashboardRoleModulePage({ params }: RoleModulePage
     const projects = await getRoleProjects(role, user.profileId)
 
     if (actions.create || actions.edit || actions.delete || actions.manage) {
-      const developers = await getDeveloperOptions()
+      let developers = await getDeveloperOptions()
+
+      if (role === 'developer') {
+        const myDevIds = await getDeveloperProfileIds(user.profileId)
+        if (myDevIds.length > 0) {
+          developers = developers.filter((d) => myDevIds.includes(d.id))
+        }
+      }
 
       return (
         <div className="mx-auto flex max-w-7xl flex-col gap-6 p-6">
@@ -117,8 +125,41 @@ export default async function DashboardRoleModulePage({ params }: RoleModulePage
   }
 
   if (navItem.moduleKey === 'units' && role === 'developer') {
-    const units = await getRoleUnits(user.profileId)
-    return <RoleUnitsModuleClient title={navItem.label} description="Monitor unit inventory tied to your developer projects." units={units} />
+    const [units, ownedProjectsResult] = await Promise.all([
+      getRoleUnits(user.profileId),
+      (async () => {
+        const admin = createAdminSupabaseClient()
+        const { data: devProfiles } = await admin
+          .from('developers_profiles')
+          .select('id')
+          .eq('user_profile_id', user.profileId)
+        const developerIds = (devProfiles ?? []).map((d: { id: number }) => d.id)
+        if (!developerIds.length) {
+           const { data: allProjects } = await admin
+             .from('projects')
+             .select('id, name')
+             .order('name', { ascending: true })
+           return (allProjects ?? []) as { id: number; name: string }[]
+        }
+        const { data: projects } = await admin
+          .from('projects')
+          .select('id, name')
+          .in('developer_id', developerIds)
+          .order('name', { ascending: true })
+        return (projects ?? []) as { id: number; name: string }[]
+      })(),
+    ])
+    // Developers can always manage units, but they need projects to assign them to
+    const canCreate = true
+    return (
+      <RoleUnitsModuleClient
+        title={navItem.label}
+        description="Monitor unit inventory tied to your developer projects."
+        units={units}
+        canCreate={canCreate}
+        projects={ownedProjectsResult}
+      />
+    )
   }
 
   if (navItem.moduleKey === 'leads' && ['broker', 'salesperson', 'agent', 'developer'].includes(role)) {

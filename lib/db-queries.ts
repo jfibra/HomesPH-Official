@@ -64,7 +64,7 @@ export async function getProjectBySlug(slug: string) {
   const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
   if (!SUPABASE_URL) return null
   const headers = getSupabaseFetchHeaders()
-  const url = `${SUPABASE_URL}/rest/v1/projects?select=*,project_galleries(*),project_amenities(*),project_units(*)&slug=eq.${encodeURIComponent(slug)}&limit=1`
+  const url = `${SUPABASE_URL}/rest/v1/projects?select=*,developers_profiles(*),project_galleries(*),project_amenities(*),project_units(*)&slug=eq.${encodeURIComponent(slug)}&limit=1`
   const res = await fetch(url, { headers, next: { revalidate: REVALIDATE } })
   if (!res.ok) return null
   const rows = await res.json()

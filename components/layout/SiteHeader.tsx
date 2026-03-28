@@ -114,7 +114,7 @@ export default function SiteHeader({
       {/* ── Top contact bar — dark navy ── */}
       {(contactPhone || contactEmail || socials.facebook || socials.twitter) && (
         <div className="bg-[#0c1f4a]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-10">
+          <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 xl:px-20 2xl:pl-[227px] 2xl:pr-[227px] flex items-center justify-between h-10">
             <div className="flex items-center gap-5">
               {contactPhone && (
                 <a href={`tel:${contactPhone}`} className="flex items-center gap-1.5 text-xs text-blue-100 hover:text-white transition-colors">
@@ -148,7 +148,7 @@ export default function SiteHeader({
 
       {/* ── Main header ── */}
       <header className={`sticky top-0 z-40 bg-white transition-all duration-200 ${scrolled ? 'shadow-md' : 'border-b border-gray-100'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 xl:px-24 2xl:pl-[296px] 2xl:pr-[296px]">
           <div className="flex items-center h-24 gap-8">
 
             {/* Logo */}

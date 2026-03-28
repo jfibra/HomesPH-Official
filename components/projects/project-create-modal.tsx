@@ -73,7 +73,13 @@ export default function ProjectCreateModal({
 }) {
   const { toast } = useToast()
   const [open, setOpen] = useState(false)
-  const [form, setForm] = useState<ProjectInput>(INITIAL_FORM)
+  const [form, setForm] = useState<ProjectInput>(() => {
+    const initial = { ...INITIAL_FORM }
+    if (developers.length === 1 && !initial.developer_id) {
+      initial.developer_id = String(developers[0].id)
+    }
+    return initial
+  })
   const [mainImageFile, setMainImageFile] = useState<File | null>(null)
   const [storageProvider, setStorageProvider] = useState<StorageProvider>('auto')
   const [isPending, startTransition] = useTransition()
