@@ -164,7 +164,7 @@ export default function SiteFooter({
                 <a href={`tel:${contactPhone}`} className="flex items-start gap-3.5">
                   <SolidPhoneIcon className="mt-0.5 h-[24px] w-[24px] shrink-0 text-white" />
                   <div>
-                    <div className="text-[15px] font-medium text-white">{contactPhone}</div>
+                    <div className="break-words text-[15px] font-medium text-white">{contactPhone}</div>
                     <div className="text-[12px] text-white/68">Mon-Sat 9AM-6PM</div>
                   </div>
                 </a>
@@ -174,7 +174,7 @@ export default function SiteFooter({
                 <a href={`mailto:${contactEmail}`} className="flex items-start gap-3.5">
                   <SolidMailIcon className="mt-0.5 h-[24px] w-[24px] shrink-0 text-white" />
                   <div>
-                    <div className="text-[15px] font-medium text-white">{contactEmail}</div>
+                    <div className="break-words text-[15px] font-medium text-white">{contactEmail}</div>
                     <div className="text-[12px] text-white/68">We reply within 24hrs</div>
                   </div>
                 </a>

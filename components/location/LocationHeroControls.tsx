@@ -26,11 +26,11 @@ export default function LocationHeroControls({
 
   return (
     <>
-      <div className="mt-[34px]">
+      <div className="mt-[24px] sm:mt-[30px]">
         <LocationHeroModeSwitch activeMode={activeMode} onModeChange={setActiveMode} />
       </div>
 
-      <div className="mt-[26px] w-full max-w-[1060px]">
+      <div className="mt-[18px] w-full max-w-[1060px] sm:mt-[24px]">
         <LocationHeroSearchCard
           locationName={locationName}
           locationSlug={locationSlug}

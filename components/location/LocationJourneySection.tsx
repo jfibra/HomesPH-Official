@@ -19,7 +19,7 @@ interface JourneyStep {
 }
 
 const JOURNEY_SECTION_CONTAINER_CLASS =
-  `${LOCATION_PAGE_SHELL_CLASS} pb-[24px] pt-[14px] sm:pb-[30px] sm:pt-[18px] lg:pb-[34px] lg:pt-[22px]`
+  `${LOCATION_PAGE_SHELL_CLASS} pb-[20px] pt-[8px] sm:pb-[30px] sm:pt-[18px] lg:pb-[34px] lg:pt-[22px]`
 const JOURNEY_SECTION_CONTENT_ALIGNMENT_CLASS =
   'w-full'
 
@@ -73,9 +73,9 @@ function JourneyStepCard({
 }: JourneyStep) {
   return (
     <article className="overflow-hidden rounded-[18px] border border-[#dbe5f4] bg-white shadow-[0_10px_24px_rgba(15,39,78,0.045)]">
-      <div className="grid min-h-[152px] grid-cols-[106px_minmax(0,1fr)] sm:min-h-[160px] sm:grid-cols-[112px_minmax(0,1fr)]">
+      <div className="grid min-h-[148px] grid-cols-[94px_minmax(0,1fr)] sm:min-h-[160px] sm:grid-cols-[112px_minmax(0,1fr)]">
         <div
-          className={`relative min-h-[152px] overflow-hidden sm:min-h-[160px] ${imageWrapperClassName ?? ''}`}
+          className={`relative min-h-[148px] overflow-hidden sm:min-h-[160px] ${imageWrapperClassName ?? ''}`}
         >
           <img
             src={imageSrc}
@@ -86,12 +86,12 @@ function JourneyStepCard({
           />
         </div>
 
-        <div className="flex min-w-0 flex-col justify-between px-[14px] py-[13px] sm:px-[16px] sm:py-[15px]">
+        <div className="flex min-w-0 flex-col justify-between px-[12px] py-[12px] sm:px-[16px] sm:py-[15px]">
           <div>
-            <h3 className="text-[18px] font-semibold leading-[1.08] tracking-[-0.035em] text-[#002143] sm:text-[19px]">
+            <h3 className="text-[17px] font-semibold leading-[1.08] tracking-[-0.035em] text-[#002143] sm:text-[19px]">
               {title}
             </h3>
-            <p className="mt-[8px] max-w-[270px] text-[13px] leading-[1.45] tracking-[-0.015em] text-[#002143] sm:max-w-[292px] sm:text-[13.5px]">
+            <p className="mt-[8px] max-w-[270px] text-[12.5px] leading-[1.45] tracking-[-0.015em] text-[#002143] sm:max-w-[292px] sm:text-[13.5px]">
               {description}
             </p>
           </div>
@@ -121,19 +121,19 @@ export default function LocationJourneySection({
         <div className={JOURNEY_SECTION_CONTENT_ALIGNMENT_CLASS}>
           <h2
             id="location-journey-heading"
-            className="text-[28px] font-semibold tracking-[-0.045em] text-[#002143] sm:text-[32px]"
+            className="text-[26px] font-semibold tracking-[-0.045em] text-[#002143] sm:text-[32px]"
           >
             <span>Your Journey to </span>
             <span className="text-[#2140d8]">Homeownership</span>
           </h2>
-          <p className="mt-[10px] max-w-[720px] text-[15px] leading-[1.5] tracking-[-0.02em] text-[#002143] sm:text-[16px]">
+          <p className="mt-[10px] max-w-[720px] text-[14px] leading-[1.5] tracking-[-0.02em] text-[#002143] sm:text-[16px]">
             We make finding and buying your dream home simple, transparent, and
             stress-free.
           </p>
         </div>
 
         <div
-          className={`${JOURNEY_SECTION_CONTENT_ALIGNMENT_CLASS} mt-[24px] grid grid-cols-1 gap-[16px] xl:grid-cols-3 xl:gap-[18px]`}
+          className={`${JOURNEY_SECTION_CONTENT_ALIGNMENT_CLASS} mt-[20px] grid grid-cols-1 gap-[14px] xl:grid-cols-3 xl:gap-[18px]`}
         >
           {steps.map((step) => (
             <JourneyStepCard key={step.title} {...step} />

@@ -16,7 +16,7 @@ import {
 } from './location-page-layout'
 
 const DISCOVERY_SECTION_CONTAINER_CLASS =
-  `${LOCATION_PAGE_SHELL_CLASS} pt-[38px] sm:pt-[46px] lg:pt-[56px] pb-[24px] sm:pb-[32px] lg:pb-[38px]`
+  `${LOCATION_PAGE_SHELL_CLASS} pt-[30px] sm:pt-[46px] lg:pt-[56px] pb-[20px] sm:pb-[32px] lg:pb-[38px]`
 const DISCOVERY_SECTION_HEADING_ALIGNMENT_CLASS =
   'w-full'
 
@@ -138,7 +138,7 @@ function DiscoverySectionHeading({
   prefix: string
 }) {
   return (
-    <h2 className="text-[28px] font-semibold tracking-[-0.045em] text-[#0f274e] sm:text-[32px]">
+    <h2 className="text-[26px] font-semibold tracking-[-0.045em] text-[#0f274e] sm:text-[32px]">
       <span>{prefix} </span>
       <span className="text-[#2140d8]">{accent}</span>
     </h2>
@@ -157,14 +157,14 @@ function PropertyTypeShortcutItem({
   return (
     <Link
       href={href}
-      className="group flex flex-col items-center gap-[14px] rounded-[24px] px-[10px] py-[8px] text-center outline-none"
+      className="group flex flex-col items-center gap-[12px] rounded-[24px] px-[8px] py-[6px] text-center outline-none sm:gap-[14px] sm:px-[10px] sm:py-[8px]"
     >
       <span
-        className="flex h-[82px] w-[82px] items-center justify-center rounded-[22px] border border-[#d9e5fb] bg-[linear-gradient(180deg,#fcfdff_0%,#edf4ff_100%)] text-[#2140d8] shadow-[inset_0_1px_0_rgba(255,255,255,0.94),0_14px_30px_rgba(20,40,174,0.08)] transition-[transform,border-color,background-color,color,box-shadow] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-[4px] group-hover:border-[#c7d8fb] group-hover:bg-[#f5f9ff] group-hover:text-[#173260] group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.96),0_18px_34px_rgba(20,40,174,0.12)] group-focus-visible:border-[#cbd9fb] group-focus-visible:ring-2 group-focus-visible:ring-[#2140d8]/20 sm:h-[92px] sm:w-[92px]"
+        className="flex h-[72px] w-[72px] items-center justify-center rounded-[20px] border border-[#d9e5fb] bg-[linear-gradient(180deg,#fcfdff_0%,#edf4ff_100%)] text-[#2140d8] shadow-[inset_0_1px_0_rgba(255,255,255,0.94),0_14px_30px_rgba(20,40,174,0.08)] transition-[transform,border-color,background-color,color,box-shadow] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-[4px] group-hover:border-[#c7d8fb] group-hover:bg-[#f5f9ff] group-hover:text-[#173260] group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.96),0_18px_34px_rgba(20,40,174,0.12)] group-focus-visible:border-[#cbd9fb] group-focus-visible:ring-2 group-focus-visible:ring-[#2140d8]/20 sm:h-[92px] sm:w-[92px]"
       >
-        <Icon size={30} strokeWidth={2} className="sm:size-[34px]" />
+        <Icon size={28} strokeWidth={2} className="sm:size-[34px]" />
       </span>
-      <span className="text-[15px] font-semibold leading-none tracking-[-0.02em] text-[#173260] sm:text-[17px]">
+      <span className="text-[14px] font-semibold leading-none tracking-[-0.02em] text-[#173260] sm:text-[17px]">
         {label}
       </span>
     </Link>
@@ -190,7 +190,7 @@ export default function LocationDiscoverySection({
               <DiscoverySectionHeading prefix="Explore by" accent="Property Type" />
             </div>
 
-            <div className="mx-auto mt-[28px] grid max-w-[1180px] grid-cols-2 gap-x-[26px] gap-y-[26px] sm:mt-[32px] sm:grid-cols-3 sm:gap-x-[30px] sm:gap-y-[30px] lg:grid-cols-5 lg:gap-x-[42px] lg:gap-y-[34px]">
+            <div className="mx-auto mt-[24px] grid max-w-[1180px] grid-cols-2 gap-x-[18px] gap-y-[20px] sm:mt-[32px] sm:grid-cols-3 sm:gap-x-[30px] sm:gap-y-[30px] lg:grid-cols-5 lg:gap-x-[42px] lg:gap-y-[34px]">
               {PROPERTY_TYPE_SHORTCUTS.map((item) => (
                 <PropertyTypeShortcutItem
                   key={item.label}
@@ -202,7 +202,7 @@ export default function LocationDiscoverySection({
             </div>
           </div>
 
-          <div className="mt-[42px] sm:mt-[52px]">
+          <div className="mt-[34px] sm:mt-[52px]">
             <div className={LOCATION_EDITORIAL_BREAKOUT_CLASS}>
               <div className={LOCATION_EDITORIAL_TITLE_SHELL_CLASS}>
                 <div className={DISCOVERY_SECTION_HEADING_ALIGNMENT_CLASS}>
@@ -215,7 +215,7 @@ export default function LocationDiscoverySection({
             </div>
           </div>
 
-          <div className={`mt-[22px] min-w-0 sm:mt-[26px] ${LOCATION_EDITORIAL_BREAKOUT_CLASS}`}>
+          <div className={`mt-[18px] min-w-0 sm:mt-[26px] ${LOCATION_EDITORIAL_BREAKOUT_CLASS}`}>
             <div className={`${LOCATION_EDITORIAL_CONTENT_SHELL_CLASS} min-w-0`}>
               <LocationPopularSearchesCarousel cards={popularLocationCards} />
             </div>
