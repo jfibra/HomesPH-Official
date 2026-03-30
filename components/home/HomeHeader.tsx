@@ -12,11 +12,17 @@ interface SocialLinks {
   [key: string]: string | undefined
 }
 
+interface HomeHeaderNavItem {
+  label: string
+  href: string
+}
+
 interface HomeHeaderProps {
   contactEmail?: string
   contactPhone?: string
   socialLinks?: SocialLinks | string
   logoUrl?: string
+  navItems?: HomeHeaderNavItem[]
 }
 
 // Home-specific nav: show company/link actions rather than global site nav
@@ -33,6 +39,7 @@ export default function HomeHeader({
   contactPhone,
   socialLinks,
   logoUrl,
+  navItems = DEFAULT_NAV_ITEMS,
 }: HomeHeaderProps) {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
@@ -136,8 +143,8 @@ export default function HomeHeader({
             {/* LocationSwitcher removed per request */}
 
             <nav className="hidden md:flex flex-1 items-center justify-center gap-2">
-              {NAV_ITEMS.map((item) => {
-                const isActive = pathname === item.href
+              {navItems.map((item) => {
+                const isActive = pathname === item.href.split('?')[0]
                 return (
                   <Link
                     key={item.href}
@@ -211,8 +218,8 @@ export default function HomeHeader({
 
         {/* Nav links */}
         <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
-          {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href
+          {navItems.map((item) => {
+            const isActive = pathname === item.href.split('?')[0]
             return (
               <Link
                 key={item.href}

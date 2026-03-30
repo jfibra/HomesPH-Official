@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { ChevronDown, Mic, Search } from 'lucide-react'
+import { type FormEvent, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { ChevronDown, Loader2, Mic, Search } from 'lucide-react'
 import type { HeroMode } from './LocationHeroControls'
 
 interface HeroQuickLink {
@@ -16,6 +17,19 @@ interface LocationHeroSearchCardProps {
   mode: HeroMode
 }
 
+interface AiClarificationState {
+  buyUrl: string
+  message: string
+  rentUrl: string
+}
+
+interface AiParseResponse {
+  ok: boolean
+  error?: string
+  redirectUrl?: string | null
+  clarification?: AiClarificationState | null
+}
+
 const CONTENT_TRANSITION =
   'transition-[background-color,border-color,color,opacity,transform] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)]'
 
@@ -24,6 +38,23 @@ const MANUAL_SEGMENT_TRANSITION =
 
 const MODE_PANEL_TRANSITION =
   'motion-reduce:animate-none motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 duration-300'
+
+const SEARCH_BAR_SHELL_CLASS =
+  'relative isolate overflow-hidden rounded-[14px] p-[1.5px] shadow-[0_10px_40px_rgba(0,0,0,0.03)] sm:rounded-[16px]'
+
+const GUIDED_PROMPT_TRANSITION =
+  'transition-[opacity,transform,width,margin] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)]'
+
+const HERO_SEARCH_ROW_HEIGHT = 'h-[60px] sm:h-[65px]'
+const HERO_SECONDARY_ROW_HEIGHT = 'min-h-[56px] sm:min-h-[58px]'
+const SEARCH_BAR_INNER_CLASS =
+  `relative z-10 grid ${HERO_SEARCH_ROW_HEIGHT} grid-cols-[20px_minmax(0,1fr)_102px] items-center gap-[12px] rounded-[12.5px] bg-white px-[14px] sm:grid-cols-[20px_minmax(0,1fr)_118px] sm:gap-[14px] sm:rounded-[14.5px] sm:px-[18px]`
+const SEARCH_BAR_ACTION_SLOT_CLASS =
+  'flex w-full items-center justify-end gap-[12px] sm:gap-[14px]'
+const HERO_SEARCH_INPUT_CLASS =
+  `min-w-0 w-full border-0 bg-transparent text-[15px] leading-6 tracking-[-0.02em] text-[#173260] placeholder:text-[#5c6d8a] focus:outline-none sm:text-[18px] ${CONTENT_TRANSITION}`
+const HERO_PRIMARY_ACTION_CLASS =
+  `inline-flex h-[44px] shrink-0 items-center justify-center rounded-[12px] bg-[#2140d8] px-[22px] text-[15px] font-semibold tracking-[-0.02em] text-white hover:bg-[#1b35b8] sm:h-[46px] sm:px-[26px] sm:text-[16px] ${CONTENT_TRANSITION}`
 
 const MANUAL_PROPERTY_OPTIONS = [
   { value: 'residential', label: 'Residential' },
@@ -76,6 +107,33 @@ const AI_PROMPT_SUGGESTIONS_BY_SLUG: Record<string, string[]> = {
   ],
 }
 
+const AI_GUIDED_PROMPTS_BY_SLUG: Record<string, string[]> = {
+  cebu: [
+    'Apartment in Cebu',
+    'Studio Apartment in Cebu',
+    'Apartment Near IT Park',
+    'Studio Condo in Mandaue',
+  ],
+  bgc: [
+    'Condo in BGC',
+    'Apartment Near Uptown',
+    'Studio Near High Street',
+    '2 Bedroom in Taguig',
+  ],
+  makati: [
+    'Condo in Makati',
+    'Apartment Near Ayala Avenue',
+    'Studio in Legazpi Village',
+    '1 Bedroom Near Salcedo',
+  ],
+  manila: [
+    'Apartment in Manila',
+    'Studio Near Taft',
+    'Condo in Ermita',
+    'Affordable Condo in Manila',
+  ],
+}
+
 function buildAiSuggestions(
   locationName: string,
   locationSlug: string,
@@ -98,6 +156,28 @@ function buildAiSuggestions(
   ]
 }
 
+function buildAiGuidedPrompts(
+  locationName: string,
+  locationSlug: string,
+  quickLinks: HeroQuickLink[]
+) {
+  const predefinedPrompts = AI_GUIDED_PROMPTS_BY_SLUG[locationSlug]
+
+  if (predefinedPrompts) {
+    return predefinedPrompts
+  }
+
+  const fallbackLabel = locationName.trim()
+  const quickLinkLabels = quickLinks.map((item) => item.label.toLowerCase())
+
+  return [
+    `Apartment in ${fallbackLabel}`,
+    `Studio Apartment in ${fallbackLabel}`,
+    `${quickLinkLabels.includes('projects') ? 'Projects' : 'Homes'} in ${fallbackLabel}`,
+    `1 Bedroom in ${fallbackLabel}`,
+  ]
+}
+
 function AIActionGlyph() {
   return (
     <span aria-hidden className="flex items-end gap-[2px]">
@@ -107,6 +187,20 @@ function AIActionGlyph() {
       <span className="h-[11px] w-[2px] rounded-full bg-white" />
     </span>
   )
+}
+
+function buildKeywordFallbackUrl(mode: 'buy' | 'rent', locationSlug: string, query: string) {
+  const params = new URLSearchParams()
+
+  if (locationSlug.trim()) {
+    params.set('location', locationSlug)
+  }
+
+  if (query.trim()) {
+    params.set('keywords', query.trim())
+  }
+
+  return `/${mode}?${params.toString()}`
 }
 
 function ManualFilterSelect({
@@ -150,89 +244,294 @@ export default function LocationHeroSearchCard({
   quickLinks,
   mode,
 }: LocationHeroSearchCardProps) {
+  const router = useRouter()
   const [manualListingType, setManualListingType] = useState<'sale' | 'rent'>('sale')
   const [aiQuery, setAiQuery] = useState('')
+  const [aiError, setAiError] = useState<string | null>(null)
+  const [aiClarification, setAiClarification] = useState<AiClarificationState | null>(null)
+  const [isAiSubmitting, setIsAiSubmitting] = useState(false)
+  const [activePromptIndex, setActivePromptIndex] = useState(0)
+  const [typedPromptLength, setTypedPromptLength] = useState(0)
+  const [isDeletingPrompt, setIsDeletingPrompt] = useState(false)
   const isAiMode = mode === 'ai'
   const aiSuggestions = buildAiSuggestions(locationName, locationSlug, quickLinks)
-  const placeholder = isAiMode
-    ? `Try "Apartment in ${locationName}"`
-    : 'City, community or building'
+  const aiGuidedPrompts = buildAiGuidedPrompts(locationName, locationSlug, quickLinks)
+  const activeGuidedPrompt = aiGuidedPrompts[activePromptIndex] ?? aiGuidedPrompts[0] ?? ''
+  const animatedGuidedPrompt = `"${activeGuidedPrompt}"`
+  const visibleGuidedPrompt = animatedGuidedPrompt.slice(0, typedPromptLength)
+  const showGuidedPrompt = isAiMode && aiQuery.length === 0
+  const placeholder = isAiMode ? '' : 'City, community or building'
   const submitLabel = isAiMode ? 'Search with AI' : 'Search manually'
+  const buyFallbackUrl = buildKeywordFallbackUrl('buy', locationSlug, aiQuery)
+  const rentFallbackUrl = buildKeywordFallbackUrl('rent', locationSlug, aiQuery)
+
+  useEffect(() => {
+    setActivePromptIndex(0)
+    setTypedPromptLength(0)
+    setIsDeletingPrompt(false)
+  }, [locationSlug])
+
+  useEffect(() => {
+    if (!showGuidedPrompt) {
+      return
+    }
+
+    setTypedPromptLength(0)
+    setIsDeletingPrompt(false)
+  }, [showGuidedPrompt])
+
+  useEffect(() => {
+    if (!showGuidedPrompt || !animatedGuidedPrompt) {
+      return
+    }
+
+    let timeoutId: number
+
+    if (!isDeletingPrompt && typedPromptLength < animatedGuidedPrompt.length) {
+      timeoutId = window.setTimeout(() => {
+        setTypedPromptLength((currentLength) => currentLength + 1)
+      }, typedPromptLength === 0 ? 420 : 64)
+    } else if (!isDeletingPrompt && typedPromptLength === animatedGuidedPrompt.length) {
+      timeoutId = window.setTimeout(() => {
+        setIsDeletingPrompt(true)
+      }, 1600)
+    } else if (isDeletingPrompt && typedPromptLength > 0) {
+      timeoutId = window.setTimeout(() => {
+        setTypedPromptLength((currentLength) => currentLength - 1)
+      }, 32)
+    } else {
+      timeoutId = window.setTimeout(() => {
+        setIsDeletingPrompt(false)
+        setActivePromptIndex((currentIndex) => (currentIndex + 1) % aiGuidedPrompts.length)
+      }, 220)
+    }
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [aiGuidedPrompts.length, animatedGuidedPrompt, isDeletingPrompt, showGuidedPrompt, typedPromptLength])
+
+  useEffect(() => {
+    setAiError(null)
+    setAiClarification(null)
+  }, [aiQuery, mode])
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    if (!isAiMode) {
+      return
+    }
+
+    event.preventDefault()
+
+    const trimmedQuery = aiQuery.trim()
+    if (!trimmedQuery) {
+      setAiError('Enter a property search to use AI Mode.')
+      setAiClarification(null)
+      return
+    }
+
+    try {
+      setIsAiSubmitting(true)
+      setAiError(null)
+      setAiClarification(null)
+
+      const response = await fetch('/api/ai/parse-property-query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: trimmedQuery,
+          locationSlug,
+        }),
+      })
+
+      const payload = (await response.json()) as AiParseResponse
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error ?? 'AI parsing is unavailable right now. Please try again.')
+      }
+
+      if (payload.redirectUrl) {
+        router.push(payload.redirectUrl)
+        return
+      }
+
+      if (payload.clarification) {
+        setAiClarification(payload.clarification)
+        return
+      }
+
+      throw new Error('We could not route that search yet. Please try again.')
+    } catch (error) {
+      setAiError(
+        error instanceof Error
+          ? error.message
+          : 'AI parsing is unavailable right now. Please try again or use Manual Mode.'
+      )
+    } finally {
+      setIsAiSubmitting(false)
+    }
+  }
 
   return (
     <form
       action="/search"
       method="GET"
-      className="mx-auto w-full max-w-[1060px] overflow-hidden rounded-[22px] border border-white/82 bg-white px-[14px] py-[14px] text-left text-[#11204b] shadow-[0_22px_50px_rgba(8,23,56,0.2)] sm:px-[18px] sm:py-[16px] xl:h-[188px]"
+      onSubmit={handleSubmit}
+      className="mx-auto min-h-[164px] w-full max-w-[1060px] rounded-[22px] border border-white/82 bg-white px-[12px] py-[12px] text-left text-[#11204b] shadow-[0_22px_50px_rgba(8,23,56,0.2)] sm:min-h-[173px] sm:px-[18px] sm:py-[16px]"
     >
       <input type="hidden" name="location" value={locationSlug} />
       <input type="hidden" name="mode" value={mode} />
       {!isAiMode ? <input type="hidden" name="type" value={manualListingType} /> : null}
 
-      <div key={mode} className={`${MODE_PANEL_TRANSITION} xl:flex xl:h-full xl:flex-col xl:justify-center`}>
+      <div key={mode} className={`${MODE_PANEL_TRANSITION} xl:flex xl:flex-col xl:justify-center`}>
         {isAiMode ? (
           <div className="space-y-[14px] xl:space-y-[16px]">
-            <div className="grid h-[56px] grid-cols-[18px_minmax(0,1fr)_18px_44px] items-center gap-[12px] rounded-[15px] border border-[#3150f5] bg-white px-[16px] shadow-[0_0_0_1px_rgba(49,80,245,0.03)] sm:h-[58px] sm:grid-cols-[18px_minmax(0,1fr)_20px_46px] sm:px-[18px]">
-              <Search size={18} strokeWidth={2} className="shrink-0 text-[#173260]" />
-              <input
-                aria-label="Search properties"
-                name="q"
-                placeholder={placeholder}
-                type="search"
-                value={aiQuery}
-                onChange={(event) => setAiQuery(event.target.value)}
-                className={`min-w-0 border-0 bg-transparent text-[15px] leading-6 tracking-[-0.02em] text-[#173260] placeholder:text-[#42577c] focus:outline-none sm:text-[16px] ${CONTENT_TRANSITION}`}
-              />
+            <div className={`${SEARCH_BAR_SHELL_CLASS} ai-search-outline-shell`}>
+              <div className={SEARCH_BAR_INNER_CLASS}>
+                <Search size={20} strokeWidth={2} className="shrink-0 text-[#173260]" />
+                <div className="flex min-w-0 items-center">
+                  <span
+                    aria-hidden
+                    className={`overflow-hidden whitespace-nowrap text-[16px] leading-6 tracking-[-0.02em] text-[#42577c] sm:text-[18px] ${GUIDED_PROMPT_TRANSITION} ${showGuidedPrompt ? 'mr-[6px] w-[28px] opacity-100 sm:w-[32px]' : 'mr-0 w-0 opacity-0'}`}
+                  >
+                    Try
+                  </span>
 
-              <button
-                type="button"
-                aria-label="Voice search"
-                className="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center text-[#2140d8] transition hover:text-[#1b35b8] sm:h-[20px] sm:w-[20px]"
-              >
-                <Mic size={17} />
-              </button>
+                  <div className="relative min-w-0 flex-1">
+                    {showGuidedPrompt ? (
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center overflow-hidden"
+                      >
+                        <span
+                          className="inline-flex min-w-0 items-center truncate text-[16px] leading-6 tracking-[-0.02em] text-[#5f7295] sm:text-[18px]"
+                        >
+                          <span className="truncate">{visibleGuidedPrompt || '\u00A0'}</span>
+                          <span className="ai-guided-caret ml-[2px] inline-block h-[1.05em] w-px shrink-0 rounded-full bg-[#5f7295]/75" />
+                        </span>
+                      </span>
+                    ) : null}
 
-              <button
-                type="submit"
-                aria-label={submitLabel}
-                className={`inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[12px] bg-[#2140d8] text-white hover:bg-[#1b35b8] sm:h-[46px] sm:w-[46px] ${CONTENT_TRANSITION}`}
-              >
-                <AIActionGlyph />
-              </button>
+                    <input
+                      aria-label="Search properties"
+                      name="q"
+                      placeholder={placeholder}
+                      type="search"
+                      value={aiQuery}
+                      onChange={(event) => setAiQuery(event.target.value)}
+                      disabled={isAiSubmitting}
+                      className={`relative z-10 ${HERO_SEARCH_INPUT_CLASS}`}
+                    />
+                  </div>
+                </div>
+
+                <div className={SEARCH_BAR_ACTION_SLOT_CLASS}>
+                  <button
+                    type="button"
+                    aria-label="Voice search"
+                    className="inline-flex h-[20px] w-[20px] shrink-0 items-center justify-center text-[#2140d8] transition hover:text-[#1b35b8]"
+                  >
+                    <Mic size={20} />
+                  </button>
+
+                  <button
+                    type="submit"
+                    aria-label={submitLabel}
+                    disabled={isAiSubmitting}
+                    className={`inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[12px] bg-[#2140d8] text-white shadow-[0_10px_24px_rgba(33,64,216,0.26)] hover:bg-[#1b35b8] sm:h-[46px] sm:w-[46px] ${CONTENT_TRANSITION}`}
+                  >
+                    {isAiSubmitting ? <Loader2 size={18} className="animate-spin" /> : <AIActionGlyph />}
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-[12px] min-[560px]:grid-cols-2 lg:grid-cols-4 xl:gap-[10px]">
+            <div className={`grid ${HERO_SECONDARY_ROW_HEIGHT} grid-cols-1 content-start gap-[12px] sm:grid-cols-2 lg:grid-cols-4 xl:gap-[10px]`}>
               {aiSuggestions.map((suggestion) => (
                 <button
                   key={suggestion}
                   type="button"
                   onClick={() => setAiQuery(suggestion)}
-                  className="inline-flex h-[40px] min-w-0 items-center justify-center rounded-[11px] border border-[#3150f5] bg-white px-[14px] text-center text-[13px] font-medium tracking-[-0.02em] text-[#2140d8] transition-[border-color,background-color,color,transform] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:border-[#2342df] hover:bg-[#f5f8ff] sm:text-[13.5px]"
+                  disabled={isAiSubmitting}
+                  className="inline-flex min-h-[44px] w-full min-w-0 items-center justify-center rounded-[10px] border border-[#1428AE] bg-white px-[16px] py-[10px] text-center text-[14px] font-medium tracking-[-0.02em] text-[#1428AE] transition-[border-color,background-color,color] duration-[200ms] ease-out hover:bg-[#f0f4ff] sm:text-[15px]"
                 >
                   <span className="truncate">{suggestion}</span>
                 </button>
               ))}
             </div>
+
+            {aiError ? (
+              <div className="rounded-[14px] border border-[#f3c5cd] bg-[#fff5f7] px-[16px] py-[12px] text-[14px] text-[#8f2841]">
+                <p className="leading-6">{aiError}</p>
+                {aiQuery.trim() ? (
+                  <div className="mt-[12px] flex flex-col gap-[10px] sm:flex-row sm:flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => router.push(buyFallbackUrl)}
+                      className="inline-flex min-h-[40px] w-full items-center justify-center rounded-[10px] bg-white px-[14px] py-[10px] text-[13px] font-semibold text-[#8f2841] transition hover:bg-[#fff0f3] sm:w-auto"
+                    >
+                      Use Buy keyword search
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push(rentFallbackUrl)}
+                      className="inline-flex min-h-[40px] w-full items-center justify-center rounded-[10px] border border-[#e7a8b6] bg-white px-[14px] py-[10px] text-[13px] font-semibold text-[#8f2841] transition hover:bg-[#fff0f3] sm:w-auto"
+                    >
+                      Use Rent keyword search
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
+            {aiClarification ? (
+              <div className="rounded-[14px] border border-[#d7deef] bg-[#f8faff] px-[16px] py-[14px]">
+                <p className="text-[14px] font-medium text-[#173260]">{aiClarification.message}</p>
+                <div className="mt-[10px] flex flex-wrap gap-[10px]">
+                  <button
+                    type="button"
+                    onClick={() => router.push(aiClarification.buyUrl)}
+                    className="inline-flex min-h-[40px] w-full items-center justify-center rounded-[10px] bg-[#2140d8] px-[18px] py-[10px] text-[14px] font-semibold text-white transition hover:bg-[#1b35b8] sm:w-auto"
+                  >
+                    Search Buy
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push(aiClarification.rentUrl)}
+                    className="inline-flex min-h-[40px] w-full items-center justify-center rounded-[10px] border border-[#2140d8] bg-white px-[18px] py-[10px] text-[14px] font-semibold text-[#2140d8] transition hover:bg-[#eef3ff] sm:w-auto"
+                  >
+                    Search Rent
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="space-y-[14px] xl:space-y-[16px]">
-            <div className="flex min-h-[56px] items-center gap-[14px] rounded-[14px] border border-[#d8dfef] bg-white px-[16px] sm:min-h-[58px] sm:px-[18px]">
-              <Search size={18} strokeWidth={2.1} className="shrink-0 text-[#173260]" />
-              <input
-                aria-label="Search manually"
-                name="q"
-                placeholder={placeholder}
-                type="search"
-                className={`min-w-0 flex-1 border-0 bg-transparent text-[15px] leading-6 tracking-[-0.02em] text-[#173260] placeholder:text-[#5c6d8a] focus:outline-none sm:text-[17px] ${CONTENT_TRANSITION}`}
-              />
+            <div className={`${SEARCH_BAR_SHELL_CLASS} bg-[#d8dfef]`}>
+              <div className={SEARCH_BAR_INNER_CLASS}>
+                <Search size={20} strokeWidth={2} className="shrink-0 text-[#173260]" />
+                <input
+                  aria-label="Search manually"
+                  name="q"
+                  placeholder={placeholder}
+                  type="search"
+                  className={HERO_SEARCH_INPUT_CLASS}
+                />
 
-              <button
-                type="submit"
-                aria-label="Search manually"
-                className={`inline-flex h-[42px] shrink-0 items-center justify-center rounded-[12px] bg-[#2140d8] px-[22px] text-[15px] font-semibold tracking-[-0.02em] text-white hover:bg-[#1b35b8] sm:h-[44px] sm:px-[26px] sm:text-[16px] ${CONTENT_TRANSITION}`}
-              >
-                Search
-              </button>
+                <div className={SEARCH_BAR_ACTION_SLOT_CLASS}>
+                  <span aria-hidden className="h-[20px] w-[20px] shrink-0 opacity-0" />
+                  <button
+                    type="submit"
+                    aria-label="Search manually"
+                    className={HERO_PRIMARY_ACTION_CLASS}
+                  >
+                    Search
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-[12px] sm:grid-cols-2 xl:grid-cols-[194px_repeat(3,minmax(0,1fr))]">

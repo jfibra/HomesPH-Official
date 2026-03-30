@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import SiteHeader from '@/components/layout/SiteHeader'
 import SiteFooter from '@/components/layout/SiteFooter'
+import { GENERAL_NAV_ITEMS } from '@/lib/general-nav'
 import { getSiteSettings } from '@/lib/site-settings'
 
 const SECTIONS = [
@@ -192,6 +193,7 @@ export default async function LegalPage() {
         contactEmail={settings.contactEmail}
         contactPhone={settings.contactPhone}
         socialLinks={settings.socialLinks}
+        navItems={GENERAL_NAV_ITEMS}
       />
 
       {/* ── Hero ── */}

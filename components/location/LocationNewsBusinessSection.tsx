@@ -3,12 +3,8 @@
 import Link from 'next/link'
 import {
   ArrowRight,
-  BarChart3,
-  Building2,
   ChevronLeft,
   ChevronRight,
-  Users,
-  type LucideIcon,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
@@ -18,6 +14,13 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel'
 import { MOCK_NEWS } from '@/lib/mock-data'
+import { buildNewsHref } from '@/lib/news-navigation'
+import {
+  LOCATION_EDITORIAL_BREAKOUT_CLASS,
+  LOCATION_EDITORIAL_CONTENT_SHELL_CLASS,
+  LOCATION_EDITORIAL_TITLE_SHELL_CLASS,
+  LOCATION_PAGE_SHELL_CLASS,
+} from './location-page-layout'
 
 interface LocationNewsBusinessSectionProps {
   locationName: string
@@ -28,13 +31,13 @@ type NewsArticle = (typeof MOCK_NEWS)[number]
 
 interface BusinessFeature {
   description: string
-  icon: LucideIcon
+  iconSrc: string
   title: string
 }
 
 const SECTION_CONTAINER_CLASS =
-  'mx-auto w-full max-w-[1600px] px-6 py-[28px] sm:px-8 sm:py-[36px] lg:px-10 lg:py-[44px]'
-const SECTION_HEADING_ALIGNMENT_CLASS = 'mx-auto w-full max-w-[1200px]'
+  `${LOCATION_PAGE_SHELL_CLASS} pb-[24px] pt-[14px] sm:pb-[34px] sm:pt-[22px] lg:pb-[40px] lg:pt-[26px]`
+const SECTION_HEADING_ALIGNMENT_CLASS = 'w-full'
 const NEWS_CARD_WIDTH_CLASS =
   'basis-[84%] sm:basis-[48%] lg:basis-[31.5%] xl:basis-[24.5%] 2xl:basis-[19.5%]'
 const NEWS_DATE_FORMATTER = new Intl.DateTimeFormat('en-US', {
@@ -48,19 +51,22 @@ const BUSINESS_FEATURES: BusinessFeature[] = [
     title: 'Manage Listings Easily',
     description:
       'Powerful dashboard to add, edit, and track all your property listings in one place.',
-    icon: Building2,
+    iconSrc:
+      'https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/homesph/listingIcon.png',
   },
   {
     title: 'Team Collaboration',
     description:
       'Add agents, manage teams, and collaborate seamlessly with your entire organization.',
-    icon: Users,
+    iconSrc:
+      'https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/homesph/collabIcon.png',
   },
   {
     title: 'Advanced Analytics',
     description:
       'Track leads, monitor performance, and make data-driven decisions to grow faster.',
-    icon: BarChart3,
+    iconSrc:
+      'https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/homesph/Analytics%20icon.png',
   },
 ]
 
@@ -115,7 +121,7 @@ function NewsBusinessSectionHeading({
   return (
     <h2
       id={id}
-      className="text-[28px] font-semibold tracking-[-0.045em] text-[#0f274e] sm:text-[32px]"
+      className="text-[26px] font-semibold tracking-[-0.045em] text-[#0f274e] sm:text-[32px]"
     >
       <span>{prefix} </span>
       <span className="text-[#2140d8]">{accent}</span>
@@ -158,7 +164,7 @@ function LatestNewsCard({
 }) {
   return (
     <Link
-      href={`/news?location=${encodeURIComponent(locationName)}`}
+      href={buildNewsHref(locationName)}
       className="group flex h-full min-w-0 flex-col overflow-hidden rounded-[24px] border border-[#e4ecf8] bg-white shadow-[0_14px_30px_rgba(15,39,78,0.06)] transition-[transform,box-shadow,border-color] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:border-[#d8e2f1] hover:shadow-[0_22px_44px_rgba(15,39,78,0.08)]"
     >
       <div className="relative h-[214px] overflow-hidden bg-[#e9eff8]">
@@ -184,15 +190,12 @@ function LatestNewsCard({
         </div>
       </div>
 
-      <div className="flex min-h-[168px] flex-1 flex-col px-[16px] pb-[16px] pt-[14px] sm:px-[18px] sm:pb-[18px]">
+      <div className="flex min-h-[122px] flex-1 flex-col px-[16px] pb-[16px] pt-[14px] sm:px-[18px] sm:pb-[18px]">
         <h3 className="line-clamp-2 text-[18px] font-semibold leading-[1.22] tracking-[-0.03em] text-[#0f274e] transition-colors duration-300 group-hover:text-[#2140d8]">
           {article.title}
         </h3>
-        <p className="mt-[10px] line-clamp-3 text-[14px] leading-[1.55] tracking-[-0.015em] text-[#41597f]">
-          {article.excerpt}
-        </p>
 
-        <span className="mt-auto inline-flex items-center gap-[7px] pt-[18px] text-[12px] font-semibold uppercase tracking-[0.08em] text-[#2140d8]">
+        <span className="mt-auto inline-flex items-center gap-[7px] pt-[16px] text-[12px] font-semibold uppercase tracking-[0.08em] text-[#2140d8]">
           <span>Read More</span>
           <ArrowRight size={14} strokeWidth={2.2} />
         </span>
@@ -203,16 +206,23 @@ function LatestNewsCard({
 
 function BusinessFeatureCard({
   description,
-  icon: Icon,
+  iconSrc,
   title,
 }: BusinessFeature) {
   return (
     <article className="rounded-[24px] border border-[#edf2fa] bg-[#f5f8fc] px-[24px] py-[28px] text-center sm:px-[28px] sm:py-[32px]">
-      <div className="mx-auto flex h-[88px] w-[88px] items-center justify-center rounded-[26px] bg-transparent text-[#173260]">
-        <Icon size={42} strokeWidth={1.7} />
+      <div className="mx-auto flex h-[112px] w-[112px] items-center justify-center rounded-[30px] bg-transparent sm:h-[120px] sm:w-[120px]">
+        <img
+          src={iconSrc}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+          className="h-[72px] w-[72px] object-contain sm:h-[78px] sm:w-[78px]"
+        />
       </div>
 
-      <h3 className="mt-[22px] text-[26px] font-semibold leading-[1.04] tracking-[-0.045em] text-[#0f274e]">
+      <h3 className="mt-[14px] text-[22px] font-semibold leading-[1.08] tracking-[-0.04em] text-[#0f274e] sm:text-[26px]">
         {title}
       </h3>
       <p className="mx-auto mt-[14px] max-w-[320px] text-[15px] leading-[1.6] tracking-[-0.02em] text-[#41597f]">
@@ -255,59 +265,65 @@ export default function LocationNewsBusinessSection({
       className="bg-white"
     >
       <div className={SECTION_CONTAINER_CLASS}>
-        <div className="relative">
-          <div className={SECTION_HEADING_ALIGNMENT_CLASS}>
-            <NewsBusinessSectionHeading
-              id="location-latest-news-heading"
-              prefix="Homes.ph"
-              accent="Latest News"
-            />
-          </div>
+        <div className={LOCATION_EDITORIAL_BREAKOUT_CLASS}>
+          <div className={LOCATION_EDITORIAL_TITLE_SHELL_CLASS}>
+            <div className="relative">
+              <div className={SECTION_HEADING_ALIGNMENT_CLASS}>
+                <NewsBusinessSectionHeading
+                  id="location-latest-news-heading"
+                  prefix="Homes.ph"
+                  accent="Latest News"
+                />
+              </div>
 
-          <div className="mt-[18px] flex items-center justify-end gap-[8px] sm:absolute sm:right-0 sm:top-0 sm:mt-0">
-            <CarouselControlButton
-              direction="prev"
-              disabled={!canScrollPrev}
-              onClick={() => carouselApi?.scrollPrev()}
-            />
-            <CarouselControlButton
-              direction="next"
-              disabled={!canScrollNext}
-              onClick={() => carouselApi?.scrollNext()}
-            />
+              <div className="mt-[16px] flex items-center justify-end gap-[8px] sm:absolute sm:right-0 sm:top-0 sm:mt-0">
+                <CarouselControlButton
+                  direction="prev"
+                  disabled={!canScrollPrev}
+                  onClick={() => carouselApi?.scrollPrev()}
+                />
+                <CarouselControlButton
+                  direction="next"
+                  disabled={!canScrollNext}
+                  onClick={() => carouselApi?.scrollNext()}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mt-[24px] sm:mt-[28px]">
-          <Carousel
-            setApi={setCarouselApi}
-            opts={{
-              align: 'start',
-              dragFree: true,
-              loop: false,
-              skipSnaps: false,
-            }}
-            className="w-full cursor-grab select-none active:cursor-grabbing"
-          >
-            <CarouselContent className="-ml-[18px]">
-              {articles.map((article) => (
-                <CarouselItem
-                  key={article.id}
-                  className={`pl-[18px] ${NEWS_CARD_WIDTH_CLASS}`}
-                >
-                  <LatestNewsCard
-                    article={article}
-                    locationName={locationName}
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
+        <div className={`mt-[20px] sm:mt-[28px] ${LOCATION_EDITORIAL_BREAKOUT_CLASS}`}>
+          <div className={LOCATION_EDITORIAL_CONTENT_SHELL_CLASS}>
+            <Carousel
+              setApi={setCarouselApi}
+              opts={{
+                align: 'start',
+                dragFree: true,
+                loop: false,
+                skipSnaps: false,
+              }}
+              className="w-full cursor-grab select-none active:cursor-grabbing"
+            >
+              <CarouselContent className="-ml-[18px]">
+                {articles.map((article) => (
+                  <CarouselItem
+                    key={article.id}
+                    className={`pl-[18px] ${NEWS_CARD_WIDTH_CLASS}`}
+                  >
+                    <LatestNewsCard
+                      article={article}
+                      locationName={locationName}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+          </div>
         </div>
 
-        <div className="pt-[56px] sm:pt-[68px]">
-          <div className="relative">
-            <div className={SECTION_HEADING_ALIGNMENT_CLASS}>
+        <div className="pt-[44px] sm:pt-[68px]">
+          <div className={`${SECTION_HEADING_ALIGNMENT_CLASS} relative`}>
+            <div>
               <NewsBusinessSectionHeading
                 id="location-business-growth-heading"
                 prefix="Grow Your"
@@ -319,17 +335,17 @@ export default function LocationNewsBusinessSection({
               </p>
             </div>
 
-            <div className="mt-[18px] flex sm:absolute sm:right-0 sm:top-[4px] sm:mt-0">
+            <div className="mt-[18px] flex w-full sm:absolute sm:right-0 sm:top-[4px] sm:mt-0 sm:w-auto">
               <Link
                 href="/registration/broker"
-                className="inline-flex h-[48px] items-center justify-center rounded-[14px] border border-[#2140d8] bg-white px-[22px] text-[16px] font-semibold tracking-[-0.02em] text-[#2140d8] transition-[transform,border-color,background-color,color] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:border-[#1733bd] hover:bg-[#2140d8] hover:text-white"
+                className="inline-flex h-[48px] w-full items-center justify-center rounded-[14px] border border-[#2140d8] bg-white px-[22px] text-[16px] font-semibold tracking-[-0.02em] text-[#2140d8] transition-[transform,border-color,background-color,color] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:border-[#1733bd] hover:bg-[#2140d8] hover:text-white sm:w-auto"
               >
                 Join Now
               </Link>
             </div>
           </div>
 
-          <div className="mt-[24px] grid grid-cols-1 gap-[16px] xl:grid-cols-3 xl:gap-[18px]">
+          <div className={`${SECTION_HEADING_ALIGNMENT_CLASS} mt-[20px] grid grid-cols-1 gap-[14px] xl:grid-cols-3 xl:gap-[18px]`}>
             {BUSINESS_FEATURES.map((feature) => (
               <BusinessFeatureCard key={feature.title} {...feature} />
             ))}

@@ -1,14 +1,12 @@
 import Link from 'next/link'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import SiteHeader from '@/components/layout/SiteHeader'
 import SiteFooter from '@/components/layout/SiteFooter'
 import { getSiteSettings } from '@/lib/site-settings'
 import { SELECTED_LOCATION_COOKIE } from '@/lib/selected-location'
 import { MOCK_NEWS } from '@/lib/mock-data'
 import AdBanner from '@/components/ui/AdBanner'
-import { GENERAL_NAV_ITEMS } from '@/lib/general-nav'
-import { buildNewsHref } from '@/lib/news-navigation'
+import { formatLocationForNews } from '@/lib/news-navigation'
 import { RealEstateNewsSection } from '@/components/news/RealEstateNewsSection'
 import { OFWNewsSection } from '@/components/news/OFWNewsSection'
 import { PhilippineTourismSection } from '@/components/news/PhilippineTourismSection'
@@ -364,7 +362,7 @@ function MiddleColumn({ leadStory, leadRest = [] }: { leadStory?: Article; leadR
                   <div className="relative h-24 overflow-hidden rounded-[8px]">
                     <StoryImage article={article} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   </div>
-                  <p className="text-left line-clamp-2 text-xs font-bold transition-colors group-hover:text-[#1428ae]" style={{ fontFamily: 'Outfit', color: '#002143' }}>
+                  <p className="line-clamp-2 text-xs font-bold transition-colors group-hover:text-[#1428ae]" style={{ fontFamily: 'Outfit', color: '#002143' }}>
                     {article.title}
                   </p>
                 </Link>
@@ -374,9 +372,6 @@ function MiddleColumn({ leadStory, leadRest = [] }: { leadStory?: Article; leadR
               </div>
             ))}
           </div>
-          <Link href="#" className="inline-block text-sm font-bold transition-colors hover:text-[#0c1f4a]" style={{ color: '#1428AE' }}>
-            READ MORE
-          </Link>
         </div>
       ) : null}
     </div>
@@ -473,17 +468,14 @@ async function getArticles(location?: string): Promise<ArticleCollection> {
 }
 
 export default async function NewsPage({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ location?: string }>
+  params: Promise<{ location: string }>
 }) {
-  const { location: queryLocation } = await searchParams
-  if (queryLocation && queryLocation !== 'All') {
-    redirect(buildNewsHref(queryLocation))
-  }
+  const { location: routeLocation } = await params
   const cookieStore = await cookies()
   const cookieLocation = cookieStore.get(SELECTED_LOCATION_COOKIE)?.value
-  const manualLocation = queryLocation && queryLocation !== 'All' ? decodeURIComponent(queryLocation) : undefined
+  const manualLocation = routeLocation && routeLocation !== 'All' ? formatLocationForNews(routeLocation) : undefined
   const savedLocation = cookieLocation ? decodeURIComponent(cookieLocation) : undefined
   const focusedLocation = manualLocation ?? savedLocation
 
@@ -536,8 +528,6 @@ export default async function NewsPage({
   ])
   const moreStories = allArticles.filter(article => !reservedIds.has(String(article.id))).slice(0, 48)
 
-  
-
   return (
     <div className="min-h-screen bg-gray-50">
       <SiteHeader
@@ -545,7 +535,6 @@ export default async function NewsPage({
         contactEmail={settings.contactEmail}
         contactPhone={settings.contactPhone}
         socialLinks={settings.socialLinks}
-        navItems={GENERAL_NAV_ITEMS}
       />
 
       <div className="overflow-hidden border-b border-gray-200 bg-white py-3 text-sm text-gray-900 shadow-sm">

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { SELECTED_LOCATION_COOKIE, SELECTED_LOCATION_COOKIE_MAX_AGE } from '@/lib/selected-location'
+import { buildNewsHref } from '@/lib/news-navigation'
 
 interface Props {
   locations: string[]
@@ -25,7 +26,7 @@ export function NewsLocationPicker({ locations, active }: Props) {
     } catch {
       // ignore storage errors in restricted environments
     }
-    router.push(isAll ? '/news' : `/news?location=${encodeURIComponent(loc)}`)
+    router.push(isAll ? '/news' : buildNewsHref(loc))
   }
 
   return (

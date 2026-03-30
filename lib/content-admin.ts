@@ -8,6 +8,7 @@ import { ensureImageFile, getImageExtension, uploadPublicFile } from '@/lib/stor
 import type { AmenityInput, AmenityRecord, LocationInput, LocationRecord, PropertyTypeInput, PropertyTypeRecord } from '@/lib/content-types'
 
 const ALLOWED_ROLES = new Set(['super_admin', 'admin'])
+const AMENITY_VIEW_ROLES = new Set(['super_admin', 'admin', 'developer'])
 
 function slugify(value: string) {
   return value
@@ -57,7 +58,10 @@ export async function requireContentAccess() {
 }
 
 export async function getAmenities(): Promise<AmenityRecord[]> {
-  await requireContentAccess()
+  const user = await getCurrentDashboardUser()
+  if (!user || !AMENITY_VIEW_ROLES.has(user.role)) {
+    redirect(getDashboardPathForRole(user?.role ?? '') ?? '/dashboard')
+  }
 
   const admin = createAdminSupabaseClient()
   const { data, error } = await admin.from('amenities').select('*').order('created_at', { ascending: false })
