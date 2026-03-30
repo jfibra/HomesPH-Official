@@ -226,12 +226,15 @@ export default function ProjectListingsSection({ project, projectListings, saleL
         </div>
       </div>
 
-      {/* Grouping Tags */}
-      <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide w-full lg:max-w-none lg:w-[941px] items-end">
+      {/* Grouping Tags Bar */}
+      <div className="bg-white rounded-[10px] border border-[#D3D3D3] px-5 flex items-center justify-center gap-x-12 h-[65px] w-full lg:w-[941px] overflow-x-auto scrollbar-hide shrink-0">
         {project.project_units?.map((u: any, idx: number) => (
-          <button key={u.id} className={`flex items-center justify-center gap-2 px-8 h-[65px] rounded-[10px] border transition-all whitespace-nowrap ${idx === 0 ? 'bg-white border-[#1428AE] text-[#1428AE]' : 'bg-[#F9FAFB] border-[#D3D3D3] text-[#555E8D]'}`}>
-            <span className="text-[18px] font-medium font-outfit">{project.name} {u.unit_name || u.unit_type}</span>
-            <span className={`text-[16px] font-normal font-outfit ${idx === 0 ? 'text-[#1428AE]' : 'text-[#8187B0]'}`}>
+          <button 
+            key={u.id} 
+            className="flex items-center gap-2 whitespace-nowrap hover:opacity-80 transition-opacity"
+          >
+            <span className="text-[18px] font-normal font-outfit text-[#1428AE]">{project.name} {u.unit_name || u.unit_type}</span>
+            <span className="text-[18px] font-normal font-outfit text-[#002143]">
               ({projectListings.filter((l: any) => l.project_unit_id === u.id).length || Math.floor(Math.random() * 10) + 1})
             </span>
           </button>
