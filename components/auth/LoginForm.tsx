@@ -8,7 +8,13 @@ import type { LoginFormState } from '@/lib/auth/types'
 
 const TOO_MANY_ATTEMPTS = 'Too many login attempts. Please wait a moment and try again.'
 
-export default function LoginForm({ logoUrl }: { logoUrl?: string }) {
+export default function LoginForm({
+  logoUrl,
+  notice,
+}: {
+  logoUrl?: string
+  notice?: string | null
+}) {
   const initialState: LoginFormState = { error: null }
   const [state, formAction, pending] = useActionState(loginAction, initialState)
   const [showPassword, setShowPassword] = useState(false)
@@ -72,6 +78,12 @@ export default function LoginForm({ logoUrl }: { logoUrl?: string }) {
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.18em]">or sign in with email</span>
           <span className="flex-1 h-px bg-gray-100" />
         </div>
+
+        {notice && (
+          <div className="mb-5 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+            {notice}
+          </div>
+        )}
 
         {state.error && (
           <div className="mb-5 px-4 py-3 rounded-xl bg-rose-50 border border-rose-200 text-sm text-rose-700">

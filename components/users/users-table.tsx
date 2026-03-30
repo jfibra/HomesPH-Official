@@ -5,6 +5,7 @@ import { format } from 'date-fns'
 import {
   ArrowDownAZ,
   ArrowDownWideNarrow,
+  BadgeAlert,
   ChevronDown,
   Eye,
   MoreHorizontal,
@@ -29,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Pagination,
   PaginationContent,
@@ -64,6 +66,15 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
+import {
+  ACCOUNT_STATUS_APPROVED,
+  ACCOUNT_STATUS_MANUALLY_DISABLED,
+  ACCOUNT_STATUS_PENDING_APPROVAL,
+  ACCOUNT_STATUS_REJECTED,
+  getAccountStatusLabel,
+  normalizeAccountStatus,
+  type AccountStatus,
+} from '@/lib/account-status'
 import { cn } from '@/lib/utils'
 import type { ManagedUserRecord, UserRoleRecord } from '@/lib/users-types'
 import UserCreateModal from './user-create-modal'
@@ -71,7 +82,9 @@ import UserEditModal from './user-edit-modal'
 import UserRoleModal from './user-role-modal'
 import UserProfileDrawer from './user-profile-drawer'
 import {
+  approveUserAction,
   deleteUserAction,
+  rejectUserAction,
   resetUserPasswordAction,
   setUserStatusAction,
 } from '@/app/dashboard/users/actions'
@@ -96,6 +109,23 @@ function getInitials(user: ManagedUserRecord) {
 
 type SortKey = 'name' | 'date'
 
+function getUserStatus(user: ManagedUserRecord) {
+  return normalizeAccountStatus(user.account_status, user.is_active)
+}
+
+function getStatusBadgeClass(status: AccountStatus) {
+  switch (status) {
+    case ACCOUNT_STATUS_PENDING_APPROVAL:
+      return 'border-amber-200 bg-amber-50 text-amber-700'
+    case ACCOUNT_STATUS_REJECTED:
+      return 'border-rose-200 bg-rose-50 text-rose-700'
+    case ACCOUNT_STATUS_MANUALLY_DISABLED:
+      return 'border-slate-200 bg-slate-100 text-slate-600'
+    default:
+      return 'border-emerald-200 bg-emerald-50 text-emerald-700'
+  }
+}
+
 export default function UsersTable({
   initialUsers,
   roles,
@@ -114,9 +144,12 @@ export default function UsersTable({
   const [editUser, setEditUser] = useState<ManagedUserRecord | null>(null)
   const [roleUser, setRoleUser] = useState<ManagedUserRecord | null>(null)
   const [statusUser, setStatusUser] = useState<ManagedUserRecord | null>(null)
+  const [approveUser, setApproveUser] = useState<ManagedUserRecord | null>(null)
+  const [rejectUser, setRejectUser] = useState<ManagedUserRecord | null>(null)
   const [deleteUser, setDeleteUser] = useState<ManagedUserRecord | null>(null)
   const [passwordUser, setPasswordUser] = useState<ManagedUserRecord | null>(null)
   const [password, setPassword] = useState('')
+  const [rejectionReason, setRejectionReason] = useState('')
   const [isPending, startTransition] = useTransition()
 
   function patchUser(nextUser: ManagedUserRecord) {
@@ -132,6 +165,7 @@ export default function UsersTable({
 
     return [...users]
       .filter((user) => {
+        const normalizedStatus = getUserStatus(user)
         const matchesSearch = !query
           || user.full_name?.toLowerCase().includes(query)
           || user.email.toLowerCase().includes(query)
@@ -140,6 +174,7 @@ export default function UsersTable({
         const matchesStatus = statusFilter === 'all'
           || (statusFilter === 'active' && user.is_active)
           || (statusFilter === 'inactive' && !user.is_active)
+          || normalizedStatus === statusFilter
 
         return matchesSearch && matchesRole && matchesStatus
       })
@@ -162,7 +197,13 @@ export default function UsersTable({
 
   async function handleStatusChange(user: ManagedUserRecord, isActive: boolean) {
     const previous = users
-    patchUser({ ...user, is_active: isActive })
+    patchUser({
+      ...user,
+      is_active: isActive,
+      account_status: isActive ? ACCOUNT_STATUS_APPROVED : ACCOUNT_STATUS_MANUALLY_DISABLED,
+      reviewed_at: new Date().toISOString(),
+      rejection_reason: null,
+    })
 
     startTransition(async () => {
       const result = await setUserStatusAction(user.id, isActive)
@@ -176,6 +217,37 @@ export default function UsersTable({
       patchUser(result.data)
       toast({ title: isActive ? 'User activated' : 'User deactivated', description: result.message })
       setStatusUser(null)
+    })
+  }
+
+  async function handleApprove(user: ManagedUserRecord) {
+    startTransition(async () => {
+      const result = await approveUserAction(user.id)
+
+      if (!result.success || !result.data) {
+        toast({ title: 'Approval failed', description: result.message, variant: 'destructive' })
+        return
+      }
+
+      patchUser(result.data)
+      toast({ title: 'User approved', description: result.message })
+      setApproveUser(null)
+    })
+  }
+
+  async function handleReject(user: ManagedUserRecord) {
+    startTransition(async () => {
+      const result = await rejectUserAction(user.id, rejectionReason)
+
+      if (!result.success || !result.data) {
+        toast({ title: 'Rejection failed', description: result.message, variant: 'destructive' })
+        return
+      }
+
+      patchUser(result.data)
+      toast({ title: 'User rejected', description: result.message })
+      setRejectUser(null)
+      setRejectionReason('')
     })
   }
 
@@ -248,7 +320,11 @@ export default function UsersTable({
               }}>
                 <SelectTrigger className="w-[170px] rounded-xl"><SelectValue placeholder="Filter by status" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All status</SelectItem>
+                  <SelectItem value="all">All states</SelectItem>
+                  <SelectItem value={ACCOUNT_STATUS_PENDING_APPROVAL}>Pending Approval</SelectItem>
+                  <SelectItem value={ACCOUNT_STATUS_APPROVED}>Approved</SelectItem>
+                  <SelectItem value={ACCOUNT_STATUS_REJECTED}>Rejected</SelectItem>
+                  <SelectItem value={ACCOUNT_STATUS_MANUALLY_DISABLED}>Disabled</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
@@ -313,8 +389,8 @@ export default function UsersTable({
                     <Badge variant="outline" className="rounded-full border-blue-200 bg-blue-50 text-blue-700">{(user.role ?? 'unknown').replace(/_/g, ' ')}</Badge>
                   </td>
                   <td className="px-4 py-4">
-                    <Badge variant="outline" className={cn('rounded-full border px-2.5 py-0.5', user.is_active ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-100 text-slate-600')}>
-                      {user.is_active ? 'Active' : 'Inactive'}
+                    <Badge variant="outline" className={cn('rounded-full border px-2.5 py-0.5', getStatusBadgeClass(getUserStatus(user)))}>
+                      {getAccountStatusLabel(user.account_status, user.is_active)}
                     </Badge>
                   </td>
                   <td className="px-4 py-4 text-slate-600">{formatDate(user.auth_created_at ?? user.created_at)}</td>
@@ -327,6 +403,22 @@ export default function UsersTable({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-52 rounded-xl border-slate-200">
+                        {([ACCOUNT_STATUS_PENDING_APPROVAL, ACCOUNT_STATUS_REJECTED] as const).includes(getUserStatus(user)) ? (
+                          <DropdownMenuItem onClick={() => setApproveUser(user)}>
+                            <UserRoundCheck size={15} />
+                            {getUserStatus(user) === ACCOUNT_STATUS_REJECTED ? 'Approve User' : 'Approve Registration'}
+                          </DropdownMenuItem>
+                        ) : null}
+                        {([ACCOUNT_STATUS_PENDING_APPROVAL, ACCOUNT_STATUS_REJECTED] as const).includes(getUserStatus(user)) ? (
+                          <DropdownMenuItem onClick={() => {
+                            setRejectUser(user)
+                            setRejectionReason(user.rejection_reason ?? '')
+                          }}>
+                            <BadgeAlert size={15} />
+                            {getUserStatus(user) === ACCOUNT_STATUS_REJECTED ? 'Update Rejection Note' : 'Reject Registration'}
+                          </DropdownMenuItem>
+                        ) : null}
+                        {([ACCOUNT_STATUS_PENDING_APPROVAL, ACCOUNT_STATUS_REJECTED] as const).includes(getUserStatus(user)) ? <DropdownMenuSeparator /> : null}
                         <DropdownMenuItem onClick={() => setSelectedUser(user)}>
                           <Eye size={15} />
                           View Profile
@@ -339,10 +431,12 @@ export default function UsersTable({
                           <UserCog size={15} />
                           Change Role
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setStatusUser(user)}>
-                          {user.is_active ? <UserMinus size={15} /> : <UserRoundCheck size={15} />}
-                          {user.is_active ? 'Deactivate User' : 'Activate User'}
-                        </DropdownMenuItem>
+                        {(getUserStatus(user) === ACCOUNT_STATUS_APPROVED || getUserStatus(user) === ACCOUNT_STATUS_MANUALLY_DISABLED) ? (
+                          <DropdownMenuItem onClick={() => setStatusUser(user)}>
+                            {user.is_active ? <UserMinus size={15} /> : <UserRoundCheck size={15} />}
+                            {user.is_active ? 'Deactivate User' : 'Activate User'}
+                          </DropdownMenuItem>
+                        ) : null}
                         <DropdownMenuItem onClick={() => setPasswordUser(user)}>
                           <RotateCcw size={15} />
                           Reset Password
@@ -413,6 +507,66 @@ export default function UsersTable({
       <UserProfileDrawer open={Boolean(selectedUser)} onOpenChange={(open) => !open && setSelectedUser(null)} user={selectedUser} />
       <UserEditModal open={Boolean(editUser)} onOpenChange={(open) => !open && setEditUser(null)} user={editUser} roles={roles} onSaved={patchUser} />
       <UserRoleModal open={Boolean(roleUser)} onOpenChange={(open) => !open && setRoleUser(null)} user={roleUser} roles={roles} onSaved={patchUser} />
+
+      <AlertDialog open={Boolean(approveUser)} onOpenChange={(open) => !open && setApproveUser(null)}>
+        <AlertDialogContent className="rounded-xl border-slate-200">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{approveUser && getUserStatus(approveUser) === ACCOUNT_STATUS_REJECTED ? 'Approve user?' : 'Approve registration?'}</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will activate the account and allow the user to sign in to the dashboard.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction className="rounded-xl bg-[#1428ae] text-white hover:bg-[#0f1f8a]" onClick={(event) => {
+              event.preventDefault()
+              if (approveUser) {
+                handleApprove(approveUser)
+              }
+            }}>
+              {isPending ? 'Approving...' : approveUser && getUserStatus(approveUser) === ACCOUNT_STATUS_REJECTED ? 'Approve User' : 'Approve Registration'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={Boolean(rejectUser)} onOpenChange={(open) => {
+        if (!open) {
+          setRejectUser(null)
+          setRejectionReason('')
+        }
+      }}>
+        <DialogContent className="max-w-lg rounded-xl border-slate-200">
+          <DialogHeader>
+            <DialogTitle>{rejectUser && getUserStatus(rejectUser) === ACCOUNT_STATUS_REJECTED ? 'Update rejection note' : 'Reject registration'}</DialogTitle>
+            <DialogDescription>
+              Add an optional note for the rejection email. The account will remain blocked from dashboard access.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label>Reason</Label>
+            <Textarea
+              className="min-h-28 rounded-xl border-slate-200"
+              placeholder="Optional rejection reason"
+              value={rejectionReason}
+              onChange={(event) => setRejectionReason(event.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-xl" onClick={() => {
+              setRejectUser(null)
+              setRejectionReason('')
+            }}>Cancel</Button>
+            <Button className="rounded-xl bg-rose-600 hover:bg-rose-700" disabled={isPending} onClick={() => {
+              if (rejectUser) {
+                handleReject(rejectUser)
+              }
+            }}>
+              {isPending ? 'Saving...' : 'Reject Registration'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={Boolean(statusUser)} onOpenChange={(open) => !open && setStatusUser(null)}>
         <AlertDialogContent className="rounded-xl border-slate-200">

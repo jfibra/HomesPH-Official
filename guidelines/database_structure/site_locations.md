@@ -1,3 +1,8 @@
+-- Reference/bootstrap script for site locations.
+-- Not required for the registration approval rollout.
+-- Run this only when setting up a fresh environment that does not yet have
+-- the site_locations table.
+
 CREATE TABLE site_locations (
 id BIGSERIAL PRIMARY KEY,
 
