@@ -5,18 +5,25 @@ import SiteFooter from '@/components/layout/SiteFooter'
 import InquiryForm from '@/components/listings/InquiryForm'
 import { getSiteSettings } from '@/lib/site-settings'
 import { MOCK_LISTINGS, MOCK_PROJECTS } from '@/lib/mock-data'
+import { getListingById } from '@/lib/property-search'
 
 const fmt = (n?: number | null) => n ? `₱ ${Number(n).toLocaleString()}` : null
 
 export default async function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const settings = await getSiteSettings()
+  
+  let listingData = await getListingById(Number(id))
+  
+  if (!listingData) {
+    listingData = MOCK_LISTINGS.find(l => l.id === Number(id)) as any
+  }
 
-  const listing = MOCK_LISTINGS.find(l => l.id === Number(id))
-  if (!listing) notFound()
+  if (!listingData) notFound()
+  const listing = listingData!
 
-  const sortedGallery = [...(listing.property_listing_galleries ?? [])].sort((a, b) => a.display_order - b.display_order)
-  const project = listing.project_id ? MOCK_PROJECTS.find(p => p.id === listing.project_id) : null
+  const sortedGallery = [...(listing.property_listing_galleries ?? [])].sort((a: any, b: any) => a.display_order - b.display_order)
+  const project = listing.projects?.id ? MOCK_PROJECTS.find(p => p.id === listing.projects?.id) : null
   const amenities = project ? (project.project_amenities ?? []).map((pa: any) => pa.amenities).filter(Boolean) : []
   const unit = listing.project_units
   const isRent = listing.listing_type === 'rent'
@@ -105,15 +112,15 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                       <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Bathroom{unit.bathrooms !== 1 ? 's' : ''}</p>
                     </div>
                   )}
-                  {(unit as any).has_parking != null && (
+                  {unit.has_parking != null && (
                     <div className="bg-gray-50 rounded-xl p-3 text-center">
-                      <p className="font-bold text-gray-900 text-sm">{(unit as any).has_parking ? 'Yes' : 'No'}</p>
+                      <p className="font-bold text-gray-900 text-sm">{unit.has_parking ? 'Yes' : 'No'}</p>
                       <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Parking</p>
                     </div>
                   )}
                   {unit.is_furnished && (
                     <div className="bg-gray-50 rounded-xl p-3 text-center">
-                      <p className="font-bold text-gray-900 text-sm">{unit.is_furnished}</p>
+                      <p className="font-bold text-gray-100 text-sm">{unit.is_furnished}</p>
                       <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Furnished</p>
                     </div>
                   )}
@@ -159,7 +166,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
               <h2 className="text-base font-bold text-gray-900 mb-3">Location</h2>
               <p className="text-sm text-gray-600">
-                {[(listing as any).barangay, (listing as any).city_municipality, (listing as any).province, (listing as any).region].filter(Boolean).join(', ')}
+                {[listing.projects?.barangay, listing.projects?.city_municipality, listing.projects?.province, listing.projects?.region].filter(Boolean).join(', ')}
               </p>
               {/* Map placeholder */}
               <div className="mt-4 h-40 bg-gradient-to-br from-[#1428ae]/10 to-[#1428ae]/5 rounded-xl flex items-center justify-center">
