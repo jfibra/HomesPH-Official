@@ -190,6 +190,7 @@ interface ListingRow {
   developer_id: number | null
   project_id: number | null
   project_unit_id: number | null
+  user_profile_id: string | null
 }
 
 interface ProjectRow {
@@ -203,6 +204,7 @@ interface ProjectRow {
   region: string | null
   project_type: string | null
   classification: string | null
+  main_image_url: string | null
 }
 
 interface ProjectUnitRow {
@@ -218,11 +220,13 @@ interface ProjectUnitRow {
   has_balcony: boolean | null
   is_furnished: string | null
   is_rfo: boolean | null
+  selling_price: number | null
 }
 
 interface DeveloperRow {
   id: number
   developer_name: string
+  logo_url: string | null
 }
 
 interface GalleryRow {
@@ -270,6 +274,10 @@ export interface PublicListingSearchRecord {
   created_at: string | null
   developers_profiles: {
     developer_name: string | null
+    logo_url: string | null
+  } | null
+  user_profiles: {
+    profile_image_url: string | null
   } | null
   projects: {
     id: number
@@ -281,6 +289,7 @@ export interface PublicListingSearchRecord {
     region: string | null
     project_type: string | null
     classification: string | null
+    main_image_url: string | null
   } | null
   project_units: {
     id: number
@@ -295,6 +304,7 @@ export interface PublicListingSearchRecord {
     has_balcony: boolean | null
     is_furnished: string | null
     is_rfo: boolean | null
+    selling_price: number | null
   } | null
   property_listing_galleries: Array<{
     id: number
@@ -305,11 +315,43 @@ export interface PublicListingSearchRecord {
   project_amenities: string[]
 }
 
+export interface ProjectDetails {
+  id: number
+  name: string
+  slug: string
+  description: string | null
+  project_type: string | null
+  city_municipality: string | null
+  province: string | null
+  barangay: string | null
+  address_details: string | null
+  main_image_url: string | null
+  developer?: {
+    developer_name: string | null
+    logo_url: string | null
+  }
+  units: Array<{
+    id: number
+    unit_name: string | null
+    unit_type: string
+    floor_area_sqm: number | null
+    lot_area_sqm: number | null
+    bedrooms: number | null
+    bathrooms: number | null
+    selling_price: number | null
+  }>
+  gallery: Array<{
+    image_url: string
+    title: string | null
+  }>
+}
+
 export interface PublicListingSearchResult {
   filters: PropertySearchFilters
   listings: PublicListingSearchRecord[]
   propertyTypeChips: string[]
   aiSummary: string | null
+  selectedProject?: ProjectDetails
 }
 
 function normalizeText(value: string | null | undefined) {
@@ -1049,83 +1091,150 @@ export async function searchPublicListings(
   const filters = parsePropertySearchFilters(searchParams)
   const admin = createAdminSupabaseClient()
 
-  const listingRows = await selectAllRows<ListingRow>(() =>
-    admin
+  // Project Detection
+  let selectedProject: ProjectDetails | undefined = undefined
+  const searchText = filters.keywordsText || filters.location
+  if (searchText && searchText.length > 2) {
+    const { data: projectMatch } = await admin
+      .from('projects')
+      .select('id, name, slug, description, project_type, city_municipality, province, barangay, address_details, main_image_url, developer_id')
+      .or(`name.ilike.%${searchText}%,slug.ilike.%${searchText}%`)
+      .limit(1)
+      .maybeSingle()
+
+    if (projectMatch) {
+      const [devResult, unitsResult, galleryResult] = await Promise.all([
+        projectMatch.developer_id
+          ? admin.from('developers_profiles').select('developer_name, logo_url').eq('id', projectMatch.developer_id).maybeSingle()
+          : Promise.resolve({ data: null }),
+        admin.from('project_units').select('id, unit_name, unit_type, floor_area_sqm, lot_area_sqm, bedrooms, bathrooms, selling_price').eq('project_id', projectMatch.id),
+        admin.from('project_galleries').select('image_url, title').eq('project_id', projectMatch.id).order('display_order', { ascending: true })
+      ])
+
+      selectedProject = {
+        id: projectMatch.id,
+        name: projectMatch.name,
+        slug: projectMatch.slug,
+        description: projectMatch.description,
+        project_type: projectMatch.project_type,
+        city_municipality: projectMatch.city_municipality,
+        province: projectMatch.province,
+        barangay: projectMatch.barangay,
+        address_details: projectMatch.address_details,
+        main_image_url: projectMatch.main_image_url,
+        developer: devResult.data
+          ? { developer_name: devResult.data.developer_name, logo_url: devResult.data.logo_url }
+          : undefined,
+        units: (unitsResult.data || []).map(u => ({
+          id: Number(u.id),
+          unit_name: u.unit_name,
+          unit_type: u.unit_type,
+          floor_area_sqm: u.floor_area_sqm ? Number(u.floor_area_sqm) : null,
+          lot_area_sqm: u.lot_area_sqm ? Number(u.lot_area_sqm) : null,
+          bedrooms: u.bedrooms,
+          bathrooms: u.bathrooms,
+          selling_price: u.selling_price ? Number(u.selling_price) : null
+        })),
+        gallery: (galleryResult.data || []).map(g => ({
+          image_url: g.image_url,
+          title: g.title
+        }))
+      }
+    }
+  }
+
+  const listingRows = await selectAllRows<ListingRow>(() => {
+    let query = admin
       .from('property_listings')
       .select(
-        'id,title,description,listing_type,status,currency,price,negotiable,is_featured,created_at,developer_id,project_id,project_unit_id'
+        'id,title,description,listing_type,status,currency,price,negotiable,is_featured,created_at,developer_id,project_id,project_unit_id,user_profile_id'
       )
       .eq('status', 'published')
       .eq('listing_type', listingMode)
-      .order('created_at', { ascending: false })
-  )
+
+    if (selectedProject) {
+      query = query.eq('project_id', selectedProject.id)
+    }
+
+    return query.order('created_at', { ascending: false })
+  })
 
   const projectIds = uniqueNumbers(listingRows.map((row) => row.project_id))
   const unitIds = uniqueNumbers(listingRows.map((row) => row.project_unit_id))
   const developerIds = uniqueNumbers(listingRows.map((row) => row.developer_id))
+  const userProfileIds = Array.from(new Set(listingRows.map((row) => row.user_profile_id).filter((id): id is string => Boolean(id))))
   const listingIds = listingRows.map((row) => row.id)
 
-  const [projects, units, developers, galleries, projectAmenities] = await Promise.all([
+  const [projects, units, developers, galleries, projectAmenities, userProfiles] = await Promise.all([
     projectIds.length > 0
       ? selectAllRows<ProjectRow>(() =>
-          admin
-            .from('projects')
-            .select(
-              'id,developer_id,name,slug,city_municipality,province,barangay,region,project_type,classification'
-            )
-            .in('id', projectIds)
-        )
+        admin
+          .from('projects')
+          .select(
+            'id,developer_id,name,slug,city_municipality,province,barangay,region,project_type,classification,main_image_url'
+          )
+          .in('id', projectIds)
+      )
       : Promise.resolve([] as ProjectRow[]),
     unitIds.length > 0
       ? selectAllRows<ProjectUnitRow>(() =>
-          admin
-            .from('project_units')
-            .select(
-              'id,project_id,unit_name,unit_type,bedrooms,bathrooms,floor_area_sqm,lot_area_sqm,has_parking,has_balcony,is_furnished,is_rfo'
-            )
-            .in('id', unitIds)
-        )
+        admin
+          .from('project_units')
+          .select(
+            'id,project_id,unit_name,unit_type,bedrooms,bathrooms,floor_area_sqm,lot_area_sqm,has_parking,has_balcony,is_furnished,is_rfo,selling_price'
+          )
+          .in('id', unitIds)
+      )
       : Promise.resolve([] as ProjectUnitRow[]),
     developerIds.length > 0
       ? selectAllRows<DeveloperRow>(() =>
-          admin
-            .from('developers_profiles')
-            .select('id,developer_name')
-            .in('id', developerIds)
-        )
+        admin
+          .from('developers_profiles')
+          .select('id,developer_name,logo_url')
+          .in('id', developerIds)
+      )
       : Promise.resolve([] as DeveloperRow[]),
     listingIds.length > 0
       ? selectAllRows<GalleryRow>(() =>
-          admin
-            .from('property_listing_galleries')
-            .select('id,listing_id,image_url,display_order')
-            .in('listing_id', listingIds)
-            .order('display_order', { ascending: true })
-        )
+        admin
+          .from('property_listing_galleries')
+          .select('id,listing_id,image_url,display_order')
+          .in('listing_id', listingIds)
+          .order('display_order', { ascending: true })
+      )
       : Promise.resolve([] as GalleryRow[]),
     projectIds.length > 0
       ? selectAllRows<ProjectAmenityRow>(() =>
-          admin
-            .from('project_amenities')
-            .select('project_id,amenity_id')
-            .in('project_id', projectIds)
-        )
+        admin
+          .from('project_amenities')
+          .select('project_id,amenity_id')
+          .in('project_id', projectIds)
+      )
       : Promise.resolve([] as ProjectAmenityRow[]),
+    userProfileIds.length > 0
+      ? selectAllRows<{ id: string, profile_image_url: string }>(() =>
+        admin
+          .from('user_profiles')
+          .select('id,profile_image_url')
+          .in('id', userProfileIds)
+      )
+      : Promise.resolve([] as Array<{ id: string, profile_image_url: string }>),
   ])
 
   const amenityIds = uniqueNumbers(projectAmenities.map((row) => row.amenity_id))
   const amenities = amenityIds.length > 0
     ? await selectAllRows<AmenityRow>(() =>
-        admin
-          .from('amenities')
-          .select('id,name')
-          .in('id', amenityIds)
-      )
+      admin
+        .from('amenities')
+        .select('id,name')
+        .in('id', amenityIds)
+    )
     : []
 
   const projectMap = new Map(projects.map((project) => [project.id, project]))
   const unitMap = new Map(units.map((unit) => [unit.id, unit]))
   const developerMap = new Map(developers.map((developer) => [developer.id, developer]))
+  const userProfileMap = new Map(userProfiles.map((u) => [u.id, u]))
   const amenityMap = new Map(amenities.map((amenity) => [amenity.id, amenity.name]))
   const galleryMap = new Map<number, GalleryRow[]>()
   const amenityNamesByProject = new Map<number, string[]>()
@@ -1169,37 +1278,41 @@ export async function searchPublicListings(
       created_at: row.created_at,
       developers_profiles: developer
         ? {
-            developer_name: developer.developer_name,
-          }
+          developer_name: developer.developer_name,
+          logo_url: developer.logo_url,
+        }
         : null,
+      user_profiles: row.user_profile_id ? userProfileMap.get(row.user_profile_id) ?? null : null,
       projects: project
         ? {
-            id: project.id,
-            name: project.name,
-            slug: project.slug,
-            city_municipality: project.city_municipality,
-            province: project.province,
-            barangay: project.barangay,
-            region: project.region,
-            project_type: project.project_type,
-            classification: project.classification,
-          }
+          id: project.id,
+          name: project.name,
+          slug: project.slug,
+          city_municipality: project.city_municipality,
+          province: project.province,
+          barangay: project.barangay,
+          region: project.region,
+          project_type: project.project_type,
+          classification: project.classification,
+          main_image_url: project.main_image_url,
+        }
         : null,
       project_units: unit
         ? {
-            id: unit.id,
-            project_id: unit.project_id,
-            unit_name: unit.unit_name,
-            unit_type: unit.unit_type,
-            bedrooms: unit.bedrooms,
-            bathrooms: unit.bathrooms,
-            floor_area_sqm: unit.floor_area_sqm,
-            lot_area_sqm: unit.lot_area_sqm,
-            has_parking: unit.has_parking,
-            has_balcony: unit.has_balcony,
-            is_furnished: unit.is_furnished,
-            is_rfo: unit.is_rfo,
-          }
+          id: unit.id,
+          project_id: unit.project_id,
+          unit_name: unit.unit_name,
+          unit_type: unit.unit_type,
+          bedrooms: unit.bedrooms,
+          bathrooms: unit.bathrooms,
+          floor_area_sqm: unit.floor_area_sqm,
+          lot_area_sqm: unit.lot_area_sqm,
+          has_parking: unit.has_parking,
+          has_balcony: unit.has_balcony,
+          is_furnished: unit.is_furnished,
+          is_rfo: unit.is_rfo,
+          selling_price: unit.selling_price,
+        }
         : null,
       property_listing_galleries: galleryMap.get(row.id) ?? [],
       project_amenities: row.project_id ? amenityNamesByProject.get(row.project_id) ?? [] : [],
@@ -1220,6 +1333,7 @@ export async function searchPublicListings(
         .slice(0, 8)
     ).slice(0, 5),
     aiSummary: buildAiSummary(filters, listingMode),
+    selectedProject,
   }
 }
 
@@ -1258,4 +1372,89 @@ export function buildPropertySearchUrl(
   }
 
   return `${pathname}?${params.toString()}`
+}
+
+export async function getListingById(id: number): Promise<PublicListingSearchRecord | null> {
+  const admin = createAdminSupabaseClient()
+
+  const { data: row, error } = await admin
+    .from('property_listings')
+    .select('id,title,description,listing_type,status,currency,price,negotiable,is_featured,created_at,developer_id,project_id,project_unit_id,user_profile_id')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (error || !row) return null
+
+  const [projectResult, unitResult, developerResult, galleryResult, userProfileResult, projectAmenitiesResult] = await Promise.all([
+    row.project_id 
+      ? admin.from('projects').select('id,developer_id,name,slug,city_municipality,province,barangay,region,project_type,classification,main_image_url').eq('id', row.project_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    row.project_unit_id
+      ? admin.from('project_units').select('id,project_id,unit_name,unit_type,bedrooms,bathrooms,floor_area_sqm,lot_area_sqm,has_parking,has_balcony,is_furnished,is_rfo,selling_price').eq('id', row.project_unit_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    row.developer_id
+      ? admin.from('developers_profiles').select('id,developer_name,logo_url').eq('id', row.developer_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    admin.from('property_listing_galleries').select('id,listing_id,image_url,display_order').eq('listing_id', id).order('display_order', { ascending: true }),
+    row.user_profile_id
+      ? admin.from('user_profiles').select('id,profile_image_url').eq('id', row.user_profile_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    row.project_id
+      ? admin.from('project_amenities').select('project_id,amenity_id').eq('project_id', row.project_id)
+      : Promise.resolve({ data: [] })
+  ])
+
+  let amenities: string[] = []
+  if (projectAmenitiesResult.data && projectAmenitiesResult.data.length > 0) {
+    const amenityIds = projectAmenitiesResult.data.map(a => a.amenity_id)
+    const { data: amenityNames } = await admin.from('amenities').select('name').in('id', amenityIds)
+    amenities = (amenityNames || []).map(a => a.name)
+  }
+
+  const project = projectResult.data
+  const developer = developerResult.data || (project?.developer_id ? (await admin.from('developers_profiles').select('developer_name, logo_url').eq('id', project.developer_id).maybeSingle()).data : null)
+
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    listing_type: row.listing_type,
+    status: row.status,
+    currency: row.currency,
+    price: row.price,
+    negotiable: row.negotiable,
+    is_featured: row.is_featured,
+    created_at: row.created_at,
+    developers_profiles: developer ? { developer_name: developer.developer_name, logo_url: developer.logo_url } : null,
+    user_profiles: userProfileResult.data ? { profile_image_url: userProfileResult.data.profile_image_url } : null,
+    projects: project ? {
+      id: project.id,
+      name: project.name,
+      slug: project.slug,
+      city_municipality: project.city_municipality,
+      province: project.province,
+      barangay: project.barangay,
+      region: project.region,
+      project_type: project.project_type,
+      classification: project.classification,
+      main_image_url: project.main_image_url
+    } : null,
+    project_units: unitResult.data ? {
+      id: unitResult.data.id,
+      project_id: unitResult.data.project_id,
+      unit_name: unitResult.data.unit_name,
+      unit_type: unitResult.data.unit_type,
+      bedrooms: unitResult.data.bedrooms,
+      bathrooms: unitResult.data.bathrooms,
+      floor_area_sqm: unitResult.data.floor_area_sqm,
+      lot_area_sqm: unitResult.data.lot_area_sqm,
+      has_parking: unitResult.data.has_parking,
+      has_balcony: unitResult.data.has_balcony,
+      is_furnished: unitResult.data.is_furnished,
+      is_rfo: unitResult.data.is_rfo,
+      selling_price: unitResult.data.selling_price
+    } : null,
+    property_listing_galleries: galleryResult.data || [],
+    project_amenities: amenities
+  }
 }

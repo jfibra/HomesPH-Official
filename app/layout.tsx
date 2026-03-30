@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Outfit, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
 import { getSiteSettings } from '../lib/site-settings'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 const BASE_URL = 'https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/homesph'
@@ -79,7 +79,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased" suppressHydrationWarning>
+      <body className={`${outfit.variable} font-sans antialiased`} suppressHydrationWarning>
         {children}
         <Toaster />
         <Analytics />
