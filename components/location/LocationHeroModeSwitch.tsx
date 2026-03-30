@@ -8,12 +8,18 @@ interface LocationHeroModeSwitchProps {
 }
 
 const SEGMENTED_TRANSITION =
-  'motion-reduce:transition-none transition-[transform,background-color,color,opacity,box-shadow,border-color,filter] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)]'
+  'motion-reduce:transition-none transition-[color,opacity] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)]'
+
+const PILL_TRANSITION =
+  'motion-reduce:transition-none transform-gpu will-change-transform transition-[transform,box-shadow] duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)]'
 
 export default function LocationHeroModeSwitch({
   activeMode,
   onModeChange,
 }: LocationHeroModeSwitchProps) {
+  const pillTransform =
+    activeMode === 'ai' ? 'translate3d(calc(100% + 8px), 0, 0)' : 'translate3d(0, 0, 0)'
+
   const handleModeChange = (nextMode: HeroMode) => {
     if (nextMode === activeMode) {
       return
@@ -26,19 +32,15 @@ export default function LocationHeroModeSwitch({
     <div
       role="tablist"
       aria-label="Search mode"
-      className="relative isolate inline-grid w-full max-w-[432px] grid-cols-2 items-center overflow-hidden rounded-[24px] border border-white/18 bg-[linear-gradient(180deg,rgba(244,247,252,0.18)_0%,rgba(226,233,244,0.1)_100%)] p-[5px] backdrop-blur-[18px] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
+      className="relative isolate grid h-full w-full grid-cols-2 items-center overflow-hidden rounded-[13px] bg-white/30 p-[4px] backdrop-blur-[10px]"
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-[24px] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.2)_0%,rgba(255,255,255,0)_58%)] opacity-90"
-      />
-      <span
-        aria-hidden
-        className={`pointer-events-none absolute inset-y-[10px] left-[16px] z-0 w-[calc(50%_-_32px)] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.28)_0%,rgba(255,255,255,0)_72%)] blur-[14px] ${SEGMENTED_TRANSITION} ${activeMode === 'ai' ? 'translate-x-[calc(100%+16px)] opacity-90' : 'translate-x-0 opacity-90'}`}
-      />
-      <span
-        aria-hidden
-        className={`pointer-events-none absolute inset-y-[5px] left-[5px] z-0 w-[calc(50%_-_5px)] rounded-[19px] border border-[#3150f5]/10 bg-[linear-gradient(180deg,#3b53ef_0%,#2140d8_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_12px_24px_rgba(33,64,216,0.24)] ${SEGMENTED_TRANSITION} ${activeMode === 'ai' ? 'translate-x-full scale-[0.985]' : 'translate-x-0 scale-100'}`}
+        className={`pointer-events-none absolute inset-y-[4px] left-[4px] z-0 rounded-[13px] bg-[#1428AE] shadow-[0_10px_24px_rgba(20,40,174,0.26)] ${PILL_TRANSITION}`}
+        style={{
+          width: 'calc(50% - 8px)',
+          transform: pillTransform,
+        }}
       />
 
       <button
@@ -46,7 +48,7 @@ export default function LocationHeroModeSwitch({
         role="tab"
         aria-selected={activeMode === 'manual'}
         onClick={() => handleModeChange('manual')}
-        className={`relative z-10 inline-flex min-h-[64px] items-center justify-center px-[34px] text-[17px] font-medium leading-none tracking-[-0.03em] ${SEGMENTED_TRANSITION} focus-visible:outline-none ${activeMode === 'manual' ? 'translate-y-[-1px] text-white opacity-100' : 'translate-y-0 text-white/[0.72] opacity-100 hover:text-white/[0.88]'}`}
+        className={`relative z-10 inline-flex h-full items-center justify-center rounded-[13px] px-[16px] text-center text-[22px] font-medium leading-[22px] tracking-[0] text-white ${SEGMENTED_TRANSITION} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70`}
       >
         Manual Mode
       </button>
@@ -56,7 +58,7 @@ export default function LocationHeroModeSwitch({
         role="tab"
         aria-selected={activeMode === 'ai'}
         onClick={() => handleModeChange('ai')}
-        className={`relative z-10 inline-flex min-h-[64px] items-center justify-center px-[34px] text-[17px] font-medium leading-none tracking-[-0.03em] ${SEGMENTED_TRANSITION} focus-visible:outline-none ${activeMode === 'ai' ? 'translate-y-[-1px] text-white opacity-100' : 'translate-y-0 text-white/[0.72] opacity-100 hover:text-white/[0.88]'}`}
+        className={`relative z-10 inline-flex h-full items-center justify-center rounded-[13px] px-[16px] text-center text-[22px] font-medium leading-[22px] tracking-[0] text-white ${SEGMENTED_TRANSITION} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70`}
       >
         AI Mode
       </button>

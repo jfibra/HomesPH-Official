@@ -3,7 +3,32 @@
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Facebook, Twitter, Menu, X, Mail, Phone, Search } from 'lucide-react'
+import {
+  Menu,
+  Search,
+  X,
+} from 'lucide-react'
+import Image from 'next/image'
+
+/* ── Solid / filled icon helpers for the top bar ── */
+const PhoneSolid = ({ size = 12, className = '' }: { size?: number; className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width={size} height={size} className={className}>
+    <path fillRule="evenodd" d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z" clipRule="evenodd" />
+  </svg>
+)
+
+const MailSolid = ({ size = 12, className = '' }: { size?: number; className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width={size} height={size} className={className}>
+    <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" />
+    <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
+  </svg>
+)
+
+const MapPinSolid = ({ size = 12, className = '' }: { size?: number; className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width={size} height={size} className={className}>
+    <path fillRule="evenodd" d="m11.54 22.351.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 3.827 3.024ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clipRule="evenodd" />
+  </svg>
+)
 
 interface SocialLinks {
   facebook?: string
@@ -23,6 +48,7 @@ interface HomeHeaderProps {
   socialLinks?: SocialLinks | string
   logoUrl?: string
   navItems?: HomeHeaderNavItem[]
+  topBarLocationLabel?: string
 }
 
 // Home-specific nav: show company/link actions rather than global site nav
@@ -34,126 +60,231 @@ const NAV_ITEMS: { label: string; href: string }[] = [
   { label: 'Restaurant', href: '/restaurant' },
 ]
 
+const LANDING_TOP_BAR_SHELL =
+  'mx-auto flex w-full max-w-[1466px] items-center justify-between px-4 sm:px-6 md:px-8 lg:px-10 min-[1466px]:px-0'
+
+const LANDING_MAIN_SHELL =
+  'mx-auto flex w-full max-w-[1346px] items-center px-4 sm:px-6 md:px-8 lg:px-10 min-[1346px]:px-0'
+
 export default function HomeHeader({
   contactEmail,
   contactPhone,
   socialLinks,
   logoUrl,
   navItems = DEFAULT_NAV_ITEMS,
+  topBarLocationLabel,
 }: HomeHeaderProps) {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const isLandingVariant = Boolean(topBarLocationLabel)
 
   useEffect(() => {
-    function onScroll() { setScrolled(window.scrollY > 8) }
+    function onScroll() {
+      setScrolled(window.scrollY > 8)
+    }
+
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Lock body scroll when sidebar is open
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
+    return () => {
+      document.body.style.overflow = ''
+    }
   }, [open])
 
   let socials: SocialLinks = {}
   if (socialLinks) {
     if (typeof socialLinks === 'string') {
-      try { socials = JSON.parse(socialLinks) } catch { socials = {} }
+      try {
+        socials = JSON.parse(socialLinks)
+      } catch {
+        socials = {}
+      }
     } else {
       socials = socialLinks
     }
   }
 
+  const showTopBar = Boolean(
+    contactPhone ||
+      contactEmail ||
+      topBarLocationLabel ||
+      socials.facebook ||
+      socials.instagram ||
+      socials.twitter,
+  )
+
+  const desktopNavClass = isLandingVariant
+    ? 'hidden flex-1 items-center justify-end gap-5 md:flex lg:gap-8 xl:gap-9'
+    : 'hidden flex-1 items-center justify-center gap-2 md:flex'
+
   return (
     <div className="w-full">
-      {/* ── Top contact bar — dark navy ── */}
-      <div className="bg-[#0c1f4a]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-10">
-          <div className="flex items-center gap-5">
-            {contactPhone && (
-              <a
-                href={`tel:${contactPhone}`}
-                className="flex items-center gap-1.5 text-xs text-blue-100 hover:text-white transition-colors"
-              >
-                <Phone size={12} className="shrink-0" />
-                <span>{contactPhone}</span>
-              </a>
-            )}
-            {contactEmail && (
-              <a
-                href={`mailto:${contactEmail}`}
-                className="hidden sm:flex items-center gap-1.5 text-xs text-blue-100 hover:text-white transition-colors"
-              >
-                <Mail size={12} className="shrink-0" />
-                <span>{contactEmail}</span>
-              </a>
-            )}
-          </div>
+      {showTopBar && (
+        <div className={isLandingVariant ? 'bg-[#1428AE]' : 'bg-[#0c1f4a]'}>
+          <div
+            className={
+              isLandingVariant
+                ? `${LANDING_TOP_BAR_SHELL} h-[26px]`
+                : 'mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 h-10'
+            }
+          >
+            <div
+              className={
+                isLandingVariant
+                  ? 'flex min-w-0 items-center gap-3 md:gap-4 lg:gap-5'
+                  : 'flex min-w-0 items-center gap-5'
+              }
+            >
+              {contactPhone && (
+                <a
+                  href={`tel:${contactPhone}`}
+                  className={
+                    isLandingVariant
+                      ? 'flex items-center gap-1.5 text-[11px] font-medium text-white/90 transition-colors hover:text-white'
+                      : 'flex items-center gap-1.5 text-xs text-blue-100 transition-colors hover:text-white'
+                  }
+                >
+                  <PhoneSolid size={isLandingVariant ? 11 : 12} className="shrink-0" />
+                  <span className="truncate">{contactPhone}</span>
+                </a>
+              )}
 
-          <div className="flex items-center gap-4">
-            {socials.facebook && (
+              {contactEmail && (
+                <a
+                  href={`mailto:${contactEmail}`}
+                  className={
+                    isLandingVariant
+                      ? 'hidden items-center gap-1.5 text-[11px] font-medium text-white/90 transition-colors hover:text-white md:flex'
+                      : 'hidden items-center gap-1.5 text-xs text-blue-100 transition-colors hover:text-white sm:flex'
+                  }
+                >
+                  <MailSolid size={isLandingVariant ? 11 : 12} className="shrink-0" />
+                  <span className="truncate">{contactEmail}</span>
+                </a>
+              )}
+
+              {topBarLocationLabel && (
+                <div className="hidden items-center gap-1.5 text-[11px] font-medium text-white/90 lg:flex">
+                  <MapPinSolid size={11} className="shrink-0" />
+                  <span className="truncate">{topBarLocationLabel}</span>
+                </div>
+              )}
+            </div>
+
+            <div className={isLandingVariant ? 'flex items-center gap-2 md:gap-3' : 'flex items-center gap-4'}>
+              {socials.facebook && (
+                <a
+                  href={socials.facebook}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Facebook"
+                  className={
+                    isLandingVariant
+                      ? 'text-white/90 transition-colors hover:text-white'
+                      : 'text-blue-200 transition-colors hover:text-white'
+                  }
+                >
+                  <Image src="/socialIcons/fb.png" alt="Facebook" width={isLandingVariant ? 12 : 14} height={isLandingVariant ? 12 : 14} />
+                </a>
+              )}
+
+              {socials.instagram && (
+                <a
+                  href={socials.instagram}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Instagram"
+                  className={
+                    isLandingVariant
+                      ? 'text-white/90 transition-colors hover:text-white'
+                      : 'text-blue-200 transition-colors hover:text-white'
+                  }
+                >
+                  <Image src="/socialIcons/insta.png" alt="Instagram" width={isLandingVariant ? 12 : 14} height={isLandingVariant ? 12 : 14} />
+                </a>
+              )}
+
               <a
-                href={socials.facebook}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Facebook"
-                className="text-blue-200 hover:text-white transition-colors"
+                href={socials.twitter || '#'}
+                target={socials.twitter ? '_blank' : undefined}
+                rel={socials.twitter ? 'noreferrer' : undefined}
+                aria-label="X / Twitter"
+                className={
+                  isLandingVariant
+                    ? 'text-white/90 transition-colors hover:text-white'
+                    : 'text-blue-200 transition-colors hover:text-white'
+                }
               >
-                <Facebook size={14} />
+                <Image src="/socialIcons/X.png" alt="X / Twitter" width={isLandingVariant ? 12 : 14} height={isLandingVariant ? 12 : 14} />
               </a>
-            )}
-            {socials.twitter && (
-              <a
-                href={socials.twitter}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Twitter / X"
-                className="text-blue-200 hover:text-white transition-colors"
-              >
-                <Twitter size={14} />
-              </a>
-            )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* ── Main header ── */}
       <header
         className={`sticky top-0 z-40 bg-white transition-all duration-200 ${
-          scrolled ? 'shadow-md' : 'border-b border-gray-100'
+          scrolled
+            ? 'shadow-[0_14px_34px_rgba(15,33,91,0.08)]'
+            : 'border-b border-slate-200/80'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-24 gap-8">
-
-            {/* Logo */}
+        <div className={isLandingVariant ? LANDING_MAIN_SHELL : 'mx-auto flex max-w-7xl items-center px-4 sm:px-6 lg:px-8'}>
+          <div
+            className={`flex w-full items-center ${
+              isLandingVariant ? 'h-[64px] gap-6' : 'h-24 gap-8'
+            }`}
+          >
             <Link href="/" className="shrink-0 group">
               {logoUrl ? (
-                // show provided logo
-                <img src={logoUrl} alt="HomesPH" className="h-12 w-auto drop-shadow-md transition-transform group-hover:scale-105" />
+                <img
+                  src={logoUrl}
+                  alt="HomesPH"
+                  className={
+                    isLandingVariant
+                      ? 'h-8 w-auto object-contain transition-transform group-hover:scale-[1.02] md:h-9 min-[1280px]:-translate-x-[9px]'
+                      : 'h-12 w-auto drop-shadow-md transition-transform group-hover:scale-105'
+                  }
+                />
               ) : (
-                // fallback to simple text brand when no logo provided
-                <span className="text-2xl font-bold text-gray-900 drop-shadow-sm">HomesPH</span>
+                <span
+                  className={
+                    isLandingVariant
+                      ? 'text-[28px] font-semibold tracking-[-0.03em] text-[#1428AE]'
+                      : 'text-2xl font-bold text-gray-900 drop-shadow-sm'
+                  }
+                >
+                  HomesPH
+                </span>
               )}
             </Link>
 
-            {/* LocationSwitcher removed per request */}
-
-            <nav className="hidden md:flex flex-1 items-center justify-center gap-2">
+            <nav className={desktopNavClass}>
               {navItems.map((item) => {
                 const isActive = pathname === item.href.split('?')[0]
+
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`relative px-4 py-2.5 text-base font-bold rounded-xl transition-all duration-150 group ${
-                      isActive 
-                        ? 'text-[#0c1f4a] bg-[#fff7ed]' 
-                        : 'text-slate-600 hover:text-[#0c1f4a] hover:bg-[#fff7ed]'
-                    }`}
+                    className={
+                      isLandingVariant
+                        ? `text-[14px] font-medium leading-none tracking-[-0.015em] transition-colors ${
+                            isActive
+                              ? 'text-[#1428AE]'
+                              : 'text-[#23345f] hover:text-[#1428AE]'
+                          }`
+                        : `relative rounded-xl px-4 py-2.5 text-base font-bold transition-all duration-150 ${
+                            isActive
+                              ? 'bg-[#fff7ed] text-[#0c1f4a]'
+                              : 'text-slate-600 hover:bg-[#fff7ed] hover:text-[#0c1f4a]'
+                          }`
+                    }
                   >
                     {item.label}
                   </Link>
@@ -161,45 +292,43 @@ export default function HomeHeader({
               })}
             </nav>
 
-            {/* Search Icon — desktop */}
-            <div className="hidden md:flex items-center gap-6 shrink-0">
-               <button className="text-slate-600 hover:text-[#0c1f4a] transition-colors cursor-pointer">
+            {!isLandingVariant && (
+              <div className="hidden items-center gap-6 shrink-0 md:flex">
+                <button className="cursor-pointer text-slate-600 transition-colors hover:text-[#0c1f4a]">
                   <Search size={24} />
-               </button>
-            </div>
+                </button>
+              </div>
+            )}
 
-            {/* Mobile hamburger */}
             <button
               aria-label="Open menu"
               onClick={() => setOpen(true)}
-              className="md:hidden ml-auto p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+              className={`ml-auto rounded-lg p-2 transition-colors md:hidden ${
+                isLandingVariant
+                  ? 'text-[#23345f] hover:bg-[#1428AE]/5'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
             >
               <Menu size={22} />
             </button>
           </div>
         </div>
-
-        {/* Mobile dropdown removed — sidebar below */}
       </header>
 
-      {/* ── Mobile sidebar ── */}
-      {/* Backdrop */}
       <div
         aria-hidden
         onClick={() => setOpen(false)}
         className={`fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
-          open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
         }`}
       />
 
-      {/* Sidebar panel */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-in-out md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Sidebar header */}
-        <div className="flex items-center justify-between px-5 h-[72px] border-b border-gray-100 shrink-0">
+        <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-gray-100 px-5">
           <Link href="/" onClick={() => setOpen(false)} className="shrink-0">
             {logoUrl ? (
               <img src={logoUrl} alt="HomesPH" className="h-9 w-auto" />
@@ -207,82 +336,120 @@ export default function HomeHeader({
               <span className="text-lg font-semibold text-gray-900">HomesPH</span>
             )}
           </Link>
+
           <button
             aria-label="Close menu"
             onClick={() => setOpen(false)}
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+            className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* Nav links */}
         <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href.split('?')[0]
+
             return (
               <Link
-                key={item.href}
+                key={`${item.href}-mobile`}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
-                  isActive ? 'bg-amber-50 text-amber-700' : 'text-gray-700 hover:bg-[#1428ae]/5 hover:text-[#1428ae]'
+                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
+                  isActive
+                    ? 'bg-amber-50 text-amber-700'
+                    : 'text-gray-700 hover:bg-[#1428AE]/5 hover:text-[#1428AE]'
                 }`}
               >
-                {isActive && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />}
+                {isActive && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />}
                 {item.label}
               </Link>
             )
           })}
         </nav>
 
-        {/* Contact info */}
-        {(contactPhone || contactEmail) && (
-          <div className="px-5 py-4 border-t border-gray-100 space-y-3">
-            <p className="text-[10px] font-bold tracking-widest uppercase text-gray-400">Contact</p>
+        {(contactPhone || contactEmail || topBarLocationLabel) && (
+          <div className="space-y-3 border-t border-gray-100 px-5 py-4">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Contact</p>
+
             {contactPhone && (
-              <a href={`tel:${contactPhone}`} className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#1428ae] transition-colors">
-                <span className="w-7 h-7 rounded-lg bg-[#1428ae]/8 flex items-center justify-center shrink-0">
-                  <Phone size={13} className="text-[#1428ae]" />
+              <a
+                href={`tel:${contactPhone}`}
+                className="flex items-center gap-3 text-sm text-gray-600 transition-colors hover:text-[#1428AE]"
+              >
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#1428AE]/8">
+                  <PhoneSolid size={13} className="text-[#1428AE]" />
                 </span>
                 {contactPhone}
               </a>
             )}
+
             {contactEmail && (
-              <a href={`mailto:${contactEmail}`} className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#1428ae] transition-colors">
-                <span className="w-7 h-7 rounded-lg bg-[#1428ae]/8 flex items-center justify-center shrink-0">
-                  <Mail size={13} className="text-[#1428ae]" />
+              <a
+                href={`mailto:${contactEmail}`}
+                className="flex items-center gap-3 text-sm text-gray-600 transition-colors hover:text-[#1428AE]"
+              >
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#1428AE]/8">
+                  <MailSolid size={13} className="text-[#1428AE]" />
                 </span>
                 <span className="truncate">{contactEmail}</span>
               </a>
             )}
+
+            {topBarLocationLabel && (
+              <div className="flex items-center gap-3 text-sm text-gray-600">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#1428AE]/8">
+                  <MapPinSolid size={13} className="text-[#1428AE]" />
+                </span>
+                <span className="truncate">{topBarLocationLabel}</span>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Social links */}
-        {(socials.facebook || socials.twitter) && (
-          <div className="px-5 py-3 border-t border-gray-100 flex items-center gap-2">
+        {(socials.facebook || socials.instagram || true) && (
+          <div className="flex items-center gap-2 border-t border-gray-100 px-5 py-3">
             {socials.facebook && (
-              <a href={socials.facebook} target="_blank" rel="noreferrer" aria-label="Facebook"
-                className="w-8 h-8 rounded-md bg-[#1428ae] text-white hover:bg-amber-500 transition-colors flex items-center justify-center">
-                <Facebook size={14} />
+              <a
+                href={socials.facebook}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Facebook"
+                className="flex h-8 w-8 items-center justify-center rounded-md bg-[#1428AE] text-white transition-colors hover:bg-amber-500"
+              >
+                <Image src="/socialIcons/fb.png" alt="Facebook" width={14} height={14} />
               </a>
             )}
-            {socials.twitter && (
-              <a href={socials.twitter} target="_blank" rel="noreferrer" aria-label="Twitter / X"
-                className="w-8 h-8 rounded-md bg-[#1428ae] text-white hover:bg-amber-500 transition-colors flex items-center justify-center">
-                <Twitter size={14} />
+
+            {socials.instagram && (
+              <a
+                href={socials.instagram}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram"
+                className="flex h-8 w-8 items-center justify-center rounded-md bg-[#1428AE] text-white transition-colors hover:bg-amber-500"
+              >
+                <Image src="/socialIcons/insta.png" alt="Instagram" width={14} height={14} />
               </a>
             )}
+
+            <a
+              href={socials.twitter || '#'}
+              target={socials.twitter ? '_blank' : undefined}
+              rel={socials.twitter ? 'noreferrer' : undefined}
+              aria-label="X / Twitter"
+              className="flex h-8 w-8 items-center justify-center rounded-md bg-[#1428AE] text-white transition-colors hover:bg-amber-500"
+            >
+              <Image src="/socialIcons/X.png" alt="X / Twitter" width={14} height={14} />
+            </a>
           </div>
         )}
 
-        {/* List Property CTA */}
-        <div className="px-5 py-4 border-t border-gray-100 shrink-0">
+        <div className="shrink-0 border-t border-gray-100 px-5 py-4">
           <Link
             href="/list-property"
             onClick={() => setOpen(false)}
-            className="block w-full py-2.5 text-center text-sm font-semibold text-white bg-[#1428ae] rounded-lg hover:bg-amber-500 transition-colors"
+            className="block w-full rounded-lg bg-[#1428AE] py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-amber-500"
           >
             List Property
           </Link>
