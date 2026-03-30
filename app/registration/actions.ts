@@ -1,5 +1,6 @@
 'use server'
 
+import { headers } from 'next/headers'
 import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
@@ -124,6 +125,9 @@ async function upsertDeveloperProfile(admin: ReturnType<typeof createAdminSupaba
 }
 
 export async function registerAccountAction(input: RegisterAccountInput): Promise<RegisterAccountResult> {
+  const headersList = await headers()
+  const origin = headersList.get('origin') ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+
   const fname = trimValue(input.fname)
   const lname = trimValue(input.lname)
   const email = trimValue(input.email).toLowerCase()
@@ -174,6 +178,7 @@ export async function registerAccountAction(input: RegisterAccountInput): Promis
     password,
     options: {
       data: metadata,
+      emailRedirectTo: `${origin}/login`,
     },
   })
 
@@ -221,7 +226,7 @@ export async function registerAccountAction(input: RegisterAccountInput): Promis
 
     return {
       success: true,
-      message: 'Account created. Check your email for the verification code.',
+      message: 'Account created. Check your email for the verification link.',
       email,
     }
   } catch (persistError) {
