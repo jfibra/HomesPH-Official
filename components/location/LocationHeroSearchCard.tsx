@@ -48,11 +48,11 @@ const GUIDED_PROMPT_TRANSITION =
 const HERO_SEARCH_ROW_HEIGHT = 'h-[60px] sm:h-[65px]'
 const HERO_SECONDARY_ROW_HEIGHT = 'min-h-[56px] sm:min-h-[58px]'
 const SEARCH_BAR_INNER_CLASS =
-  `relative z-10 grid ${HERO_SEARCH_ROW_HEIGHT} grid-cols-[20px_minmax(0,1fr)_108px] items-center gap-[14px] rounded-[12.5px] bg-white px-[16px] sm:grid-cols-[20px_minmax(0,1fr)_118px] sm:rounded-[14.5px] sm:px-[18px]`
+  `relative z-10 grid ${HERO_SEARCH_ROW_HEIGHT} grid-cols-[20px_minmax(0,1fr)_102px] items-center gap-[12px] rounded-[12.5px] bg-white px-[14px] sm:grid-cols-[20px_minmax(0,1fr)_118px] sm:gap-[14px] sm:rounded-[14.5px] sm:px-[18px]`
 const SEARCH_BAR_ACTION_SLOT_CLASS =
   'flex w-full items-center justify-end gap-[12px] sm:gap-[14px]'
 const HERO_SEARCH_INPUT_CLASS =
-  `min-w-0 w-full border-0 bg-transparent text-[16px] leading-6 tracking-[-0.02em] text-[#173260] placeholder:text-[#5c6d8a] focus:outline-none sm:text-[18px] ${CONTENT_TRANSITION}`
+  `min-w-0 w-full border-0 bg-transparent text-[15px] leading-6 tracking-[-0.02em] text-[#173260] placeholder:text-[#5c6d8a] focus:outline-none sm:text-[18px] ${CONTENT_TRANSITION}`
 const HERO_PRIMARY_ACTION_CLASS =
   `inline-flex h-[44px] shrink-0 items-center justify-center rounded-[12px] bg-[#2140d8] px-[22px] text-[15px] font-semibold tracking-[-0.02em] text-white hover:bg-[#1b35b8] sm:h-[46px] sm:px-[26px] sm:text-[16px] ${CONTENT_TRANSITION}`
 
@@ -379,7 +379,7 @@ export default function LocationHeroSearchCard({
       action="/search"
       method="GET"
       onSubmit={handleSubmit}
-      className="mx-auto min-h-[164px] w-full max-w-[1060px] rounded-[22px] border border-white/82 bg-white px-[14px] py-[14px] text-left text-[#11204b] shadow-[0_22px_50px_rgba(8,23,56,0.2)] sm:min-h-[173px] sm:px-[18px] sm:py-[16px]"
+      className="mx-auto min-h-[164px] w-full max-w-[1060px] rounded-[22px] border border-white/82 bg-white px-[12px] py-[12px] text-left text-[#11204b] shadow-[0_22px_50px_rgba(8,23,56,0.2)] sm:min-h-[173px] sm:px-[18px] sm:py-[16px]"
     >
       <input type="hidden" name="location" value={locationSlug} />
       <input type="hidden" name="mode" value={mode} />
@@ -448,14 +448,14 @@ export default function LocationHeroSearchCard({
               </div>
             </div>
 
-            <div className={`grid ${HERO_SECONDARY_ROW_HEIGHT} grid-cols-1 content-start gap-[12px] min-[560px]:grid-cols-2 lg:grid-cols-4 xl:gap-[10px]`}>
+            <div className={`grid ${HERO_SECONDARY_ROW_HEIGHT} grid-cols-1 content-start gap-[12px] sm:grid-cols-2 lg:grid-cols-4 xl:gap-[10px]`}>
               {aiSuggestions.map((suggestion) => (
                 <button
                   key={suggestion}
                   type="button"
                   onClick={() => setAiQuery(suggestion)}
                   disabled={isAiSubmitting}
-                  className="inline-flex h-[42px] min-w-0 items-center justify-center rounded-[10px] border border-[#1428AE] bg-white px-[22px] text-center text-[15px] font-medium tracking-[-0.02em] text-[#1428AE] transition-[border-color,background-color,color] duration-[200ms] ease-out hover:bg-[#f0f4ff]"
+                  className="inline-flex min-h-[44px] w-full min-w-0 items-center justify-center rounded-[10px] border border-[#1428AE] bg-white px-[16px] py-[10px] text-center text-[14px] font-medium tracking-[-0.02em] text-[#1428AE] transition-[border-color,background-color,color] duration-[200ms] ease-out hover:bg-[#f0f4ff] sm:text-[15px]"
                 >
                   <span className="truncate">{suggestion}</span>
                 </button>
@@ -470,14 +470,14 @@ export default function LocationHeroSearchCard({
                     <button
                       type="button"
                       onClick={() => router.push(buyFallbackUrl)}
-                      className="inline-flex min-h-[40px] items-center justify-center rounded-[10px] bg-white px-[14px] py-[10px] text-[13px] font-semibold text-[#8f2841] transition hover:bg-[#fff0f3] sm:w-auto"
+                      className="inline-flex min-h-[40px] w-full items-center justify-center rounded-[10px] bg-white px-[14px] py-[10px] text-[13px] font-semibold text-[#8f2841] transition hover:bg-[#fff0f3] sm:w-auto"
                     >
                       Use Buy keyword search
                     </button>
                     <button
                       type="button"
                       onClick={() => router.push(rentFallbackUrl)}
-                      className="inline-flex min-h-[40px] items-center justify-center rounded-[10px] border border-[#e7a8b6] bg-white px-[14px] py-[10px] text-[13px] font-semibold text-[#8f2841] transition hover:bg-[#fff0f3] sm:w-auto"
+                      className="inline-flex min-h-[40px] w-full items-center justify-center rounded-[10px] border border-[#e7a8b6] bg-white px-[14px] py-[10px] text-[13px] font-semibold text-[#8f2841] transition hover:bg-[#fff0f3] sm:w-auto"
                     >
                       Use Rent keyword search
                     </button>
@@ -493,14 +493,14 @@ export default function LocationHeroSearchCard({
                   <button
                     type="button"
                     onClick={() => router.push(aiClarification.buyUrl)}
-                    className="inline-flex h-[40px] items-center justify-center rounded-[10px] bg-[#2140d8] px-[18px] text-[14px] font-semibold text-white transition hover:bg-[#1b35b8]"
+                    className="inline-flex min-h-[40px] w-full items-center justify-center rounded-[10px] bg-[#2140d8] px-[18px] py-[10px] text-[14px] font-semibold text-white transition hover:bg-[#1b35b8] sm:w-auto"
                   >
                     Search Buy
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push(aiClarification.rentUrl)}
-                    className="inline-flex h-[40px] items-center justify-center rounded-[10px] border border-[#2140d8] bg-white px-[18px] text-[14px] font-semibold text-[#2140d8] transition hover:bg-[#eef3ff]"
+                    className="inline-flex min-h-[40px] w-full items-center justify-center rounded-[10px] border border-[#2140d8] bg-white px-[18px] py-[10px] text-[14px] font-semibold text-[#2140d8] transition hover:bg-[#eef3ff] sm:w-auto"
                   >
                     Search Rent
                   </button>
