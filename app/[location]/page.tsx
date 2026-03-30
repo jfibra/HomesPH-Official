@@ -7,7 +7,6 @@ import LocationNewsBusinessSection from '../../components/location/LocationNewsB
 import SiteFooter from '../../components/layout/SiteFooter'
 import { MOCK_PROJECTS } from '../../lib/mock-data'
 import { getSiteSettings } from '../../lib/site-settings'
-import { buildNewsHref } from '../../lib/news-navigation'
 
 interface LocationPageParams {
   location?: string
@@ -68,15 +67,6 @@ export default async function LocationPage({ params }: LocationPageProps) {
     { label: 'Projects', href: `/projects?location=${locationSlug}` },
     { label: 'Developers', href: '/developers' },
   ]
-  const footerLinks = [
-    { label: 'Our Company', href: '/our-company' },
-    { label: 'News', href: buildNewsHref(locationName) },
-    { label: 'Mortgage', href: '/mortgage' },
-    { label: 'Legal', href: '/legal' },
-    { label: 'Tourism', href: '/tourism' },
-    { label: 'Restaurant', href: '/restaurant' },
-  ]
-
   return (
     <div className="min-h-screen bg-white">
       <LocationHero
@@ -101,7 +91,7 @@ export default async function LocationPage({ params }: LocationPageProps) {
         contactPhone={settings.contactPhone}
         socialLinks={settings.socialLinks}
         brandName={settings.siteTitle}
-        links={footerLinks}
+        showQuickLinks={false}
       />
     </div>
   )

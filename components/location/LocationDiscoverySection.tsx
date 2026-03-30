@@ -1,12 +1,4 @@
 import Link from 'next/link'
-import type { LucideIcon } from 'lucide-react'
-import {
-  Building2,
-  House,
-  Landmark,
-  LandPlot,
-  LayoutGrid,
-} from 'lucide-react'
 import LocationPopularSearchesCarousel from './LocationPopularSearchesCarousel'
 import {
   LOCATION_EDITORIAL_BREAKOUT_CLASS,
@@ -16,7 +8,7 @@ import {
 } from './location-page-layout'
 
 const DISCOVERY_SECTION_CONTAINER_CLASS =
-  `${LOCATION_PAGE_SHELL_CLASS} pt-[38px] sm:pt-[46px] lg:pt-[56px] pb-[24px] sm:pb-[32px] lg:pb-[38px]`
+  `${LOCATION_PAGE_SHELL_CLASS} pt-[30px] sm:pt-[46px] lg:pt-[56px] pb-[20px] sm:pb-[32px] lg:pb-[38px]`
 const DISCOVERY_SECTION_HEADING_ALIGNMENT_CLASS =
   'w-full'
 
@@ -26,9 +18,10 @@ interface LocationDiscoverySectionProps {
 }
 
 interface PropertyTypeShortcut {
-  icon: LucideIcon
+  imageAlt: string
+  imageSrc: string
   label: string
-  query: string
+  propertyType: string
 }
 
 interface PopularLocationReference {
@@ -41,11 +34,42 @@ interface PopularLocationCardData extends PopularLocationReference {
 }
 
 const PROPERTY_TYPE_SHORTCUTS: PropertyTypeShortcut[] = [
-  { icon: House, label: 'House', query: 'house' },
-  { icon: Building2, label: 'Condo', query: 'condo' },
-  { icon: LayoutGrid, label: 'Townhouse', query: 'townhouse' },
-  { icon: LandPlot, label: 'Land', query: 'land' },
-  { icon: Landmark, label: 'Villa', query: 'villa' },
+  {
+    imageAlt: 'House property type',
+    imageSrc: '/properties/House%202.png',
+    label: 'House',
+    propertyType: 'House & Lot',
+  },
+  {
+    imageAlt: 'Condo property type',
+    imageSrc: '/properties/condo%201.png',
+    label: 'Condo',
+    propertyType: 'Condominium',
+  },
+  {
+    imageAlt: 'Land property type',
+    imageSrc: '/properties/land%201.png',
+    label: 'Land',
+    propertyType: 'Lot Only',
+  },
+  {
+    imageAlt: 'Office property type',
+    imageSrc: '/properties/office%201.png',
+    label: 'Office',
+    propertyType: 'Office Space',
+  },
+  {
+    imageAlt: 'Warehouse property type',
+    imageSrc: '/properties/warehouse%201.png',
+    label: 'Warehouse',
+    propertyType: 'Warehouse',
+  },
+  {
+    imageAlt: 'Building property type',
+    imageSrc: '/properties/building%201.png',
+    label: 'Building',
+    propertyType: 'Commercial Space',
+  },
 ]
 
 const POPULAR_SEARCH_EDITORIAL_ORDER: PopularLocationReference[] = [
@@ -138,7 +162,7 @@ function DiscoverySectionHeading({
   prefix: string
 }) {
   return (
-    <h2 className="text-[28px] font-semibold tracking-[-0.045em] text-[#0f274e] sm:text-[32px]">
+    <h2 className="text-[26px] font-semibold tracking-[-0.045em] text-[#0f274e] sm:text-[32px]">
       <span>{prefix} </span>
       <span className="text-[#2140d8]">{accent}</span>
     </h2>
@@ -147,24 +171,32 @@ function DiscoverySectionHeading({
 
 function PropertyTypeShortcutItem({
   href,
-  icon: Icon,
+  imageAlt,
+  imageSrc,
   label,
 }: {
   href: string
-  icon: LucideIcon
+  imageAlt: string
+  imageSrc: string
   label: string
 }) {
   return (
     <Link
       href={href}
-      className="group flex flex-col items-center gap-[14px] rounded-[24px] px-[10px] py-[8px] text-center outline-none"
+      className="group flex w-[92px] flex-col items-center gap-[10px] text-center outline-none sm:w-[106px] sm:gap-[12px] lg:w-[125px]"
     >
       <span
-        className="flex h-[82px] w-[82px] items-center justify-center rounded-[22px] border border-[#d9e5fb] bg-[linear-gradient(180deg,#fcfdff_0%,#edf4ff_100%)] text-[#2140d8] shadow-[inset_0_1px_0_rgba(255,255,255,0.94),0_14px_30px_rgba(20,40,174,0.08)] transition-[transform,border-color,background-color,color,box-shadow] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-[4px] group-hover:border-[#c7d8fb] group-hover:bg-[#f5f9ff] group-hover:text-[#173260] group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.96),0_18px_34px_rgba(20,40,174,0.12)] group-focus-visible:border-[#cbd9fb] group-focus-visible:ring-2 group-focus-visible:ring-[#2140d8]/20 sm:h-[92px] sm:w-[92px]"
+        className="flex h-[84px] w-[84px] items-center justify-center rounded-[14px] bg-[#f6faff] p-[12px] transition-transform duration-200 group-hover:-translate-y-[3px] group-hover:bg-[#edf5ff] group-focus-visible:ring-2 group-focus-visible:ring-[#2140d8]/20 sm:h-[94px] sm:w-[94px] sm:p-[14px] lg:h-[125px] lg:w-[125px] lg:rounded-[15px] lg:p-[16px]"
       >
-        <Icon size={30} strokeWidth={2} className="sm:size-[34px]" />
+        <img
+          src={imageSrc}
+          alt={imageAlt}
+          className="h-full w-full object-contain transition-transform duration-200 group-hover:scale-[1.03]"
+          loading="lazy"
+          decoding="async"
+        />
       </span>
-      <span className="text-[15px] font-semibold leading-none tracking-[-0.02em] text-[#173260] sm:text-[17px]">
+      <span className="text-[14px] font-medium leading-none tracking-[-0.02em] text-[#173260] sm:text-[16px]">
         {label}
       </span>
     </Link>
@@ -190,19 +222,20 @@ export default function LocationDiscoverySection({
               <DiscoverySectionHeading prefix="Explore by" accent="Property Type" />
             </div>
 
-            <div className="mx-auto mt-[28px] grid max-w-[1180px] grid-cols-2 gap-x-[26px] gap-y-[26px] sm:mt-[32px] sm:grid-cols-3 sm:gap-x-[30px] sm:gap-y-[30px] lg:grid-cols-5 lg:gap-x-[42px] lg:gap-y-[34px]">
+            <div className="mt-[24px] grid w-full max-w-[1040px] grid-cols-2 justify-items-center gap-y-[20px] sm:mt-[32px] sm:grid-cols-3 sm:gap-y-[24px] lg:flex lg:max-w-[1326px] lg:flex-nowrap lg:items-start lg:justify-between lg:gap-y-[0px]">
               {PROPERTY_TYPE_SHORTCUTS.map((item) => (
                 <PropertyTypeShortcutItem
                   key={item.label}
-                  href={`/search?location=${encodeURIComponent(locationSlug)}&q=${encodeURIComponent(item.query)}`}
-                  icon={item.icon}
+                  href={`/search?location=${encodeURIComponent(locationSlug)}&propertyType=${encodeURIComponent(item.propertyType)}`}
+                  imageAlt={item.imageAlt}
+                  imageSrc={item.imageSrc}
                   label={item.label}
                 />
               ))}
             </div>
           </div>
 
-          <div className="mt-[42px] sm:mt-[52px]">
+          <div className="mt-[34px] sm:mt-[52px]">
             <div className={LOCATION_EDITORIAL_BREAKOUT_CLASS}>
               <div className={LOCATION_EDITORIAL_TITLE_SHELL_CLASS}>
                 <div className={DISCOVERY_SECTION_HEADING_ALIGNMENT_CLASS}>
@@ -215,7 +248,7 @@ export default function LocationDiscoverySection({
             </div>
           </div>
 
-          <div className={`mt-[22px] min-w-0 sm:mt-[26px] ${LOCATION_EDITORIAL_BREAKOUT_CLASS}`}>
+          <div className={`mt-[18px] min-w-0 sm:mt-[26px] ${LOCATION_EDITORIAL_BREAKOUT_CLASS}`}>
             <div className={`${LOCATION_EDITORIAL_CONTENT_SHELL_CLASS} min-w-0`}>
               <LocationPopularSearchesCarousel cards={popularLocationCards} />
             </div>

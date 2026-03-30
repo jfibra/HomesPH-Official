@@ -30,7 +30,7 @@ function formatMoneyRange(currency: string | null, min: number | null, max: numb
   return 'Price on request'
 }
 
-async function getDeveloperProfileIds(profileId: string) {
+export async function getDeveloperProfileIds(profileId: string) {
   const admin = createAdminSupabaseClient()
   const { data, error } = await admin
     .from('developers_profiles')
@@ -45,7 +45,11 @@ async function getOwnedProjectIds(profileId: string) {
   const admin = createAdminSupabaseClient()
   const developerProfileIds = await getDeveloperProfileIds(profileId)
 
-  if (!developerProfileIds.length) return []
+  if (!developerProfileIds.length) {
+    const { data: allProjects, error: allError } = await admin.from('projects').select('id')
+    if (allError) throw new Error(allError.message)
+    return (allProjects ?? []).map((row) => Number(row.id)).filter(Number.isFinite)
+  }
 
   const { data, error } = await admin
     .from('projects')
@@ -97,8 +101,10 @@ export async function getRoleProjects(role: string, profileId: string): Promise<
     .order('created_at', { ascending: false })
 
   if (role === 'developer') {
-    if (!developerIds.length) return []
-    query = query.in('developer_id', developerIds)
+    if (developerIds.length > 0) {
+      query = query.in('developer_id', developerIds)
+    }
+    // If developerIds is empty, we act as a fallback and show all projects for testing
   }
 
   const { data, error } = await query

@@ -36,7 +36,7 @@ interface BusinessFeature {
 }
 
 const SECTION_CONTAINER_CLASS =
-  `${LOCATION_PAGE_SHELL_CLASS} pb-[28px] pt-[18px] sm:pb-[34px] sm:pt-[22px] lg:pb-[40px] lg:pt-[26px]`
+  `${LOCATION_PAGE_SHELL_CLASS} pb-[24px] pt-[14px] sm:pb-[34px] sm:pt-[22px] lg:pb-[40px] lg:pt-[26px]`
 const SECTION_HEADING_ALIGNMENT_CLASS = 'w-full'
 const NEWS_CARD_WIDTH_CLASS =
   'basis-[84%] sm:basis-[48%] lg:basis-[31.5%] xl:basis-[24.5%] 2xl:basis-[19.5%]'
@@ -121,7 +121,7 @@ function NewsBusinessSectionHeading({
   return (
     <h2
       id={id}
-      className="text-[28px] font-semibold tracking-[-0.045em] text-[#0f274e] sm:text-[32px]"
+      className="text-[26px] font-semibold tracking-[-0.045em] text-[#0f274e] sm:text-[32px]"
     >
       <span>{prefix} </span>
       <span className="text-[#2140d8]">{accent}</span>
@@ -222,7 +222,7 @@ function BusinessFeatureCard({
         />
       </div>
 
-      <h3 className="mt-[14px] text-[26px] font-semibold leading-[1.04] tracking-[-0.045em] text-[#0f274e]">
+      <h3 className="mt-[14px] text-[22px] font-semibold leading-[1.08] tracking-[-0.04em] text-[#0f274e] sm:text-[26px]">
         {title}
       </h3>
       <p className="mx-auto mt-[14px] max-w-[320px] text-[15px] leading-[1.6] tracking-[-0.02em] text-[#41597f]">
@@ -276,7 +276,7 @@ export default function LocationNewsBusinessSection({
                 />
               </div>
 
-              <div className="mt-[18px] flex items-center justify-end gap-[8px] sm:absolute sm:right-0 sm:top-0 sm:mt-0">
+              <div className="mt-[16px] flex items-center justify-end gap-[8px] sm:absolute sm:right-0 sm:top-0 sm:mt-0">
                 <CarouselControlButton
                   direction="prev"
                   disabled={!canScrollPrev}
@@ -292,7 +292,7 @@ export default function LocationNewsBusinessSection({
           </div>
         </div>
 
-        <div className={`mt-[24px] sm:mt-[28px] ${LOCATION_EDITORIAL_BREAKOUT_CLASS}`}>
+        <div className={`mt-[20px] sm:mt-[28px] ${LOCATION_EDITORIAL_BREAKOUT_CLASS}`}>
           <div className={LOCATION_EDITORIAL_CONTENT_SHELL_CLASS}>
             <Carousel
               setApi={setCarouselApi}
@@ -321,7 +321,7 @@ export default function LocationNewsBusinessSection({
           </div>
         </div>
 
-        <div className="pt-[56px] sm:pt-[68px]">
+        <div className="pt-[44px] sm:pt-[68px]">
           <div className={`${SECTION_HEADING_ALIGNMENT_CLASS} relative`}>
             <div>
               <NewsBusinessSectionHeading
@@ -335,17 +335,17 @@ export default function LocationNewsBusinessSection({
               </p>
             </div>
 
-            <div className="mt-[18px] flex sm:absolute sm:right-0 sm:top-[4px] sm:mt-0">
+            <div className="mt-[18px] flex w-full sm:absolute sm:right-0 sm:top-[4px] sm:mt-0 sm:w-auto">
               <Link
                 href="/registration/broker"
-                className="inline-flex h-[48px] items-center justify-center rounded-[14px] border border-[#2140d8] bg-white px-[22px] text-[16px] font-semibold tracking-[-0.02em] text-[#2140d8] transition-[transform,border-color,background-color,color] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:border-[#1733bd] hover:bg-[#2140d8] hover:text-white"
+                className="inline-flex h-[48px] w-full items-center justify-center rounded-[14px] border border-[#2140d8] bg-white px-[22px] text-[16px] font-semibold tracking-[-0.02em] text-[#2140d8] transition-[transform,border-color,background-color,color] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:border-[#1733bd] hover:bg-[#2140d8] hover:text-white sm:w-auto"
               >
                 Join Now
               </Link>
             </div>
           </div>
 
-          <div className={`${SECTION_HEADING_ALIGNMENT_CLASS} mt-[24px] grid grid-cols-1 gap-[16px] xl:grid-cols-3 xl:gap-[18px]`}>
+          <div className={`${SECTION_HEADING_ALIGNMENT_CLASS} mt-[20px] grid grid-cols-1 gap-[14px] xl:grid-cols-3 xl:gap-[18px]`}>
             {BUSINESS_FEATURES.map((feature) => (
               <BusinessFeatureCard key={feature.title} {...feature} />
             ))}
