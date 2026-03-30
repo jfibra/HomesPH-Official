@@ -107,7 +107,7 @@ export default async function ProjectsPage(
           <p className="text-xs font-bold uppercase tracking-[0.6em] text-amber-400 mb-2">Nationwide Developments</p>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-3">Property Projects</h1>
           <p className="text-blue-200 text-sm max-w-xl">
-            Explore {MOCK_PROJECTS.length} master-planned communities from the Philippines' top developers.
+            Explore {allProjects.length} master-planned communities from the Philippines' top developers.
           </p>
         </div>
       </div>

@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const API_URL = process.env.HOMESPH_NEWS_API_URL!
+const BASE_URL = process.env.HOMESPH_NEWS_BASE_URL!
 const API_KEY = process.env.HOMESPH_NEWS_API_KEY!
+
+// Allowed query params per the external API docs
+const ALLOWED_PARAMS = ['search', 'q', 'category', 'country', 'province', 'city', 'topic', 'per_page', 'limit', 'page'] as const
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const category = searchParams.get('category')
-  const location = searchParams.get('location')
-  const page = searchParams.get('page') ?? '1'
-  const limit = searchParams.get('limit') ?? '20'
 
-  const upstream = new URL(API_URL)
-  upstream.searchParams.set('page', page)
-  upstream.searchParams.set('limit', limit)
-  if (category) upstream.searchParams.set('category', category)
-  if (location) upstream.searchParams.set('location', location)
+  const upstream = new URL(`${BASE_URL}/articles`)
+  for (const key of ALLOWED_PARAMS) {
+    const value = searchParams.get(key)
+    if (value !== null) upstream.searchParams.set(key, value)
+  }
 
   try {
     const res = await fetch(upstream.toString(), {
@@ -22,7 +21,7 @@ export async function GET(request: NextRequest) {
         'Accept': 'application/json',
         'X-Site-Key': API_KEY,
       },
-      next: { revalidate: 300 }, // cache for 5 minutes
+      next: { revalidate: 300 },
     })
 
     if (!res.ok) {

@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
 import { getSiteSettings } from '../lib/site-settings'
 import './globals.css'
+import 'leaflet/dist/leaflet.css'
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });

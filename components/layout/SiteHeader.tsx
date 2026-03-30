@@ -179,7 +179,8 @@ export default function SiteHeader({
               width: '469px',
               height: '20px',
               left: 'calc(50% - 469px / 2 - 0.5px)',
-              top: '85px',
+              top: '50%',
+              transform: 'translateY(-50%)',
               pointerEvents: 'auto'
             }}>
               {resolvedNavItems.map((item) => {
@@ -191,20 +192,17 @@ export default function SiteHeader({
                   'Rent': { left: '138px', width: '37px' },
                   'Projects': { left: '205px', width: '72px' },
                   'News': { left: '307px', width: '44px' },
-                  'Contact Us': { left: '381px', width: '110px' }
+                  'Contact Us': { left: '381px', width: '88px' }
                 }
                 const pos = positions[item.label] || { left: '0px', width: 'auto' }
-                
-                const bgPositions: Record<string, { left: string; width: string }> = {
-                  'Home': { left: '717.5px', width: '63px' }, // Calculated based on centering
-                  'Buy': { left: '786.5px', width: '63px' },   // 787px is left of bg, centered on Buy (803px)
-                  'Rent': { left: '850px', width: '63px' },
-                  'Projects': { left: '921px', width: '90px' },
-                  'News': { left: '1017px', width: '74px' },
-                  'Contact Us': { left: '1095px', width: '110px' }
+                const activeBgWidths: Record<string, string> = {
+                  'Home': '63px',
+                  'Buy': '63px',
+                  'Rent': '63px',
+                  'Projects': '90px',
+                  'News': '74px',
+                  'Contact Us': '110px',
                 }
-                const activeBg = bgPositions[item.label] || { left: '0px', width: '0px' }
-                const containerLeft = 725 // origin of our nav div
                 
                 return (
                   <Link
@@ -234,9 +232,10 @@ export default function SiteHeader({
                       <div style={{
                         position: 'absolute',
                         zIndex: -1,
-                        left: `calc(${activeBg.left}px - ${containerLeft}px)`,
-                        top: '-8px', // 77px - 85px
-                        width: activeBg.width,
+                        left: '50%',
+                        top: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: activeBgWidths[item.label] ?? '63px',
                         height: '36px',
                         backgroundColor: '#FDF8EF',
                         borderRadius: '8px',
@@ -263,7 +262,7 @@ export default function SiteHeader({
               })}
             </div>
 
-            <div className="hidden md:flex items-center gap-2 lg:gap-6 shrink-0">
+            <div className="hidden md:flex items-center gap-2 lg:gap-6 shrink-0 ml-auto">
               <button className="text-slate-600 hover:text-[#0c1f4a] transition-colors p-2 rounded-lg hover:bg-slate-100">
                 <Search size={22} />
               </button>
