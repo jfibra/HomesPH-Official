@@ -1,3 +1,9 @@
+-- Full schema bootstrap/reference file.
+-- Do not run this file on an existing populated database because it contains
+-- destructive DROP TABLE statements further below.
+-- For the registration approval rollout on an existing environment, run only
+-- registration_approval_migration.sql.
+
 CREATE TABLE public.user_profiles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -10,9 +16,14 @@ CREATE TABLE public.user_profiles (
   profile_image_url TEXT,
   prc_number VARCHAR(50),
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  account_status TEXT NOT NULL DEFAULT 'approved',
+  reviewed_at TIMESTAMPTZ,
+  reviewed_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  rejection_reason TEXT,
   role TEXT DEFAULT 'agent',
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
+  CONSTRAINT user_profiles_account_status_check CHECK (account_status IN ('pending_approval', 'approved', 'rejected', 'manually_disabled')),
   CONSTRAINT user_profiles_user_id_key UNIQUE (user_id)
 );
 
@@ -20,6 +31,22 @@ ALTER TABLE public.user_profiles
 ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;
 ALTER TABLE public.user_profiles
 ADD COLUMN IF NOT EXISTS prc_number VARCHAR(50);
+ALTER TABLE public.user_profiles
+ADD COLUMN IF NOT EXISTS account_status TEXT NOT NULL DEFAULT 'approved';
+ALTER TABLE public.user_profiles
+ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ;
+ALTER TABLE public.user_profiles
+ADD COLUMN IF NOT EXISTS reviewed_by uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.user_profiles
+ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
+ALTER TABLE public.user_profiles
+DROP CONSTRAINT IF EXISTS user_profiles_account_status_check;
+ALTER TABLE public.user_profiles
+ADD CONSTRAINT user_profiles_account_status_check CHECK (account_status IN ('pending_approval', 'approved', 'rejected', 'manually_disabled'));
+
+UPDATE public.user_profiles
+SET account_status = CASE WHEN is_active THEN 'approved' ELSE 'manually_disabled' END
+WHERE account_status IS NULL;
 
 CREATE OR REPLACE FUNCTION public.handle_new_user_profile()
 RETURNS trigger AS $$

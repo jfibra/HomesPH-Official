@@ -7,7 +7,6 @@ import Link from 'next/link'
 
 interface Props {
   email: string
-  onVerified?: () => void
 }
 
 export default function OtpVerifyStep({ email }: Props) {
@@ -50,6 +49,9 @@ export default function OtpVerifyStep({ email }: Props) {
             We sent a verification link to
           </p>
           <p className="text-sm font-bold text-[#0c1f4a] mt-1">{email}</p>
+          <p className="text-sm text-gray-500 mt-3 leading-relaxed">
+            After you verify your email, your account will stay pending until an administrator approves your registration.
+          </p>
         </div>
 
         {error && (
@@ -67,7 +69,7 @@ export default function OtpVerifyStep({ email }: Props) {
         )}
 
         <Link
-          href="/login"
+          href="/login?notice=approval-pending"
           className="flex items-center justify-center w-full py-3.5 rounded-xl bg-gradient-to-r from-[#0c1f4a] to-[#163880] text-white text-[15px] font-bold tracking-wide hover:from-[#0f2860] hover:to-[#1a44a0] active:scale-[0.99] hover:scale-[1.005] transition-all duration-150 shadow-[0_4px_20px_rgba(12,31,74,0.28)]"
         >
           Return to Login

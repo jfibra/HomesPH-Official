@@ -51,9 +51,10 @@
   background: conic-gradient(
     from var(--ai-search-border-angle),
     #1428ae,
-    #3b5fea,
-    #1428ae,
-    #3b5fea,
+    #3b5fea 18%,
+    #f4aa1d 42%,
+    #ffd86b 64%,
+    #3b5fea 86%,
     #1428ae
   );
   animation: ai-search-border-rotate 3s linear infinite;

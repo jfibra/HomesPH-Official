@@ -1,7 +1,8 @@
 import 'server-only'
 
+import { canAccessDashboardAccount } from '@/lib/account-status'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { getUserProfileWithIsActiveFallback } from '@/lib/auth/profile-query'
+import { getUserProfileWithAccountStateFallback } from '@/lib/auth/profile-query'
 import { getRoleRouteSegment } from '@/lib/auth/roles'
 import type { DashboardUser } from '@/lib/auth/types'
 import { getProfileCompletionStatus } from '@/lib/profile-completion'
@@ -15,6 +16,7 @@ interface UserProfileRow {
   profile_image_url: string | null
   role: string | null
   birthday: string | null
+  account_status: string | null
   is_active: boolean | null
 }
 
@@ -30,15 +32,15 @@ export async function getCurrentDashboardUser(): Promise<DashboardUser | null> {
     return null
   }
 
-  const { data: profile } = await getUserProfileWithIsActiveFallback<Omit<UserProfileRow, 'is_active'>>({
+  const { data: profile } = await getUserProfileWithAccountStateFallback<Omit<UserProfileRow, 'is_active' | 'account_status'>>({
     supabase,
     userId: user.id,
-    selectWithIsActive: 'id,fname,lname,full_name,profile_image_url,role,birthday,is_active',
-    selectWithoutIsActive: 'id,fname,lname,full_name,profile_image_url,role,birthday',
+    selectWithAccountState: 'id,fname,lname,full_name,profile_image_url,role,birthday,is_active,account_status',
+    selectWithoutAccountState: 'id,fname,lname,full_name,profile_image_url,role,birthday,is_active',
   })
 
   const roleSegment = getRoleRouteSegment(profile?.role)
-  if (!profile || !roleSegment || profile.is_active === false) {
+  if (!profile || !roleSegment || !canAccessDashboardAccount(profile)) {
     return null
   }
 

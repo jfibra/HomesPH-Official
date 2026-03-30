@@ -1,3 +1,5 @@
+import type { AccountStatus } from '@/lib/account-status'
+
 export interface UserRoleRecord {
   id: number
   role_name: string
@@ -16,6 +18,10 @@ export interface ManagedUserRecord {
   profile_image_url: string | null
   role: string | null
   is_active: boolean | null
+  account_status: AccountStatus
+  reviewed_at: string | null
+  reviewed_by: string | null
+  rejection_reason: string | null
   created_at: string | null
   updated_at: string | null
   email: string

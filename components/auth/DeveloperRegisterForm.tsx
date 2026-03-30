@@ -30,7 +30,6 @@ export default function DeveloperRegisterForm() {
   const [loading, setLoading] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const [otpEmail, setOtpEmail] = useState<string | null>(null)
-  const [verified, setVerified] = useState(false)
 
   const {
     register,
@@ -61,30 +60,8 @@ export default function DeveloperRegisterForm() {
     }
   }
 
-  if (verified) {
-    return (
-      <div className="w-full max-w-[540px]">
-        <div className="bg-white rounded-xl border-t-[3px] border-emerald-500 shadow-[0_4px_6px_rgba(12,31,74,0.04),0_10px_40px_rgba(12,31,74,0.10)] ring-1 ring-[#0c1f4a]/[0.05] px-8 py-10 text-center">
-          <div className="w-16 h-16 rounded-xl bg-emerald-50 flex items-center justify-center mx-auto mb-5">
-            <ShieldCheck size={28} className="text-emerald-500" />
-          </div>
-          <h2 className="text-2xl font-black text-[#0c1f4a] mb-2">Email Verified!</h2>
-          <p className="text-gray-500 text-sm leading-relaxed mb-6">
-            Your developer account has been created. Our team will review your company profile shortly.
-          </p>
-          <Link
-            href="/login"
-            className="inline-block px-8 py-3 rounded-xl bg-gradient-to-r from-[#0c1f4a] to-[#163880] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all"
-          >
-            Go to Login
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
   if (otpEmail) {
-    return <OtpVerifyStep email={otpEmail} onVerified={() => setVerified(true)} />
+    return <OtpVerifyStep email={otpEmail} />
   }
 
   return (

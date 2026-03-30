@@ -47,7 +47,7 @@ const MODE_PANEL_TRANSITION =
   'motion-reduce:animate-none motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 duration-300'
 
 const SEARCH_BAR_SHELL_CLASS =
-  'relative isolate overflow-hidden rounded-[14px] p-[1.5px] shadow-[0_10px_40px_rgba(0,0,0,0.03)] sm:rounded-[16px]'
+  'relative isolate overflow-hidden rounded-[14px] p-[2px] shadow-[0_10px_40px_rgba(0,0,0,0.03)] sm:rounded-[16px]'
 
 const GUIDED_PROMPT_TRANSITION =
   'transition-[opacity,transform,width,margin] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)]'
@@ -115,33 +115,6 @@ const AI_PROMPT_SUGGESTIONS_BY_SLUG: Record<string, string[]> = {
   ],
 }
 
-const AI_GUIDED_PROMPTS_BY_SLUG: Record<string, string[]> = {
-  cebu: [
-    'Apartment in Cebu',
-    'Studio Apartment in Cebu',
-    'Apartment Near IT Park',
-    'Studio Condo in Mandaue',
-  ],
-  bgc: [
-    'Condo in BGC',
-    'Apartment Near Uptown',
-    'Studio Near High Street',
-    '2 Bedroom in Taguig',
-  ],
-  makati: [
-    'Condo in Makati',
-    'Apartment Near Ayala Avenue',
-    'Studio in Legazpi Village',
-    '1 Bedroom Near Salcedo',
-  ],
-  manila: [
-    'Apartment in Manila',
-    'Studio Near Taft',
-    'Condo in Ermita',
-    'Affordable Condo in Manila',
-  ],
-}
-
 function buildAiSuggestions(
   locationName: string,
   locationSlug: string,
@@ -163,29 +136,6 @@ function buildAiSuggestions(
     `1 Bedroom in ${fallbackLabel}`,
   ]
 }
-
-function buildAiGuidedPrompts(
-  locationName: string,
-  locationSlug: string,
-  quickLinks: HeroQuickLink[]
-) {
-  const predefinedPrompts = AI_GUIDED_PROMPTS_BY_SLUG[locationSlug]
-
-  if (predefinedPrompts) {
-    return predefinedPrompts
-  }
-
-  const fallbackLabel = locationName.trim()
-  const quickLinkLabels = quickLinks.map((item) => item.label.toLowerCase())
-
-  return [
-    `Apartment in ${fallbackLabel}`,
-    `Studio Apartment in ${fallbackLabel}`,
-    `${quickLinkLabels.includes('projects') ? 'Projects' : 'Homes'} in ${fallbackLabel}`,
-    `1 Bedroom in ${fallbackLabel}`,
-  ]
-}
-
 function AIActionGlyph() {
   return (
     <span aria-hidden className="flex items-end gap-[2px]">
@@ -256,6 +206,7 @@ export default function LocationHeroSearchCard({
   const [manualListingType, setManualListingType] = useState<'sale' | 'rent'>('sale')
   const [aiQuery, setAiQuery] = useState('')
   const [fetchedAiSuggestions, setFetchedAiSuggestions] = useState<string[]>([])
+  const [lastAiSuggestionsQuery, setLastAiSuggestionsQuery] = useState('')
   const [aiSuggestionsError, setAiSuggestionsError] = useState<string | null>(null)
   const [isAiSuggestionsLoading, setIsAiSuggestionsLoading] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
@@ -268,7 +219,6 @@ export default function LocationHeroSearchCard({
   const isAiMode = mode === 'ai'
   const debouncedAiQuery = useDebounce(aiQuery, 500)
   const fallbackAiSuggestions = buildAiSuggestions(locationName, locationSlug, quickLinks)
-  const aiGuidedPrompts = buildAiGuidedPrompts(locationName, locationSlug, quickLinks)
   const filteredFallbackAiSuggestions = fallbackAiSuggestions.filter((suggestion) => {
     const normalizedQuery = aiQuery.trim().toLowerCase()
     return normalizedQuery.length === 0 || suggestion.toLowerCase().includes(normalizedQuery)
@@ -278,7 +228,14 @@ export default function LocationHeroSearchCard({
       ? fetchedAiSuggestions
       : filteredFallbackAiSuggestions
   ).slice(0, AI_SUGGESTION_COUNT)
-  const activeGuidedPrompt = aiGuidedPrompts[activePromptIndex] ?? aiGuidedPrompts[0] ?? ''
+  const guidedPromptSuggestions = (
+    lastAiSuggestionsQuery === '' && fetchedAiSuggestions.length > 0
+      ? fetchedAiSuggestions
+      : fallbackAiSuggestions
+  ).slice(0, AI_SUGGESTION_COUNT)
+  const guidedPromptSourceKey = guidedPromptSuggestions.join('|')
+  const activeGuidedPrompt =
+    guidedPromptSuggestions[activePromptIndex] ?? guidedPromptSuggestions[0] ?? ''
   const animatedGuidedPrompt = `"${activeGuidedPrompt}"`
   const visibleGuidedPrompt = animatedGuidedPrompt.slice(0, typedPromptLength)
   const showGuidedPrompt = isAiMode && aiQuery.length === 0
@@ -291,7 +248,7 @@ export default function LocationHeroSearchCard({
     setActivePromptIndex(0)
     setTypedPromptLength(0)
     setIsDeletingPrompt(false)
-  }, [locationSlug])
+  }, [guidedPromptSourceKey, locationSlug])
 
   useEffect(() => {
     if (!showGuidedPrompt) {
@@ -324,14 +281,14 @@ export default function LocationHeroSearchCard({
     } else {
       timeoutId = window.setTimeout(() => {
         setIsDeletingPrompt(false)
-        setActivePromptIndex((currentIndex) => (currentIndex + 1) % aiGuidedPrompts.length)
+        setActivePromptIndex((currentIndex) => (currentIndex + 1) % guidedPromptSuggestions.length)
       }, 220)
     }
 
     return () => {
       window.clearTimeout(timeoutId)
     }
-  }, [aiGuidedPrompts.length, animatedGuidedPrompt, isDeletingPrompt, showGuidedPrompt, typedPromptLength])
+  }, [animatedGuidedPrompt, guidedPromptSuggestions.length, isDeletingPrompt, showGuidedPrompt, typedPromptLength])
 
   useEffect(() => {
     setAiError(null)
@@ -341,12 +298,14 @@ export default function LocationHeroSearchCard({
   useEffect(() => {
     if (!isAiMode) {
       setFetchedAiSuggestions([])
+      setLastAiSuggestionsQuery('')
       setAiSuggestionsError(null)
       setIsAiSuggestionsLoading(false)
       return
     }
 
     setFetchedAiSuggestions([])
+    setLastAiSuggestionsQuery('')
     setAiSuggestionsError(null)
   }, [isAiMode, locationSlug])
 
@@ -386,6 +345,7 @@ export default function LocationHeroSearchCard({
         }
 
         setFetchedAiSuggestions(payload.suggestions)
+        setLastAiSuggestionsQuery(debouncedAiQuery.trim())
         setAiSuggestionsError(null)
       } catch (error) {
         if (isCancelled || latestAiSuggestionRequestRef.current !== requestId) {
