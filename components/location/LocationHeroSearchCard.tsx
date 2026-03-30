@@ -1,9 +1,10 @@
 'use client'
 
-import { type FormEvent, useEffect, useState } from 'react'
+import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronDown, Loader2, Mic, Search } from 'lucide-react'
 import type { HeroMode } from './LocationHeroControls'
+import { useDebounce } from '@/hooks/use-debounce'
 
 interface HeroQuickLink {
   label: string
@@ -30,6 +31,12 @@ interface AiParseResponse {
   clarification?: AiClarificationState | null
 }
 
+interface AiSuggestionsResponse {
+  ok: boolean
+  error?: string
+  suggestions?: string[]
+}
+
 const CONTENT_TRANSITION =
   'transition-[background-color,border-color,color,opacity,transform] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)]'
 
@@ -47,6 +54,7 @@ const GUIDED_PROMPT_TRANSITION =
 
 const HERO_SEARCH_ROW_HEIGHT = 'h-[60px] sm:h-[65px]'
 const HERO_SECONDARY_ROW_HEIGHT = 'min-h-[56px] sm:min-h-[58px]'
+const AI_SUGGESTION_COUNT = 4
 const SEARCH_BAR_INNER_CLASS =
   `relative z-10 grid ${HERO_SEARCH_ROW_HEIGHT} grid-cols-[20px_minmax(0,1fr)_102px] items-center gap-[12px] rounded-[12.5px] bg-white px-[14px] sm:grid-cols-[20px_minmax(0,1fr)_118px] sm:gap-[14px] sm:rounded-[14.5px] sm:px-[18px]`
 const SEARCH_BAR_ACTION_SLOT_CLASS =
@@ -247,15 +255,29 @@ export default function LocationHeroSearchCard({
   const router = useRouter()
   const [manualListingType, setManualListingType] = useState<'sale' | 'rent'>('sale')
   const [aiQuery, setAiQuery] = useState('')
+  const [fetchedAiSuggestions, setFetchedAiSuggestions] = useState<string[]>([])
+  const [aiSuggestionsError, setAiSuggestionsError] = useState<string | null>(null)
+  const [isAiSuggestionsLoading, setIsAiSuggestionsLoading] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
   const [aiClarification, setAiClarification] = useState<AiClarificationState | null>(null)
   const [isAiSubmitting, setIsAiSubmitting] = useState(false)
   const [activePromptIndex, setActivePromptIndex] = useState(0)
   const [typedPromptLength, setTypedPromptLength] = useState(0)
   const [isDeletingPrompt, setIsDeletingPrompt] = useState(false)
+  const latestAiSuggestionRequestRef = useRef(0)
   const isAiMode = mode === 'ai'
-  const aiSuggestions = buildAiSuggestions(locationName, locationSlug, quickLinks)
+  const debouncedAiQuery = useDebounce(aiQuery, 500)
+  const fallbackAiSuggestions = buildAiSuggestions(locationName, locationSlug, quickLinks)
   const aiGuidedPrompts = buildAiGuidedPrompts(locationName, locationSlug, quickLinks)
+  const filteredFallbackAiSuggestions = fallbackAiSuggestions.filter((suggestion) => {
+    const normalizedQuery = aiQuery.trim().toLowerCase()
+    return normalizedQuery.length === 0 || suggestion.toLowerCase().includes(normalizedQuery)
+  })
+  const displayedAiSuggestions = (
+    (isAiSuggestionsLoading || aiSuggestionsError === null) && fetchedAiSuggestions.length > 0
+      ? fetchedAiSuggestions
+      : filteredFallbackAiSuggestions
+  ).slice(0, AI_SUGGESTION_COUNT)
   const activeGuidedPrompt = aiGuidedPrompts[activePromptIndex] ?? aiGuidedPrompts[0] ?? ''
   const animatedGuidedPrompt = `"${activeGuidedPrompt}"`
   const visibleGuidedPrompt = animatedGuidedPrompt.slice(0, typedPromptLength)
@@ -316,14 +338,81 @@ export default function LocationHeroSearchCard({
     setAiClarification(null)
   }, [aiQuery, mode])
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    if (!isAiMode) {
+      setFetchedAiSuggestions([])
+      setAiSuggestionsError(null)
+      setIsAiSuggestionsLoading(false)
+      return
+    }
+
+    setFetchedAiSuggestions([])
+    setAiSuggestionsError(null)
+  }, [isAiMode, locationSlug])
+
+  useEffect(() => {
     if (!isAiMode) {
       return
     }
 
-    event.preventDefault()
+    let isCancelled = false
+    const requestId = latestAiSuggestionRequestRef.current + 1
+    latestAiSuggestionRequestRef.current = requestId
+    setIsAiSuggestionsLoading(true)
+    setAiSuggestionsError(null)
 
-    const trimmedQuery = aiQuery.trim()
+    async function fetchAiSuggestions() {
+      try {
+        const response = await fetch('/api/ai/suggest-queries', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: debouncedAiQuery.trim() || null,
+            locationSlug,
+            count: AI_SUGGESTION_COUNT,
+          }),
+        })
+
+        const payload = (await response.json()) as AiSuggestionsResponse
+
+        if (isCancelled || latestAiSuggestionRequestRef.current !== requestId) {
+          return
+        }
+
+        if (!response.ok || !payload.ok || !payload.suggestions || payload.suggestions.length === 0) {
+          throw new Error(payload.error ?? 'AI suggestions are unavailable right now.')
+        }
+
+        setFetchedAiSuggestions(payload.suggestions)
+        setAiSuggestionsError(null)
+      } catch (error) {
+        if (isCancelled || latestAiSuggestionRequestRef.current !== requestId) {
+          return
+        }
+
+        setAiSuggestionsError(
+          error instanceof Error ? error.message : 'AI suggestions are unavailable right now.'
+        )
+      } finally {
+        if (isCancelled || latestAiSuggestionRequestRef.current !== requestId) {
+          return
+        }
+
+        setIsAiSuggestionsLoading(false)
+      }
+    }
+
+    void fetchAiSuggestions()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [debouncedAiQuery, isAiMode, locationSlug])
+
+  async function submitAiQuery(query: string) {
+    const trimmedQuery = query.trim()
     if (!trimmedQuery) {
       setAiError('Enter a property search to use AI Mode.')
       setAiClarification(null)
@@ -374,12 +463,26 @@ export default function LocationHeroSearchCard({
     }
   }
 
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    if (!isAiMode) {
+      return
+    }
+
+    event.preventDefault()
+    await submitAiQuery(aiQuery)
+  }
+
+  function handleSuggestionClick(suggestion: string) {
+    setAiQuery(suggestion)
+    submitAiQuery(suggestion)
+  }
+
   return (
     <form
       action="/search"
       method="GET"
       onSubmit={handleSubmit}
-      className="mx-auto min-h-[164px] w-full max-w-[1060px] rounded-[22px] border border-white/82 bg-white px-[12px] py-[12px] text-left text-[#11204b] shadow-[0_22px_50px_rgba(8,23,56,0.2)] sm:min-h-[173px] sm:px-[18px] sm:py-[16px]"
+      className="mx-auto min-h-[164px] w-full max-w-[1060px] rounded-[22px] border border-white bg-white px-[12px] py-[12px] text-left text-[#11204b] shadow-[0_22px_50px_rgba(8,23,56,0.2)] sm:min-h-[173px] sm:px-[18px] sm:py-[16px]"
     >
       <input type="hidden" name="location" value={locationSlug} />
       <input type="hidden" name="mode" value={mode} />
@@ -448,12 +551,15 @@ export default function LocationHeroSearchCard({
               </div>
             </div>
 
-            <div className={`grid ${HERO_SECONDARY_ROW_HEIGHT} grid-cols-1 content-start gap-[12px] sm:grid-cols-2 lg:grid-cols-4 xl:gap-[10px]`}>
-              {aiSuggestions.map((suggestion) => (
+            <div
+              aria-busy={isAiSuggestionsLoading}
+              className={`grid ${HERO_SECONDARY_ROW_HEIGHT} grid-cols-1 content-start gap-[12px] sm:grid-cols-2 lg:grid-cols-4 xl:gap-[10px] ${isAiSuggestionsLoading ? 'opacity-90' : ''}`}
+            >
+              {displayedAiSuggestions.map((suggestion) => (
                 <button
                   key={suggestion}
                   type="button"
-                  onClick={() => setAiQuery(suggestion)}
+                  onClick={() => handleSuggestionClick(suggestion)}
                   disabled={isAiSubmitting}
                   className="inline-flex min-h-[44px] w-full min-w-0 items-center justify-center rounded-[10px] border border-[#1428AE] bg-white px-[16px] py-[10px] text-center text-[14px] font-medium tracking-[-0.02em] text-[#1428AE] transition-[border-color,background-color,color] duration-[200ms] ease-out hover:bg-[#f0f4ff] sm:text-[15px]"
                 >

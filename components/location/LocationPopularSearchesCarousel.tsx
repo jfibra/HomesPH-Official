@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { Outfit } from 'next/font/google'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { LocationCard, type Location as HomeLocation } from '@/components/home/LocationCard'
 import {
   Carousel,
   CarouselContent,
@@ -242,21 +241,97 @@ function PopularLocationPanel({
 }: {
   panel: PopularLocationPanel
 }) {
-  if (!panel.cards.length) return null
+  const [
+    leftFeaturedCard,
+    leftTopCard,
+    leftTopSecondaryCard,
+    leftBottomCard,
+    leftBottomSecondaryCard,
+    rightFeaturedCard,
+    rightTopCard,
+    rightTopSecondaryCard,
+    rightBottomCard,
+    rightBottomSecondaryCard,
+  ] = panel.cards
+
+  if (!leftFeaturedCard) return null
+
+  const featuredCardClassName =
+    'h-[310px] sm:col-span-2 sm:h-[352px] xl:col-span-1 xl:row-span-2 xl:h-[316px] 2xl:h-[313px] 2xl:w-[207px]'
+  const supportingCardClassName =
+    'h-[174px] sm:h-[188px] xl:h-[149px] 2xl:h-[149px] 2xl:w-[244px]'
 
   return (
-    <div className="grid min-w-0 grid-cols-2 justify-items-center gap-x-[16px] gap-y-[20px] sm:grid-cols-3 sm:gap-x-[20px] sm:gap-y-[24px] lg:grid-cols-4 xl:w-[1345px] xl:grid-cols-[repeat(5,248.7px)] xl:justify-between xl:gap-x-[0px] xl:gap-y-[24.54px]">
-      {panel.cards.map((card, index) => {
-        const location: HomeLocation = {
-          description: null,
-          id: index + 1,
-          logo_url: null,
-          slug: card.slug,
-          title: card.title,
-        }
+    <div className="grid min-w-0 gap-[18px] sm:grid-cols-2 xl:grid-cols-6 xl:grid-rows-2 2xl:w-[1465px] 2xl:grid-cols-[207px_244px_244px_207px_244px_244px] 2xl:gap-[15px]">
+      <PopularLocationEditorialCard
+        card={leftFeaturedCard}
+        featured
+        className={`${featuredCardClassName} xl:col-start-1 xl:row-start-1`}
+      />
 
-        return <LocationCard key={card.slug} location={location} />
-      })}
+      {leftTopCard ? (
+        <PopularLocationEditorialCard
+          card={leftTopCard}
+          className={`${supportingCardClassName} xl:col-start-2 xl:row-start-1`}
+        />
+      ) : null}
+
+      {leftTopSecondaryCard ? (
+        <PopularLocationEditorialCard
+          card={leftTopSecondaryCard}
+          className={`${supportingCardClassName} xl:col-start-3 xl:row-start-1`}
+        />
+      ) : null}
+
+      {leftBottomCard ? (
+        <PopularLocationEditorialCard
+          card={leftBottomCard}
+          className={`${supportingCardClassName} xl:col-start-2 xl:row-start-2`}
+        />
+      ) : null}
+
+      {leftBottomSecondaryCard ? (
+        <PopularLocationEditorialCard
+          card={leftBottomSecondaryCard}
+          className={`${supportingCardClassName} xl:col-start-3 xl:row-start-2`}
+        />
+      ) : null}
+
+      {rightFeaturedCard ? (
+        <PopularLocationEditorialCard
+          card={rightFeaturedCard}
+          featured
+          className={`${featuredCardClassName} xl:col-start-4 xl:row-start-1`}
+        />
+      ) : null}
+
+      {rightTopCard ? (
+        <PopularLocationEditorialCard
+          card={rightTopCard}
+          className={`${supportingCardClassName} xl:col-start-5 xl:row-start-1`}
+        />
+      ) : null}
+
+      {rightTopSecondaryCard ? (
+        <PopularLocationEditorialCard
+          card={rightTopSecondaryCard}
+          className={`${supportingCardClassName} xl:col-start-6 xl:row-start-1`}
+        />
+      ) : null}
+
+      {rightBottomCard ? (
+        <PopularLocationEditorialCard
+          card={rightBottomCard}
+          className={`${supportingCardClassName} xl:col-start-5 xl:row-start-2`}
+        />
+      ) : null}
+
+      {rightBottomSecondaryCard ? (
+        <PopularLocationEditorialCard
+          card={rightBottomSecondaryCard}
+          className={`${supportingCardClassName} xl:col-start-6 xl:row-start-2`}
+        />
+      ) : null}
     </div>
   )
 }

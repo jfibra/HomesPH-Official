@@ -52,12 +52,14 @@ export default function LocationHero({
   ]
 
   return (
-    <section className={`${outfit.className} relative isolate w-full overflow-hidden bg-[#1c4f89] text-white`}>
-      <img
-        src={resolvedHeroImage}
-        alt={`${locationName} homes showcase`}
-        className="absolute inset-0 h-full w-full scale-[1.02] object-cover object-center"
-      />
+    <section className={`${outfit.className} relative isolate w-full bg-[#1c4f89] text-white`}>
+      <div className="absolute inset-0 overflow-hidden">
+        <img
+          src={resolvedHeroImage}
+          alt={`${locationName} homes showcase`}
+          className="h-full w-full scale-[1.02] object-cover object-center"
+        />
+      </div>
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(20,73,124,0.58)_0%,rgba(35,98,153,0.18)_34%,rgba(8,24,49,0.34)_100%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(196,228,255,0.24)_0%,rgba(20,73,124,0)_42%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(9,29,55,0.12)_0%,rgba(9,29,55,0.03)_28%,rgba(9,29,55,0.05)_58%,rgba(9,29,55,0.12)_100%)]" />
