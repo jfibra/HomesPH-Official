@@ -8,8 +8,8 @@ import { MOCK_NEWS } from '@/lib/mock-data'
 import AdBanner from '@/components/ui/AdBanner'
 import { formatLocationForNews } from '@/lib/news-navigation'
 import { RealEstateNewsSection } from '@/components/news/RealEstateNewsSection'
-import { OFWNewsSection } from '@/components/news/OFWNewsSection'
-import { PhilippineTourismSection } from '@/components/news/PhilippineTourismSection'
+import { LocationNewsGrid } from '@/components/news/LocationNewsGrid'
+import { CityNavigation } from '@/components/news/CityNavigation'
 
 interface Article {
   id: number | string
@@ -554,7 +554,7 @@ export default async function NewsPage({
       </div>
 
       <main className="w-full">
-        <div className="mx-auto w-full px-[230px] py-8">
+        <div className="mx-auto w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-[120px] 2xl:px-[230px] py-8">
         {allArticles.length === 0 ? (
           <div className="py-28 text-center text-gray-400">
             <p className="text-2xl font-extrabold text-gray-700">No articles found</p>
@@ -563,8 +563,8 @@ export default async function NewsPage({
         ) : (
           <>
             {/* MAIN 3-COLUMN GRID */}
-            <div className="flex justify-center">
-              <div className="grid gap-8 grid-cols-[295px_620px_295px]">
+            <div className="flex justify-center w-full overflow-x-auto">
+              <div className="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-[295px_620px_295px] lg:grid-cols-[295px_620px_295px] min-w-full md:min-w-max">
               <LeftColumn leadStory={leadStory} localLatest={localLatest} />
               <MiddleColumn leadStory={leadStory} leadRest={leadRest} />
               <RightColumn leadRest={leadRest} />
@@ -578,15 +578,38 @@ export default async function NewsPage({
         )}
         </div>
 
-        {/* Carousel Sections using new components - FULL WIDTH */}
-        <div className="mt-6 space-y-[40px] -mx-[230px] px-[230px]">
+        {/* Carousel Sections using new components */}
+        <div className="mt-6 space-y-[40px]">
+          {/* Real Estate Latest News - Global Carousel */}
           <RealEstateNewsSection articles={allArticles} />
-          <OFWNewsSection articles={allArticles} />
-          <PhilippineTourismSection />
+          
+          {/* City Navigation */}
+          <CityNavigation currentLocation={effectiveFocusedLocation || ''} />
+
+          {/* Location-specific Real Estate Grid */}
+          {effectiveFocusedLocation && (
+            <LocationNewsGrid
+              key={effectiveFocusedLocation}
+              articles={allArticles.filter(
+                a =>
+                  (a.category &&
+                    [
+                      'Market Trends',
+                      'New Developments',
+                      'Regional Update',
+                      'Investment',
+                      'Sustainability',
+                    ].includes(a.category)) &&
+                  (a.location?.toLowerCase().includes(effectiveFocusedLocation.toLowerCase()) ||
+                    a.city?.toLowerCase().includes(effectiveFocusedLocation.toLowerCase()))
+              ) as unknown as any[]}
+              title={`${effectiveFocusedLocation} Real Estate Latest`}
+            />
+          )}
         </div>
 
         {/* Continue with more content inside main padding */}
-        <div className="mx-auto w-full px-[230px]">
+        <div className="mx-auto w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-[120px] 2xl:px-[230px]">
           {allArticles.length > 0 && (
             <>
             {/* MORE NEWS GRID */}

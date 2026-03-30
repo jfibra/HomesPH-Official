@@ -263,16 +263,16 @@ export default function SiteHeader({
               })}
             </div>
 
-            <div className="hidden md:flex items-center gap-6 shrink-0">
-              <button className="text-slate-600 hover:text-[#0c1f4a] transition-colors">
-                <Search size={24} />
+            <div className="hidden md:flex items-center gap-2 lg:gap-6 shrink-0">
+              <button className="text-slate-600 hover:text-[#0c1f4a] transition-colors p-2 rounded-lg hover:bg-slate-100">
+                <Search size={22} />
               </button>
-              <Link href="/login" className="px-6 py-3 text-base font-bold text-[#0c1f4a] rounded-xl border-2 border-[#0c1f4a]/10 hover:border-[#0c1f4a]/30 hover:bg-slate-50 transition-all duration-150">
+              <Link href="/login" className="px-3 md:px-4 lg:px-6 py-2.5 md:py-2 lg:py-3 text-xs md:text-sm lg:text-base font-bold text-[#0c1f4a] rounded-lg md:rounded-xl border border-[#0c1f4a]/10 hover:border-[#0c1f4a]/30 hover:bg-slate-50 transition-all duration-150 whitespace-nowrap">
                 Login
               </Link>
               <button
                 onClick={() => setShowRegisterModal(true)}
-                className="px-6 py-3 text-base font-bold text-white bg-[#0c1f4a] rounded-xl shadow-lg hover:shadow-[#0c1f4a]/20 hover:bg-[#f59e0b] hover:text-[#0c1f4a] transition-all duration-150"
+                className="px-3 md:px-4 lg:px-6 py-2.5 md:py-2 lg:py-3 text-xs md:text-sm lg:text-base font-bold text-white bg-[#0c1f4a] rounded-lg md:rounded-xl shadow-lg hover:shadow-[#0c1f4a]/20 hover:bg-[#f59e0b] hover:text-[#0c1f4a] transition-all duration-150 whitespace-nowrap"
               >
                 Register
               </button>
