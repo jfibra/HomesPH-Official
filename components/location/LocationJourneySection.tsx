@@ -32,6 +32,7 @@ function buildJourneySteps(locationName: string, locationSlug: string): JourneyS
       ctaHref: `/buy?location=${encodeURIComponent(locationSlug)}`,
       imageAlt: `Browse properties in ${locationName}`,
       imageClassName: 'object-[44%_50%]',
+      imageWrapperClassName: 'rounded-r-[16px] sm:rounded-r-[18px]',
       imageSrc:
         'https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/homesph/browse.png',
     },
@@ -43,6 +44,7 @@ function buildJourneySteps(locationName: string, locationSlug: string): JourneyS
       ctaHref: '/developers',
       imageAlt: 'Connect with brokers',
       imageClassName: 'object-[48%_50%]',
+      imageWrapperClassName: 'rounded-r-[16px] sm:rounded-r-[18px]',
       imageSrc:
         'https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/homesph/brokers.png',
     },

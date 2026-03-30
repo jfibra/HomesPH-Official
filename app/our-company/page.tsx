@@ -143,7 +143,6 @@ export default async function OurCompanyPage() {
       <HomeFooter
         contactEmail={settings.contactEmail}
         contactPhone={settings.contactPhone}
-        links={settings.footerLinks}
         logoUrl={settings.logoUrl}
       />
     </div>

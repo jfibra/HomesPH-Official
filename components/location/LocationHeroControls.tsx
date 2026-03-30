@@ -25,12 +25,12 @@ export default function LocationHeroControls({
   const [activeMode, setActiveMode] = useState<HeroMode>('manual')
 
   return (
-    <>
-      <div className="mt-[24px] sm:mt-[30px]">
+    <div className="relative z-10 mt-[24px] w-full max-w-[1060px] sm:mt-[30px] lg:absolute lg:left-[calc(50%_-_0.5px)] lg:top-[377px] lg:mt-0 lg:-translate-x-1/2">
+      <div className="mx-auto h-[58px] w-full max-w-[459px]">
         <LocationHeroModeSwitch activeMode={activeMode} onModeChange={setActiveMode} />
       </div>
 
-      <div className="mt-[18px] w-full max-w-[1060px] sm:mt-[24px]">
+      <div className="mt-[18px] w-full sm:mt-[24px]">
         <LocationHeroSearchCard
           locationName={locationName}
           locationSlug={locationSlug}
@@ -38,6 +38,6 @@ export default function LocationHeroControls({
           mode={activeMode}
         />
       </div>
-    </>
+    </div>
   )
 }
