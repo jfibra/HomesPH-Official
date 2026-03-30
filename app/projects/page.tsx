@@ -101,10 +101,14 @@ export default async function ProjectsPage(
         socialLinks={settings.socialLinks}
       />
 
-      {/* ── Search Bar Section ── */}
-      <div className="bg-white border-b border-gray-100 py-6 w-full">
-        <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 xl:px-24 2xl:pl-[296px] 2xl:pr-[297px]">
-          <SearchFilter />
+      {/* â”€â”€ Hero â”€â”€ */}
+      <div className="bg-[#0c1f4a] text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-xs font-bold uppercase tracking-[0.6em] text-amber-400 mb-2">Nationwide Developments</p>
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-3">Property Projects</h1>
+          <p className="text-blue-200 text-sm max-w-xl">
+            Explore {MOCK_PROJECTS.length} master-planned communities from the Philippines' top developers.
+          </p>
         </div>
       </div>
 

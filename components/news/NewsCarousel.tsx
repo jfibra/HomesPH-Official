@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
 
 interface Article {
@@ -46,9 +46,32 @@ export function NewsCarousel({
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
+  const [cardWidth, setCardWidth] = useState(280)
+  const [gap, setGap] = useState(8)
   
   // Limit items to 13 to show all available dummy data
   const displayItems = items.slice(0, 13)
+
+  // Responsive card width and gap based on screen size
+  useEffect(() => {
+    const updateCardDimensions = () => {
+      const width = window.innerWidth
+      if (width < 640) {
+        setCardWidth(220)
+        setGap(8)
+      } else if (width < 768) {
+        setCardWidth(250)
+        setGap(12)
+      } else {
+        setCardWidth(280)
+        setGap(16)
+      }
+    }
+
+    updateCardDimensions()
+    window.addEventListener('resize', updateCardDimensions)
+    return () => window.removeEventListener('resize', updateCardDimensions)
+  }, [])
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
@@ -58,10 +81,9 @@ export function NewsCarousel({
     }
   }
 
-  const cardWidth = 280 // Width that fits 4.5 cards approximately
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
-      const scrollAmount = cardWidth
+      const scrollAmount = cardWidth + gap
       const newScrollLeft =
         scrollContainerRef.current.scrollLeft +
         (direction === 'left' ? -scrollAmount : scrollAmount)
@@ -74,12 +96,12 @@ export function NewsCarousel({
   }
 
   return (
-    <section className="py-3 px-[120] bg-gray-50">
+    <section className="py-6 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-[120px] 2xl:px-[230px] bg-gray-50">
       <div className="w-full">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-[28px] font-semibold tracking-[-0.045em] text-[#002143] sm:text-[32px]" style={{ fontFamily: 'Outfit' }}>
+            <h2 className="text-[20px] sm:text-[24px] md:text-[28px] lg:text-[32px] font-semibold tracking-[-0.045em] text-[#002143]" style={{ fontFamily: 'Outfit' }}>
               {title}
             </h2>
             {description && (
@@ -87,22 +109,22 @@ export function NewsCarousel({
             )}
           </div>
           {showNavigation && (
-            <div className="hidden gap-2 md:flex">
+            <div className="flex gap-1 sm:gap-2">
               <button
                 onClick={() => scroll('left')}
                 disabled={!canScrollLeft}
-                className="inline-flex h-[42px] w-[42px] items-center justify-center rounded-full border border-[#d8e2f1] bg-white text-[#173260] transition-[transform,border-color,background-color,opacity] duration-320 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:border-[#c5d3eb] hover:bg-[#f8faff] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0"
+                className="inline-flex h-[32px] sm:h-[36px] md:h-[42px] w-[32px] sm:w-[36px] md:w-[42px] items-center justify-center rounded-full border border-[#d8e2f1] bg-white text-[#173260] transition-[transform,border-color,background-color,opacity] duration-320 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:border-[#c5d3eb] hover:bg-[#f8faff] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0"
                 aria-label="Scroll left"
               >
-                <ChevronLeft size={18} strokeWidth={2.1} />
+                <ChevronLeft size={16} className="sm:size-[18px]" strokeWidth={2.1} />
               </button>
               <button
                 onClick={() => scroll('right')}
                 disabled={!canScrollRight}
-                className="inline-flex h-[42px] w-[42px] items-center justify-center rounded-full border border-[#d8e2f1] bg-white text-[#173260] transition-[transform,border-color,background-color,opacity] duration-320 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:border-[#c5d3eb] hover:bg-[#f8faff] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0"
+                className="inline-flex h-[32px] sm:h-[36px] md:h-[42px] w-[32px] sm:w-[36px] md:w-[42px] items-center justify-center rounded-full border border-[#d8e2f1] bg-white text-[#173260] transition-[transform,border-color,background-color,opacity] duration-320 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:border-[#c5d3eb] hover:bg-[#f8faff] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0"
                 aria-label="Scroll right"
               >
-                <ChevronRight size={18} strokeWidth={2.1} />
+                <ChevronRight size={16} className="sm:size-[18px]" strokeWidth={2.1} />
               </button>
             </div>
           )}
@@ -112,7 +134,7 @@ export function NewsCarousel({
         <div
           ref={scrollContainerRef}
           onScroll={checkScroll}
-          className="flex gap-2 overflow-x-hidden pb-2"
+          className="flex gap-2 sm:gap-3 md:gap-4 overflow-hidden pb-2"
           style={{ scrollBehavior: 'smooth' }}
         >
           {displayItems.map(article => {
@@ -121,7 +143,7 @@ export function NewsCarousel({
               <Link
                 key={article.id}
                 href={`/news/${article.slug}`}
-                className="group flex shrink-0 w-[280px] flex-col overflow-hidden rounded-[12px] border border-[#e4ecf8] bg-white shadow-[0_14px_30px_rgba(15,39,78,0.06)] transition-[transform,box-shadow,border-color] duration-320 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:border-[#d8e2f1] hover:shadow-[0_22px_44px_rgba(15,39,78,0.08)]"
+                className="group flex shrink-0 w-[220px] sm:w-[250px] md:w-[280px] flex-col overflow-hidden rounded-[12px] border border-[#e4ecf8] bg-white shadow-[0_14px_30px_rgba(15,39,78,0.06)] transition-[transform,box-shadow,border-color] duration-320 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:border-[#d8e2f1] hover:shadow-[0_22px_44px_rgba(15,39,78,0.08)]"
               >
                 <div className="relative h-[180px] overflow-hidden bg-[#e9eff8]">
                   {image ? (

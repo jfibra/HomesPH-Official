@@ -52,9 +52,9 @@
   background: conic-gradient(
     from var(--ai-search-border-angle),
     #1428ae,
-    #f4aa1d,
+    #3b5fea,
     #1428ae,
-    #f4aa1d,
+    #3b5fea,
     #1428ae
   );
   animation: ai-search-border-rotate 3s linear infinite;
@@ -168,9 +168,8 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-sans), 'Geist', 'Geist Fallback';
-  --font-mono: var(--font-mono), 'Geist Mono', 'Geist Mono Fallback';
-  --font-outfit: var(--font-outfit), sans-serif;
+  --font-sans: var(--font-outfit), 'Geist', 'Geist Fallback';
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
