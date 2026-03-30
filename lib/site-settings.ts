@@ -60,7 +60,7 @@ const getRawSiteSettings = cache(async (): Promise<Record<string, unknown>> => {
           apikey: SERVICE_ROLE,
           Authorization: `Bearer ${SERVICE_ROLE}`,
           'Content-Type': 'application/json',
-        },
+        } as Record<string, string>,
         next: { revalidate: 60 },
       },
     )

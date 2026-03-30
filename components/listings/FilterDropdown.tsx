@@ -32,7 +32,7 @@ export default function FilterDropdown({ label, width, left, top, icon }: Filter
         padding: '0 18px',
         background: '#FFFFFF',
         cursor: 'pointer',
-        zIndex: 15,
+        zIndex: 60,
         pointerEvents: 'auto',
         transition: 'border-color 0.2s ease'
       }}

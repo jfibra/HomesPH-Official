@@ -1,5 +1,8 @@
 import Link from 'next/link'
 import SiteFooter from '@/components/layout/SiteFooter'
+import SiteHeader from '@/components/layout/SiteHeader'
+import Image from 'next/image'
+import LocationSwitcher from '@/components/home/LocationSwitcher'
 import {
   type ListingSearchMode,
   type PropertySearchParamsInput,
@@ -102,16 +105,58 @@ export default async function PublicListingsPage({
           opacity: 0.6;
         }
       `}} />
-      {/* Rectangle 11026 - Top Bar (Full Width) */}
-      <div style={{
-        position: 'absolute',
-        width: '100%',
-        height: '40px',
-        left: '0px',
-        top: '0px',
-        background: '#1428AE',
-        zIndex: 5
-      }} />
+      {/* Top Contact Bar for Buy/Rent pages */}
+      {(() => {
+        let socials: any = {}
+        const raw = settings.socialLinks as any
+        if (raw) {
+          if (typeof raw === 'string') {
+            try { socials = JSON.parse(raw) } catch { socials = {} }
+          } else {
+            socials = raw
+          }
+        }
+        const hasTopBar = Boolean(settings.contactPhone || settings.contactEmail || socials.facebook || socials.twitter || socials.instagram)
+        if (!hasTopBar) return null
+        return (
+          <div className="bg-[#002143]" style={{ position: 'relative', zIndex: 1000 }}>
+            <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 xl:px-20 2xl:pl-[227px] 2xl:pr-[227px] flex items-center justify-between h-10">
+              <div className="flex items-center gap-5">
+                {settings.contactPhone && (
+                  <a href={`tel:${settings.contactPhone}`} className="flex items-center gap-1.5 text-xs text-blue-100 hover:text-white transition-colors">
+                    {/* phone icon */}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="12" height="12" className="shrink-0">
+                      <path fillRule="evenodd" d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z" clipRule="evenodd" />
+                    </svg>
+                    <span>{settings.contactPhone}</span>
+                  </a>
+                )}
+                {settings.contactEmail && (
+                  <a href={`mailto:${settings.contactEmail}`} className="hidden sm:flex items-center gap-1.5 text-xs text-blue-100 hover:text-white transition-colors">
+                    {/* mail icon */}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="12" height="12" className="shrink-0">
+                      <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" />
+                      <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
+                    </svg>
+                    <span>{settings.contactEmail}</span>
+                  </a>
+                )}
+              </div>
+              <div className="flex items-center gap-4">
+                {socials.facebook && (
+                  <a href={socials.facebook} target="_blank" rel="noreferrer" aria-label="Facebook" className="text-blue-200 hover:text-white transition-colors">
+                    <Image src="/socialIcons/fb.png" alt="Facebook" width={14} height={14} />
+                  </a>
+                )}
+                <a href={socials.twitter || '#'} aria-label="X / Twitter" className="text-blue-200 hover:text-white transition-colors">
+                  <Image src="/socialIcons/X.png" alt="X / Twitter" width={14} height={14} />
+                </a>
+                <LocationSwitcher variant="dark" />
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Footer Wrapper - Center across 100% (Full Width) */}
       <div style={{
@@ -130,182 +175,41 @@ export default async function PublicListingsPage({
         />
       </div>
 
-      {/* Centered 1920px Content Frame */}
+      {/* Main Site Header */}
+      {/* Main Site Header (top contact bar rendered above to match design) */}
+      <SiteHeader
+        logoUrl={settings.logoUrl}
+      />
+
+      {/* 1920px Centered Container */}
       <div style={{
         position: 'relative',
-        width: '1920px',
-        margin: '0 auto',
-        height: '3239px',
-        zIndex: 10,
-        pointerEvents: 'none' // Allow clicks to pass to full-width elements if needed
+        width: '100%',
+        maxWidth: '1920px',
+        margin: '-150px auto 0',
+        display: 'flex',
+        flexDirection: 'column',
       }}>
         {/* Enable interactions for children */}
         <div style={{ pointerEvents: 'auto', width: '100%', height: '100%', position: 'relative' }}>
 
-          {/* Phone */}
-          <div style={{ position: 'absolute', left: '227px', top: '11px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Phone size={18} color="white" />
-          </div>
-          <span style={{ position: 'absolute', left: '250px', top: '13px', height: '15px', fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: 'white', whiteSpace: 'nowrap' }}>
-            {settings.contactPhone}
-          </span>
-
-          {/* Email */}
-          <div style={{ position: 'absolute', left: '398px', top: '11px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Mail size={18} color="white" />
-          </div>
-          <span style={{ position: 'absolute', left: '421px', top: '13px', height: '15px', fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: 'white', whiteSpace: 'nowrap' }}>
-            {settings.contactEmail}
-          </span>
-
-          {/* Location - Moved right to avoid overlap with dynamic email */}
-          <div style={{ position: 'absolute', left: '588px', top: '11px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <MapPin size={18} color="white" />
-          </div>
-          <span style={{ position: 'absolute', left: '611px', top: '13px', height: '15px', fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: 'white', whiteSpace: 'nowrap' }}>
-            Manila, Philippines
-          </span>
-
-          {/* Social Icons - Top Bar */}
-          <div style={{ position: 'absolute', left: '1508px', top: '11px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Facebook size={18} color="white" />
-          </div>
-          <div style={{ position: 'absolute', left: '1536px', top: '12px', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Instagram size={16} color="white" />
-          </div>
-          <div style={{ position: 'absolute', left: '1562px', top: '13px', width: '14px', height: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Twitter size={14} color="white" />
-          </div>
-
-          {/* Dropdown All - Top Bar */}
-          <div style={{
-            boxSizing: 'border-box',
-            position: 'absolute',
-            width: '101px',
-            height: '25px',
-            left: '1591px',
-            top: '7px',
-            border: '1px solid #FFFFFF',
-            borderRadius: '5px'
-          }} />
-          {/* Dot */}
-          <div style={{ position: 'absolute', width: '4px', height: '4px', left: '1599px', top: '18px', background: '#FFCE70', borderRadius: '50%' }} />
-          {/* Text */}
-          <span style={{ position: 'absolute', width: '61px', height: '12px', left: '1609px', top: '14px', fontFamily: "'Outfit'", fontWeight: 300, fontSize: '12px', lineHeight: '12px', color: 'white' }}>
-            All
-          </span>
-          {/* Dropdown Icon */}
-          <div style={{ position: 'absolute', left: '1670px', top: '11px', width: '17px', height: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ChevronDown size={17} color="white" />
-          </div>
-
-          {/* Header Divider */}
-          <div style={{
-            position: 'absolute',
-            width: '1920px',
-            height: '1px',
-            left: '0px',
-            top: '150px',
-            background: '#D3D3D3'
-          }} />
-
-          {/* Main Header */}
-          <div style={{ position: 'absolute', left: '290px', top: '70px' }}>
-            <Link href="/">
-              <img src={settings.logoUrl} alt="Logo" style={{ width: '179px', height: '50px' }} />
-            </Link>
-          </div>
-
-          <div style={{
-            position: 'absolute',
-            width: '469px',
-            height: '20px',
-            left: 'calc(50% - 469px / 2 - 0.5px)',
-            top: '85px',
-            display: 'flex',
-            gap: '40px',
-            justifyContent: 'center',
-            alignItems: 'center',
-            pointerEvents: 'auto'
-          }}>
-            {[
-              { label: 'Home', href: '/', width: '48px' },
-              { label: 'Buy', href: '/buy', width: '30px' },
-              { label: 'Rent', href: '/rent', width: '37px' },
-              { label: 'Projects', href: '/projects', width: '72px' },
-              { label: 'News', href: '/news', width: '44px' },
-              { label: 'Contact Us', href: '/contact-us', width: '88px' }
-            ].map((item) => {
-              const isActive = (item.label === 'Buy' && mode === 'sale') || (item.label === 'Rent' && mode === 'rent')
-              const bgWidth = item.label === 'Contact Us' ? '120px' : (item.label === 'Projects' ? '90px' : '63px')
-
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="nav-link-item nav-link-hover"
-                  style={{
-                    position: 'relative',
-                    height: '20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontFamily: "'Outfit'",
-                    fontSize: '18px',
-                    fontWeight: 400,
-                    color: '#002143',
-                    textDecoration: 'none',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  {isActive && (
-                    <div style={{
-                      position: 'absolute',
-                      zIndex: -1,
-                      left: '50%',
-                      top: '50%',
-                      transform: 'translate(-50%, -55%)',
-                      width: bgWidth,
-                      height: '36px',
-                      backgroundColor: '#FDF8EF',
-                      borderRadius: '8px'
-                    }} />
-                  )}
-                  {item.label}
-                </Link>
-              )
-            })}
-          </div>
-
-          <div style={{ position: 'absolute', left: '1460px', top: '85px' }}>
-            <Link href="/login" style={{ fontSize: '18px', fontWeight: 400, color: '#002143' }}>Login</Link>
-          </div>
-          <Link href="/registration" style={{
-            position: 'absolute',
-            width: '103px',
-            height: '46px',
-            left: '1520px',
-            top: '72px',
-            background: '#1428AE',
-            borderRadius: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textDecoration: 'none'
-          }}>
-            <span style={{ fontSize: '18px', fontWeight: 500, color: '#FFFFFF' }}>Sign in</span>
-          </Link>
+          {/* Absolute positioning container for previous elements */}
 
           {/* Search Bar Section */}
-          <BuySearchBar initialValue={(Array.isArray(searchParams.location) ? searchParams.location[0] : searchParams.location) || ''} />
+          {/* Search Bar and Filter Section */}
+          <div style={{ position: 'relative', zIndex: 100, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ position: 'relative', width: '100%', maxWidth: '1920px' }}>
+              <BuySearchBar initialValue={(Array.isArray(searchParams.location) ? searchParams.location[0] : searchParams.location) || ''} />
 
-          {/* Filter Dropdowns */}
-          <PropertyTypeFilter />
-          <BedsBathsFilter />
-          <MoreFilters />
+              {/* Filter Dropdowns */}
+              <PropertyTypeFilter />
+              <BedsBathsFilter />
+              <MoreFilters />
 
-          <div style={{ position: 'absolute', left: '1418px', top: '259.12px', fontSize: '16px', fontWeight: 500, color: '#001392' }}>Clear Filters</div>
-          <div style={{ position: 'absolute', left: '1535px', top: '259.12px', fontSize: '16px', fontWeight: 500, color: '#001392' }}>Save Search</div>
+              <div style={{ position: 'absolute', left: '1418px', top: '259.12px', fontSize: '16px', fontWeight: 500, color: '#001392' }}>Clear Filters</div>
+              <div style={{ position: 'absolute', left: '1535px', top: '259.12px', fontSize: '16px', fontWeight: 500, color: '#001392' }}>Save Search</div>
+            </div>
+          </div>
 
           {/* Main Divider */}
           <div style={{
@@ -987,75 +891,93 @@ export default async function PublicListingsPage({
             )
           })}
 
-          {/* Sidebar Elements */}
-          {/* Sidebar Elements */}
-          {/* AD 1 (Small) */}
-          <div style={{ position: 'absolute', width: '350.85px', height: '335.77px', left: '1272.15px', top: '351.23px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ width: '350.85px', height: '335.77px', background: '#D9D9D9', borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <iframe
-                src="https://homesphnews-api-394504332858.asia-southeast1.run.app/ads/14?size=300x250"
-                width="300"
-                height="250"
-                frameBorder="0"
-                scrolling="no"
-                style={{ border: 'none', overflow: 'hidden' }}
-              />
-            </div>
-            <span style={{ marginTop: '10px', fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', color: '#7F7F7F' }}>Advertisement</span>
-          </div>
-
-          {/* Alert Me Button */}
+          {/* Sidebar Area - Absolute Track for Sticky Sidebar */}
           <div style={{
-            boxSizing: 'border-box',
             position: 'absolute',
-            width: '350.85px',
-            height: '56.3px',
+            top: '351.23px', // Start at the same vertical position as before
             left: '1272.15px',
-            top: '740.28px',
-            border: '1px solid #1428AE',
-            borderRadius: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '13px',
-            cursor: 'pointer'
+            width: '350.85px',
+            bottom: '40px', // End before the footer
+            pointerEvents: 'none' // Allow clicking through the track itself
           }}>
-            <Bell size={25.13} color="#1428AE" fill="#1428AE" />
-            <span style={{ fontFamily: "'Outfit'", fontWeight: 400, fontSize: '18px', lineHeight: '18px', color: '#1428AE' }}>ALERT ME OF NEW PROPERTIES</span>
-          </div>
+            <div style={{
+              position: 'sticky',
+              top: '100px', // Stick 100px from the top (below the header)
+              width: '100%',
+              height: 'fit-content',
+              zIndex: 30,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '30px',
+              pointerEvents: 'auto' // Re-enable pointer events for the sidebar content
+            }}>
+              {/* AD 1 (Small) */}
+              <div style={{ width: '350.85px', height: '335.77px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ width: '350.85px', height: '335.77px', background: '#D9D9D9', borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <iframe
+                    src="https://homesphnews-api-394504332858.asia-southeast1.run.app/ads/14?size=300x250"
+                    width="300"
+                    height="250"
+                    frameBorder="0"
+                    scrolling="no"
+                    style={{ border: 'none', overflow: 'hidden' }}
+                  />
+                </div>
+                <span style={{ marginTop: '10px', fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', color: '#7F7F7F' }}>Advertisement</span>
+              </div>
 
-          {/* Recommended Searches */}
-          <div style={{ position: 'absolute', width: '350.85px', left: '1272.15px', top: '826.74px' }}>
-            <div style={{ width: '350.85px', height: '35.19px', background: '#F4F4F9', borderRadius: '5px', display: 'flex', alignItems: 'center', paddingLeft: '16px', marginBottom: '15px' }}>
-              <span style={{ fontFamily: "'Outfit'", fontWeight: 400, fontSize: '18px', lineHeight: '18px', color: '#002143' }}>Recommended searches</span>
-            </div>
-            <div style={{ paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#002143', cursor: 'pointer' }}>1 Bedroom Properties for sale in the Philippines</span>
-              <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#002143', cursor: 'pointer' }}>2 Bedroom Properties for sale in the Philippines</span>
-              <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#002143', cursor: 'pointer' }}>Apartments for sale in the Philippines</span>
-              <span style={{ fontFamily: "'Outfit'", fontWeight: 500, fontSize: '15px', lineHeight: '15px', color: '#1428AE', cursor: 'pointer' }}>View More</span>
-            </div>
-          </div>
+              {/* Alert Me Button */}
+              <div style={{
+                boxSizing: 'border-box',
+                width: '350.85px',
+                height: '56.3px',
+                border: '1px solid #1428AE',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '13px',
+                cursor: 'pointer',
+                background: '#FFFFFF'
+              }}>
+                <Bell size={25.13} color="#1428AE" fill="#1428AE" />
+                <span style={{ fontFamily: "'Outfit'", fontWeight: 400, fontSize: '18px', lineHeight: '18px', color: '#1428AE' }}>ALERT ME OF NEW PROPERTIES</span>
+              </div>
 
-          {/* Useful Links */}
-          <div style={{ position: 'absolute', width: '350.85px', left: '1272.15px', top: '1007.69px' }}>
-            <div style={{ width: '350.85px', height: '35.19px', background: '#F4F4F9', borderRadius: '5px', display: 'flex', alignItems: 'center', paddingLeft: '16px', marginBottom: '15px' }}>
-              <span style={{ fontFamily: "'Outfit'", fontWeight: 400, fontSize: '18px', lineHeight: '18px', color: '#002143' }}>Useful Links</span>
-            </div>
-            <div style={{ paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#002143', cursor: 'pointer' }}>Apartments for rent in the Philippines</span>
-              <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#002143', cursor: 'pointer' }}>Apartment for sale in the Philippines</span>
-              <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#002143', cursor: 'pointer' }}>Hotel Apartment for rent in the Philippines</span>
-              <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#002143', cursor: 'pointer' }}>Villa Compound for sale in the Philippines</span>
-            </div>
-          </div>
+              {/* Recommended Searches */}
+              <div style={{ width: '350.85px' }}>
+                <div style={{ width: '350.85px', height: '35.19px', background: '#F4F4F9', borderRadius: '5px', display: 'flex', alignItems: 'center', paddingLeft: '16px', marginBottom: '15px' }}>
+                  <span style={{ fontFamily: "'Outfit'", fontWeight: 400, fontSize: '18px', lineHeight: '18px', color: '#002143' }}>Recommended searches</span>
+                </div>
+                <div style={{ paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#002143', cursor: 'pointer' }}>1 Bedroom Properties for sale in the Philippines</span>
+                  <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#002143', cursor: 'pointer' }}>2 Bedroom Properties for sale in the Philippines</span>
+                  <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#002143', cursor: 'pointer' }}>Apartments for sale in the Philippines</span>
+                  <span style={{ fontFamily: "'Outfit'", fontWeight: 500, fontSize: '15px', lineHeight: '15px', color: '#1428AE', cursor: 'pointer' }}>View More</span>
+                </div>
+              </div>
 
-          {/* AD 2 (Large) */}
-          <div style={{ position: 'absolute', width: '350.85px', height: '588.1px', left: '1272.15px', top: '1193.67px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ width: '350.85px', height: '588.1px', background: '#D9D9D9', borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontFamily: "'Outfit'", fontWeight: 900, fontSize: '80px', lineHeight: '80px', color: '#002143', textAlign: 'center' }}>ADS</span>
+              {/* Useful Links */}
+              <div style={{ width: '350.85px' }}>
+                <div style={{ width: '350.85px', height: '35.19px', background: '#F4F4F9', borderRadius: '5px', display: 'flex', alignItems: 'center', paddingLeft: '16px', marginBottom: '15px' }}>
+                  <span style={{ fontFamily: "'Outfit'", fontWeight: 400, fontSize: '18px', lineHeight: '18px', color: '#002143' }}>Useful Links</span>
+                </div>
+                <div style={{ paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#002143', cursor: 'pointer' }}>Apartments for rent in the Philippines</span>
+                  <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#002143', cursor: 'pointer' }}>Apartment for sale in the Philippines</span>
+                  <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#002143', cursor: 'pointer' }}>Hotel Apartment for rent in the Philippines</span>
+                  <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#002143', cursor: 'pointer' }}>Villa Compound for sale in the Philippines</span>
+                </div>
+              </div>
+
+              {/* AD 2 (Large) */}
+              <div style={{ width: '350.85px', height: '588.1px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ width: '350.85px', height: '588.1px', background: '#D9D9D9', borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontFamily: "'Outfit'", fontWeight: 900, fontSize: '80px', lineHeight: '80px', color: '#002143', textAlign: 'center' }}>ADS</span>
+                </div>
+                <span style={{ marginTop: '10px', fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', color: '#7F7F7F' }}>Advertisement</span>
+              </div>
             </div>
-            <span style={{ marginTop: '10px', fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', color: '#7F7F7F' }}>Advertisement</span>
           </div>
 
         </div>

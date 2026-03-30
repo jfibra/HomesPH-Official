@@ -128,7 +128,7 @@ export default function SiteHeader({
     <div className="w-full">
       {/* ── Top contact bar — dark navy ── */}
       {(contactPhone || contactEmail || socials.facebook || socials.twitter) && (
-        <div className="bg-[#0c1f4a]">
+        <div className="bg-[#002143] relative z-[1000]">
           <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 xl:px-20 2xl:pl-[227px] 2xl:pr-[227px] flex items-center justify-between h-10">
             <div className="flex items-center gap-5">
               {contactPhone && (
@@ -161,120 +161,97 @@ export default function SiteHeader({
 
       {/* ── Main header ── */}
       <header className={`sticky top-0 z-40 bg-white transition-all duration-200 ${scrolled ? 'shadow-md' : 'border-b border-gray-100'}`}>
-        <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 xl:px-24 2xl:pl-[296px] 2xl:pr-[296px]">
-          <div className="flex items-center h-24 gap-8">
+        <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 xl:px-24 2xl:pl-[290px] 2xl:pr-[290px]">
+          <div className="flex items-center h-[110px] relative">
 
             {/* Logo */}
-            <Link href={logoHref} className="shrink-0 group" onClick={handleLogoClick}>
-              {logoUrl ? (
-                <img src={logoUrl} alt={logoText} className="h-12 w-auto drop-shadow-md transition-transform group-hover:scale-105" />
-              ) : (
-                <span className="text-2xl font-bold text-gray-900 drop-shadow-sm">{logoText}</span>
-              )}
-            </Link>
-
-            {/* Desktop nav — absolute positioning per Figma */}
-            <div style={{
-              position: 'absolute',
-              width: '469px',
-              height: '20px',
-              left: 'calc(50% - 469px / 2 - 0.5px)',
-              top: '85px',
-              pointerEvents: 'auto'
-            }}>
-              {resolvedNavItems.map((item) => {
-                const itemPath = item.href.split('?')[0]
-                const isActive = itemPath === '/' ? pathname === '/' : pathname.startsWith(itemPath)
-                const positions: Record<string, { left: string; width: string }> = {
-                  'Home': { left: '0px', width: '48px' },
-                  'Buy': { left: '78px', width: '30px' },
-                  'Rent': { left: '138px', width: '37px' },
-                  'Projects': { left: '205px', width: '72px' },
-                  'News': { left: '307px', width: '44px' },
-                  'Contact Us': { left: '381px', width: '110px' }
-                }
-                const pos = positions[item.label] || { left: '0px', width: 'auto' }
-                
-                const bgPositions: Record<string, { left: string; width: string }> = {
-                  'Home': { left: '717.5px', width: '63px' }, // Calculated based on centering
-                  'Buy': { left: '786.5px', width: '63px' },   // 787px is left of bg, centered on Buy (803px)
-                  'Rent': { left: '850px', width: '63px' },
-                  'Projects': { left: '921px', width: '90px' },
-                  'News': { left: '1017px', width: '74px' },
-                  'Contact Us': { left: '1095px', width: '110px' }
-                }
-                const activeBg = bgPositions[item.label] || { left: '0px', width: '0px' }
-                const containerLeft = 725 // origin of our nav div
-                
-                return (
-                  <Link
-                    key={item.href + item.label}
-                    href={item.href}
-                    style={{
-                      position: 'absolute',
-                      left: pos.left,
-                      top: '0px',
-                      width: pos.width,
-                      height: '20px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontFamily: "'Outfit'",
-                      fontSize: '18px',
-                      fontWeight: 400,
-                      color: '#002143',
-                      textDecoration: 'none',
-                      whiteSpace: 'nowrap',
-                      transition: 'all 0.2s ease',
-                      zIndex: 1
-                    }}
-                    className={`nav-link-hover ${isActive ? 'active-nav-link' : ''}`}
-                  >
-                    {isActive && (
-                      <div style={{
-                        position: 'absolute',
-                        zIndex: -1,
-                        left: `calc(${activeBg.left}px - ${containerLeft}px)`,
-                        top: '-8px', // 77px - 85px
-                        width: activeBg.width,
-                        height: '36px',
-                        backgroundColor: '#FDF8EF',
-                        borderRadius: '8px',
-                      }} />
-                    )}
-                    <span className="relative z-10">{item.label}</span>
-                    <style jsx>{`
-                      .nav-link-hover:hover::before {
-                        content: '';
-                        position: absolute;
-                        z-index: -1;
-                        left: -16px;
-                        right: -16px;
-                        top: -8px;
-                        bottom: -8px;
-                        background-color: #FDF8EF;
-                        border-radius: 8px;
-                        opacity: 0.5;
-                        transition: opacity 0.2s;
-                      }
-                    `}</style>
-                  </Link>
-                )
-              })}
+            <div className="flex-shrink-0">
+              <Link href={logoHref} className="shrink-0 group block" onClick={handleLogoClick}>
+                {logoUrl ? (
+                  <img src={logoUrl} alt={logoText} style={{ width: '179px', height: '50px' }} className="drop-shadow-sm transition-transform group-hover:scale-105" />
+                ) : (
+                  <span className="text-2xl font-bold text-gray-900 drop-shadow-sm">{logoText}</span>
+                )}
+              </Link>
             </div>
 
-            <div className="hidden md:flex items-center gap-6 shrink-0">
-              <button className="text-slate-600 hover:text-[#0c1f4a] transition-colors">
-                <Search size={24} />
-              </button>
-              <Link href="/login" className="px-6 py-3 text-base font-bold text-[#0c1f4a] rounded-xl border-2 border-[#0c1f4a]/10 hover:border-[#0c1f4a]/30 hover:bg-slate-50 transition-all duration-150">
+            {/* Desktop Nav — position to exact spec within a 469px container */}
+            <div className="hidden lg:block absolute left-1/2 -translate-x-1/2 pointer-events-auto" style={{ width: '469px', height: '20px' }}>
+              <div className="relative" style={{ width: '469px', height: '20px' }}>
+                {resolvedNavItems.map((item) => {
+                  const itemPath = item.href.split('?')[0]
+                  const isActive = item.label === 'Home'
+                    ? pathname === itemPath
+                    : (pathname === itemPath || pathname.startsWith(itemPath + '/'))
+
+                  // Fixed widths per design
+                  const linkWidth = item.label === 'Home' ? 48 : item.label === 'Buy' ? 30 : item.label === 'Rent' ? 37 : item.label === 'Projects' ? 72 : item.label === 'News' ? 44 : 88
+                  // Left offsets within the 469px container (design spec)
+                  const leftOffsetMap: Record<string, number> = { Home: 0, Buy: 78, Rent: 138, Projects: 205, News: 307, 'Contact Us': 381 }
+                  const left = leftOffsetMap[item.label] ?? 381 // default to last if unknown
+                  const bgWidth = item.label === 'Projects' ? 90 : item.label === 'Contact Us' ? 120 : 63
+
+                  return (
+                    <Link
+                      key={item.href + item.label}
+                      href={item.href}
+                      style={{
+                        position: 'absolute',
+                        left,
+                        width: linkWidth,
+                        height: 20,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontFamily: "'Outfit'",
+                        fontSize: 18,
+                        fontWeight: 400,
+                        color: '#002143',
+                        textDecoration: 'none',
+                        whiteSpace: 'nowrap'
+                      }}
+                      className={`nav-link-item ${isActive ? 'active' : ''}`}
+                    >
+                      {isActive && (
+                        <div style={{
+                          position: 'absolute',
+                          zIndex: -1,
+                          left: '50%',
+                          top: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          width: bgWidth,
+                          height: 36,
+                          backgroundColor: '#FDF8EF',
+                          borderRadius: 8,
+                        }} />
+                      )}
+                      <span className="relative z-10">{item.label}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Auth Buttons */}
+            <div className="ml-auto hidden md:flex items-center gap-[16px]">
+              <Link href="/login" style={{ fontSize: '18px', fontWeight: 400, color: '#002143', textDecoration: 'none' }}>
                 Login
               </Link>
               <button
                 onClick={() => setShowRegisterModal(true)}
-                className="px-6 py-3 text-base font-bold text-white bg-[#0c1f4a] rounded-xl shadow-lg hover:shadow-[#0c1f4a]/20 hover:bg-[#f59e0b] hover:text-[#0c1f4a] transition-all duration-150"
+                style={{
+                  width: '103px',
+                  height: '46px',
+                  background: '#1428AE',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
               >
-                Register
+                <span style={{ fontSize: '18px', fontWeight: 500, color: '#FFFFFF' }}>Sign in</span>
               </button>
             </div>
 
@@ -282,10 +259,11 @@ export default function SiteHeader({
             <button
               aria-label="Open menu"
               onClick={() => setOpen(true)}
-              className="md:hidden ml-auto p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+              className="lg:hidden ml-auto p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
             >
-              <Menu size={22} />
+              <Menu size={24} />
             </button>
+
           </div>
         </div>
       </header>
@@ -415,3 +393,4 @@ export default function SiteHeader({
     </div>
   )
 }
+ 
