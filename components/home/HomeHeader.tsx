@@ -22,7 +22,6 @@ interface HomeHeaderProps {
 // Home-specific nav: show company/link actions rather than global site nav
 const NAV_ITEMS: { label: string; href: string }[] = [
   { label: 'Our Company', href: '/our-company' },
-  { label: 'News', href: '/news' },
   { label: 'Mortgage', href: '/mortgage' },
   { label: 'Legal', href: '/legal' },
   { label: 'Tourism', href: '/tourism' },

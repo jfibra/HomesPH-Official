@@ -5,10 +5,10 @@ import { getSiteSettings } from '@/lib/site-settings'
 import { MOCK_PROJECTS, MOCK_LOCATIONS } from '@/lib/mock-data'
 import AdBanner from '@/components/ui/AdBanner'
 
-const fmt = (n?: number | null) => n ? `â‚± ${Number(n).toLocaleString()}` : null
+const fmt = (n?: number | null) => n ? `₱ ${Number(n).toLocaleString()}` : null
 const fmtRange = (min?: number | null, max?: number | null) => {
   if (!min && !max) return 'Price on request'
-  if (min && max) return `${fmt(min)} â€“ ${fmt(max)}`
+  if (min && max) return `${fmt(min)} – ${fmt(max)}`
   return fmt(min ?? max) ?? 'Price on request'
 }
 
@@ -37,7 +37,7 @@ export default async function ProjectsPage(
         socialLinks={settings.socialLinks}
       />
 
-      {/* â”€â”€ Hero â”€â”€ */}
+      {/* ── Hero ── */}
       <div className="bg-[#0c1f4a] text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-xs font-bold uppercase tracking-[0.6em] text-amber-400 mb-2">Nationwide Developments</p>
@@ -49,14 +49,14 @@ export default async function ProjectsPage(
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* â”€â”€ Filters â”€â”€ */}
+        {/* ── Filters ── */}
         <form method="GET" className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-8 flex flex-col lg:flex-row gap-4 items-end">
           <div className="flex-1 min-w-0">
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">Search Projects</label>
             <input
               name="q"
               defaultValue={sp.q}
-              placeholder="Project name, city, developerâ€¦"
+              placeholder="Project name, city, developer…"
               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1428ae]/30"
             />
           </div>
@@ -109,7 +109,7 @@ export default async function ProjectsPage(
               </div>
             </div>
 
-            {/* â”€â”€ Projects Grid â”€â”€ */}
+            {/* ── Projects Grid ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map(p => (
                 <Link
@@ -131,7 +131,7 @@ export default async function ProjectsPage(
                         {p.status}
                       </span>
                       {p.is_featured && (
-                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/90 text-amber-700">â­ Featured</span>
+                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/90 text-amber-700">⭐ Featured</span>
                       )}
                     </div>
                     <div className="absolute bottom-3 right-3">
@@ -173,7 +173,7 @@ export default async function ProjectsPage(
 
             {projects.length === 0 && (
               <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center shadow-sm">
-                <div className="text-6xl mb-4">ðŸ—ï¸</div>
+                <div className="text-6xl mb-4">🏗️</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">No projects found</h3>
                 <p className="text-gray-500">Try adjusting your filters.</p>
               </div>
@@ -184,20 +184,20 @@ export default async function ProjectsPage(
           <div className="hidden lg:flex flex-col gap-6 w-[300px] shrink-0">
             <div className="sticky top-24 space-y-6">
               <AdBanner sizes={['300x250']} />
-              <AdBanner sizes={['160x600']} />
+              <AdBanner sizes={['300x600']} />
             </div>
           </div>
         </div>
 
-        {/* â”€â”€ Project Types Info â”€â”€ */}
+        {/* ── Project Types Info ── */}
         <div className="mt-16 bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
           <h2 className="text-xl font-bold text-gray-900 mb-6">Understanding Development Classifications</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { type: 'Affordable', range: 'Under â‚±4.5M', desc: 'Government-assisted and developer-subsidized units ideal for first-time buyers and families.' },
-              { type: 'Mid-Range', range: 'â‚±4.5M â€“ â‚±10M', desc: 'Modern, well-designed homes with standard to upscale amenities. The most popular segment.' },
-              { type: 'Premium', range: 'â‚±10M â€“ â‚±30M', desc: 'High-quality finishes, managed concierge, and prime urban locations.' },
-              { type: 'Luxury', range: 'â‚±30M and above', desc: 'World-class architecture, bespoke interiors, private services, and exclusive addresses.' },
+              { type: 'Affordable', range: 'Under ₱4.5M', desc: 'Government-assisted and developer-subsidized units ideal for first-time buyers and families.' },
+              { type: 'Mid-Range', range: '₱4.5M – ₱10M', desc: 'Modern, well-designed homes with standard to upscale amenities. The most popular segment.' },
+              { type: 'Premium', range: '₱10M – ₱30M', desc: 'High-quality finishes, managed concierge, and prime urban locations.' },
+              { type: 'Luxury', range: '₱30M and above', desc: 'World-class architecture, bespoke interiors, private services, and exclusive addresses.' },
             ].map(cat => (
               <div key={cat.type} className="space-y-2">
                 <p className="font-bold text-[#1428ae] text-sm">{cat.type}</p>

@@ -20,7 +20,6 @@ const NAV_ITEMS: { label: string; href: string; clearLocation?: boolean }[] = [
   { label: 'Buy', href: '/buy' },
   { label: 'Rent', href: '/rent' },
   { label: 'Projects', href: '/projects' },
-  { label: 'News', href: '/news' },
   { label: 'Contact Us', href: '/contact-us' },
 ]
 
