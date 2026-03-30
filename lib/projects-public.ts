@@ -21,6 +21,9 @@ export type PublicProject = {
   price_range_max: number | null
   main_image_url: string | null
   is_featured: boolean
+  created_at: string
+  latitude: number | null
+  longitude: number | null
   developers_profiles: { logo_url: string | null; developer_name: string } | null
   project_units: PublicProjectUnit[]
 }
@@ -42,6 +45,9 @@ export async function getPublicProjects(): Promise<PublicProject[]> {
       price_range_max,
       main_image_url,
       is_featured,
+      created_at,
+      latitude,
+      longitude,
       developers_profiles (
         logo_url,
         developer_name
