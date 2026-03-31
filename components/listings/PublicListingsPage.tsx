@@ -42,6 +42,10 @@ import MoreFilters from './MoreFilters'
 interface PublicListingsPageProps {
   mode: ListingSearchMode
   searchParams: PropertySearchParamsInput
+  rentPHListings?: RentPHProperty[]
+  rentPHTotal?: number
+  rentPHPage?: number
+  rentPHLastPage?: number
 }
 
 function formatPrice(value: number | null) {
@@ -54,6 +58,10 @@ function formatPrice(value: number | null) {
 export default async function PublicListingsPage({
   mode,
   searchParams,
+  rentPHListings,
+  rentPHTotal = 0,
+  rentPHPage = 1,
+  rentPHLastPage = 1,
 }: PublicListingsPageProps) {
   const settings = await getSiteSettings()
   const { listings, propertyTypeChips, selectedProject } = await searchPublicListings(
@@ -1063,3 +1071,4 @@ export default async function PublicListingsPage({
     </div>
   )
 }
+

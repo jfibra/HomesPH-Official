@@ -1,5 +1,10 @@
 'use server'
 
+import { headers } from 'next/headers'
+import {
+  ACCOUNT_STATUS_PENDING_APPROVAL,
+  isMissingAccountStateColumnError,
+} from '@/lib/account-status'
 import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
@@ -98,7 +103,7 @@ async function upsertDeveloperProfile(admin: ReturnType<typeof createAdminSupaba
   const payload = {
     user_profile_id: userProfileId,
     developer_name: developerName,
-    is_active: true,
+    is_active: false,
   }
 
   if (existingDeveloper?.id) {
@@ -108,6 +113,10 @@ async function upsertDeveloperProfile(admin: ReturnType<typeof createAdminSupaba
       .eq('id', existingDeveloper.id)
 
     if (error) {
+      if (error.message?.toLowerCase().includes('is_active')) {
+        throw new Error('developers_profiles.is_active is required for approval-based registration. Apply the latest schema update first.')
+      }
+
       throw new Error(error.message)
     }
 
@@ -119,11 +128,19 @@ async function upsertDeveloperProfile(admin: ReturnType<typeof createAdminSupaba
     .insert(payload)
 
   if (error) {
+    if (error.message?.toLowerCase().includes('is_active')) {
+      throw new Error('developers_profiles.is_active is required for approval-based registration. Apply the latest schema update first.')
+    }
+
     throw new Error(error.message)
   }
 }
 
 export async function registerAccountAction(input: RegisterAccountInput): Promise<RegisterAccountResult> {
+  const headersList = await headers()
+  const origin = headersList.get('origin') ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+  const normalizedOrigin = origin.replace(/\/$/, '')
+
   const fname = trimValue(input.fname)
   const lname = trimValue(input.lname)
   const email = trimValue(input.email).toLowerCase()
@@ -174,6 +191,7 @@ export async function registerAccountAction(input: RegisterAccountInput): Promis
     password,
     options: {
       data: metadata,
+      emailRedirectTo: `${normalizedOrigin}/login?notice=approval-pending`,
     },
   })
 
@@ -204,12 +222,20 @@ export async function registerAccountAction(input: RegisterAccountInput): Promis
         full_name: fullName,
         role: input.role,
         prc_number: licensedPrcNumber,
-        is_active: true,
+        is_active: false,
+        account_status: ACCOUNT_STATUS_PENDING_APPROVAL,
+        reviewed_at: null,
+        reviewed_by: null,
+        rejection_reason: null,
       }, { onConflict: 'user_id' })
       .select('id')
       .single<{ id: string }>()
 
     if (profileError || !profile) {
+      if (isMissingAccountStateColumnError(profileError)) {
+        throw new Error('user_profiles.account_status and review fields are required for approval-based registration. Apply the latest schema update first.')
+      }
+
       throw new Error(profileError?.message ?? 'Unable to create user profile.')
     }
 
@@ -219,9 +245,11 @@ export async function registerAccountAction(input: RegisterAccountInput): Promis
       await upsertDeveloperProfile(admin, profile.id, trimValue(input.companyName))
     }
 
+    await supabase.auth.signOut()
+
     return {
       success: true,
-      message: 'Account created. Check your email for the verification code.',
+      message: 'Account created. Verify your email to place your registration in the admin approval queue.',
       email,
     }
   } catch (persistError) {

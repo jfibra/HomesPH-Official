@@ -5,7 +5,21 @@ import LoginForm from '../../components/auth/LoginForm'
 import { getCurrentDashboardUser } from '@/lib/auth/user'
 import { redirect } from 'next/navigation'
 
-export default async function LoginPage() {
+function getLoginNotice(notice: string | string[] | undefined) {
+    const value = Array.isArray(notice) ? notice[0] : notice
+
+    if (value === 'approval-pending') {
+        return 'After you verify your email, an admin must approve your account before dashboard access is enabled.'
+    }
+
+    return null
+}
+
+export default async function LoginPage(props: {
+    searchParams?: Promise<{ notice?: string | string[] }>
+}) {
+    const searchParams = (await props.searchParams) ?? {}
+    const notice = getLoginNotice(searchParams.notice)
     const currentUser = await getCurrentDashboardUser()
     if (currentUser) {
         redirect(`/dashboard/${currentUser.roleSegment}`)
@@ -124,7 +138,7 @@ export default async function LoginPage() {
                 {/* On mobile the card lifts into the brand strip via -mt-10 */}
                 <div className="flex-1 flex items-start lg:items-center justify-center px-5 pb-12 pt-0 lg:py-14 bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
                     <div className="w-full flex justify-center -mt-10 lg:mt-0">
-                        <LoginForm logoUrl={settings.logoUrl} />
+                        <LoginForm logoUrl={settings.logoUrl} notice={notice} />
                     </div>
                 </div>
 

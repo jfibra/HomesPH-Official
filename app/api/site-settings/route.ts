@@ -13,7 +13,7 @@ async function fetchSettings() {
       apikey: SERVICE_ROLE,
       Authorization: `Bearer ${SERVICE_ROLE}`,
       'Content-Type': 'application/json',
-    },
+    } as Record<string, string>,
   })
 
   if (!res.ok) {

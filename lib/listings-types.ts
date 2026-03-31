@@ -99,6 +99,7 @@ export interface ListingDetailsRecord {
 }
 
 export interface ListingAnalyticsPoint {
+  [key: string]: any
   label: string
   views: number
   inquiries: number

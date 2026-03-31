@@ -1,4 +1,5 @@
-import { UsersRound, UserPlus, ShieldCheck, CircleOff } from 'lucide-react'
+import { Clock3, ShieldCheck, UserPlus, UsersRound } from 'lucide-react'
+import { ACCOUNT_STATUS_PENDING_APPROVAL } from '@/lib/account-status'
 import { Card, CardContent } from '@/components/ui/card'
 import UsersTable from '@/components/users/users-table'
 import { getManagedUsers, getUserRoles, requireUsersAccess } from '@/lib/users-admin'
@@ -12,7 +13,7 @@ export default async function DashboardUsersPage() {
   ])
 
   const activeUsers = users.filter((user) => user.is_active).length
-  const inactiveUsers = users.length - activeUsers
+  const pendingUsers = users.filter((user) => user.account_status === ACCOUNT_STATUS_PENDING_APPROVAL).length
   const admins = users.filter((user) => ['super_admin', 'admin'].includes(user.role ?? '')).length
 
   return (
@@ -26,7 +27,7 @@ export default async function DashboardUsersPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card className="border-slate-200 shadow-sm">
           <CardContent className="flex items-center gap-4 px-5 py-5">
             <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
@@ -35,6 +36,17 @@ export default async function DashboardUsersPage() {
             <div>
               <p className="text-sm text-slate-500">Total Users</p>
               <p className="text-2xl font-black tracking-tight text-slate-900">{users.length}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-slate-200 shadow-sm">
+          <CardContent className="flex items-center gap-4 px-5 py-5">
+            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
+              <Clock3 size={20} />
+            </span>
+            <div>
+              <p className="text-sm text-slate-500">Pending Review</p>
+              <p className="text-2xl font-black tracking-tight text-slate-900">{pendingUsers}</p>
             </div>
           </CardContent>
         </Card>
@@ -51,8 +63,8 @@ export default async function DashboardUsersPage() {
         </Card>
         <Card className="border-slate-200 shadow-sm">
           <CardContent className="flex items-center gap-4 px-5 py-5">
-            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
-              {inactiveUsers > 0 ? <CircleOff size={20} /> : <UserPlus size={20} />}
+            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-50 text-violet-700">
+              <UserPlus size={20} />
             </span>
             <div>
               <p className="text-sm text-slate-500">Admins and Super Admins</p>

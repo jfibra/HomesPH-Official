@@ -1,5 +1,6 @@
 'use client'
 
+import { getAccountStatusLabel, normalizeAccountStatus, type AccountStatus } from '@/lib/account-status'
 import { format } from 'date-fns'
 import { CalendarDays, Mail, ShieldCheck, UserRound } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -29,6 +30,19 @@ function getInitials(user: ManagedUserRecord) {
     .join('')
 }
 
+function getStatusBadgeClass(status: AccountStatus) {
+  switch (status) {
+    case 'pending_approval':
+      return 'rounded-full border-amber-200 bg-amber-50 text-amber-700'
+    case 'rejected':
+      return 'rounded-full border-rose-200 bg-rose-50 text-rose-700'
+    case 'manually_disabled':
+      return 'rounded-full border-slate-200 bg-slate-100 text-slate-600'
+    default:
+      return 'rounded-full border-emerald-200 bg-emerald-50 text-emerald-700'
+  }
+}
+
 export default function UserProfileDrawer({
   open,
   onOpenChange,
@@ -38,6 +52,8 @@ export default function UserProfileDrawer({
   onOpenChange: (open: boolean) => void
   user: ManagedUserRecord | null
 }) {
+  const status = user ? normalizeAccountStatus(user.account_status, user.is_active) : null
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
       <DrawerContent className="ml-auto h-full w-full max-w-xl border-l border-slate-200 bg-white">
@@ -58,8 +74,8 @@ export default function UserProfileDrawer({
                 <p className="mt-1 text-sm text-slate-500">{user.email}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Badge variant="outline" className="rounded-full border-blue-200 bg-blue-50 text-blue-700">{(user.role ?? 'unknown').replace(/_/g, ' ')}</Badge>
-                  <Badge variant="outline" className={user.is_active ? 'rounded-full border-emerald-200 bg-emerald-50 text-emerald-700' : 'rounded-full border-slate-200 bg-slate-100 text-slate-600'}>
-                    {user.is_active ? 'Active' : 'Inactive'}
+                  <Badge variant="outline" className={getStatusBadgeClass(status ?? 'approved')}>
+                    {getAccountStatusLabel(user.account_status, user.is_active)}
                   </Badge>
                 </div>
               </div>
@@ -68,11 +84,20 @@ export default function UserProfileDrawer({
             <div className="grid gap-4 sm:grid-cols-2">
               <DetailCard icon={Mail} label="Email" value={user.email} />
               <DetailCard icon={ShieldCheck} label="Role" value={(user.role ?? 'Not assigned').replace(/_/g, ' ')} />
+              <DetailCard icon={ShieldCheck} label="Account Status" value={getAccountStatusLabel(user.account_status, user.is_active)} />
               <DetailCard icon={UserRound} label="Gender" value={user.gender ? user.gender.replace(/_/g, ' ') : 'Not set'} />
               <DetailCard icon={CalendarDays} label="Birthday" value={formatDate(user.birthday)} />
+              <DetailCard icon={CalendarDays} label="Last Reviewed" value={formatDate(user.reviewed_at)} />
               <DetailCard icon={CalendarDays} label="Account Created" value={formatDate(user.auth_created_at ?? user.created_at)} />
               <DetailCard icon={CalendarDays} label="Last Login" value={formatDate(user.last_sign_in_at)} />
             </div>
+
+            {user.rejection_reason ? (
+              <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-rose-500">Rejection Reason</p>
+                <p className="mt-2 text-sm text-rose-800">{user.rejection_reason}</p>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </DrawerContent>

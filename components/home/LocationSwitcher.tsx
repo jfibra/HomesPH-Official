@@ -45,7 +45,7 @@ export default function LocationSwitcher({ variant = 'light' }: { variant?: 'lig
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-2 w-56 bg-white border border-gray-100 rounded-md shadow-lg">
+        <div className="absolute z-[1100] mt-2 w-56 bg-white border border-gray-100 rounded-md shadow-lg">
           <div className="max-h-64 overflow-auto">
             {locations.map((l) => (
               <button

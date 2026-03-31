@@ -2,49 +2,32 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase-browser'
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
-import { ShieldCheck, MailCheck, RefreshCw } from 'lucide-react'
+import { MailCheck, RefreshCw, ShieldCheck } from 'lucide-react'
+import Link from 'next/link'
 
 interface Props {
   email: string
-  onVerified: () => void
 }
 
-export default function OtpVerifyStep({ email, onVerified }: Props) {
-  const [otp, setOtp] = useState('')
-  const [loading, setLoading] = useState(false)
+export default function OtpVerifyStep({ email }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [resent, setResent] = useState(false)
   const [resending, setResending] = useState(false)
 
-  async function handleVerify() {
-    if (otp.length < 6) return
-    setLoading(true)
-    setError(null)
-
-    const { error: verifyError } = await supabase.auth.verifyOtp({
-      email,
-      token: otp,
-      type: 'signup',
-    })
-
-    setLoading(false)
-
-    if (verifyError) {
-      setError(verifyError.message)
-      setOtp('')
-    } else {
-      onVerified()
-    }
-  }
-
   async function handleResend() {
     setResending(true)
     setError(null)
-    await supabase.auth.resend({ type: 'signup', email })
+    
+    const { error: resendError } = await supabase.auth.resend({ type: 'signup', email })
+    
     setResending(false)
-    setResent(true)
-    setTimeout(() => setResent(false), 5000)
+    
+    if (resendError) {
+      setError(resendError.message)
+    } else {
+      setResent(true)
+      setTimeout(() => setResent(false), 5000)
+    }
   }
 
   return (
@@ -63,65 +46,38 @@ export default function OtpVerifyStep({ email, onVerified }: Props) {
             Check your email
           </h2>
           <p className="text-sm text-gray-500 mt-2 leading-relaxed">
-            We sent a 6-digit verification code to
+            We sent a verification link to
           </p>
           <p className="text-sm font-bold text-[#0c1f4a] mt-1">{email}</p>
-        </div>
-
-        {/* OTP input */}
-        <div className="flex justify-center mb-6">
-          <InputOTP
-            maxLength={6}
-            value={otp}
-            onChange={setOtp}
-          >
-            <InputOTPGroup className="gap-2">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <InputOTPSlot
-                  key={i}
-                  index={i}
-                  className="w-11 h-12 text-lg font-bold rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-[#0c1f4a] focus:ring-[#0c1f4a]/20"
-                />
-              ))}
-            </InputOTPGroup>
-          </InputOTP>
+          <p className="text-sm text-gray-500 mt-3 leading-relaxed">
+            After you verify your email, your account will stay pending until an administrator approves your registration.
+          </p>
         </div>
 
         {error && (
-          <p className="mb-4 text-center text-sm text-rose-600 flex items-center justify-center gap-1.5">
+          <p className="mb-6 text-center text-sm text-rose-600 flex items-center justify-center gap-1.5">
             <span className="shrink-0 w-4 h-4 rounded-full bg-rose-500 text-white inline-flex items-center justify-center font-black text-[9px]">!</span>
             {error}
           </p>
         )}
 
         {resent && (
-          <p className="mb-4 text-center text-sm text-emerald-600 flex items-center justify-center gap-1.5">
+          <p className="mb-6 text-center text-sm text-emerald-600 flex items-center justify-center gap-1.5">
             <ShieldCheck size={14} />
-            New code sent!
+            Verification email resent!
           </p>
         )}
 
-        <button
-          onClick={handleVerify}
-          disabled={otp.length < 6 || loading}
-          className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#0c1f4a] to-[#163880] text-white text-[15px] font-bold tracking-wide hover:from-[#0f2860] hover:to-[#1a44a0] active:scale-[0.99] hover:scale-[1.005] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100 shadow-[0_4px_20px_rgba(12,31,74,0.28)]"
+        <Link
+          href="/login?notice=approval-pending"
+          className="flex items-center justify-center w-full py-3.5 rounded-xl bg-gradient-to-r from-[#0c1f4a] to-[#163880] text-white text-[15px] font-bold tracking-wide hover:from-[#0f2860] hover:to-[#1a44a0] active:scale-[0.99] hover:scale-[1.005] transition-all duration-150 shadow-[0_4px_20px_rgba(12,31,74,0.28)]"
         >
-          {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-              </svg>
-              Verifying…
-            </span>
-          ) : (
-            'Verify Email'
-          )}
-        </button>
+          Return to Login
+        </Link>
 
         <div className="mt-5 text-center">
           <p className="text-sm text-gray-500">
-            Didn&rsquo;t receive a code?{' '}
+            Didn&rsquo;t receive an email?{' '}
             <button
               onClick={handleResend}
               disabled={resending}
@@ -130,7 +86,7 @@ export default function OtpVerifyStep({ email, onVerified }: Props) {
               {resending ? (
                 <><RefreshCw size={12} className="animate-spin" /> Sending…</>
               ) : (
-                'Resend code'
+                'Resend link'
               )}
             </button>
           </p>
