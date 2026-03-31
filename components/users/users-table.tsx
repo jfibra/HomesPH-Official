@@ -403,13 +403,13 @@ export default function UsersTable({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-52 rounded-xl border-slate-200">
-                        {([ACCOUNT_STATUS_PENDING_APPROVAL, ACCOUNT_STATUS_REJECTED] as const).includes(getUserStatus(user)) ? (
+                        {([ACCOUNT_STATUS_PENDING_APPROVAL, ACCOUNT_STATUS_REJECTED] as readonly string[]).includes(getUserStatus(user)) ? (
                           <DropdownMenuItem onClick={() => setApproveUser(user)}>
                             <UserRoundCheck size={15} />
                             {getUserStatus(user) === ACCOUNT_STATUS_REJECTED ? 'Approve User' : 'Approve Registration'}
                           </DropdownMenuItem>
                         ) : null}
-                        {([ACCOUNT_STATUS_PENDING_APPROVAL, ACCOUNT_STATUS_REJECTED] as const).includes(getUserStatus(user)) ? (
+                        {([ACCOUNT_STATUS_PENDING_APPROVAL, ACCOUNT_STATUS_REJECTED] as readonly string[]).includes(getUserStatus(user)) ? (
                           <DropdownMenuItem onClick={() => {
                             setRejectUser(user)
                             setRejectionReason(user.rejection_reason ?? '')
@@ -418,7 +418,7 @@ export default function UsersTable({
                             {getUserStatus(user) === ACCOUNT_STATUS_REJECTED ? 'Update Rejection Note' : 'Reject Registration'}
                           </DropdownMenuItem>
                         ) : null}
-                        {([ACCOUNT_STATUS_PENDING_APPROVAL, ACCOUNT_STATUS_REJECTED] as const).includes(getUserStatus(user)) ? <DropdownMenuSeparator /> : null}
+                        {([ACCOUNT_STATUS_PENDING_APPROVAL, ACCOUNT_STATUS_REJECTED] as readonly string[]).includes(getUserStatus(user)) ? <DropdownMenuSeparator /> : null}
                         <DropdownMenuItem onClick={() => setSelectedUser(user)}>
                           <Eye size={15} />
                           View Profile

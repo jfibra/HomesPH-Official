@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import SiteFooter from '@/components/layout/SiteFooter'
+import SiteHeader from '@/components/layout/SiteHeader'
 import {
   type ListingSearchMode,
   type PropertySearchParamsInput,
@@ -7,12 +8,7 @@ import {
 } from '@/lib/property-search'
 import { getSiteSettings } from '@/lib/site-settings'
 import {
-  Phone,
-  Mail,
   MapPin,
-  Facebook,
-  Instagram,
-  Twitter,
   ChevronDown,
   Search as SearchIcon,
   Settings2,
@@ -38,6 +34,7 @@ import FilterDropdown from './FilterDropdown'
 import PropertyTypeFilter from './PropertyTypeFilter'
 import BedsBathsFilter from './BedsBathsFilter'
 import MoreFilters from './MoreFilters'
+import type { RentPHProperty } from './RentPHListingsGrid'
 
 interface PublicListingsPageProps {
   mode: ListingSearchMode
@@ -72,13 +69,23 @@ export default async function PublicListingsPage({
   const isSale = mode === 'sale'
 
   return (
+    <>
+    <div style={{ position: 'relative', zIndex: 50 }}>
+      <SiteHeader
+        logoUrl={settings.logoUrl}
+        contactEmail={settings.contactEmail}
+        contactPhone={settings.contactPhone}
+        socialLinks={settings.socialLinks}
+      />
+    </div>
     <div style={{
       position: 'relative',
       width: '100%',
       minHeight: '3239px',
       background: '#FFFFFF',
       fontFamily: "'Outfit', sans-serif",
-      overflowX: 'hidden'
+      overflowX: 'hidden',
+      marginTop: '-150px'
     }}>
       <style dangerouslySetInnerHTML={{
         __html: `
@@ -93,33 +100,7 @@ export default async function PublicListingsPage({
           box-shadow: 0px 20px 40px rgba(0, 33, 67, 0.12);
           z-index: 50 !important;
         }
-        .nav-link-item {
-          position: relative;
-          transition: all 0.2s ease;
-        }
-        .nav-link-item:hover::before {
-          content: '';
-          position: absolute;
-          z-index: -1;
-          left: -12px;
-          right: -12px;
-          top: -8px;
-          bottom: -8px;
-          background-color: #FDF8EF;
-          border-radius: 8px;
-          opacity: 0.6;
-        }
       `}} />
-      {/* Rectangle 11026 - Top Bar (Full Width) */}
-      <div style={{
-        position: 'absolute',
-        width: '100%',
-        height: '40px',
-        left: '0px',
-        top: '0px',
-        background: '#1428AE',
-        zIndex: 5
-      }} />
 
       {/* Footer Wrapper - Center across 100% (Full Width) */}
       <div style={{
@@ -149,160 +130,6 @@ export default async function PublicListingsPage({
       }}>
         {/* Enable interactions for children */}
         <div style={{ pointerEvents: 'auto', width: '100%', height: '100%', position: 'relative' }}>
-
-          {/* Phone */}
-          <div style={{ position: 'absolute', left: '227px', top: '11px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Phone size={18} color="white" />
-          </div>
-          <span style={{ position: 'absolute', left: '250px', top: '13px', height: '15px', fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: 'white', whiteSpace: 'nowrap' }}>
-            {settings.contactPhone}
-          </span>
-
-          {/* Email */}
-          <div style={{ position: 'absolute', left: '398px', top: '11px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Mail size={18} color="white" />
-          </div>
-          <span style={{ position: 'absolute', left: '421px', top: '13px', height: '15px', fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: 'white', whiteSpace: 'nowrap' }}>
-            {settings.contactEmail}
-          </span>
-
-          {/* Location - Moved right to avoid overlap with dynamic email */}
-          <div style={{ position: 'absolute', left: '588px', top: '11px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <MapPin size={18} color="white" />
-          </div>
-          <span style={{ position: 'absolute', left: '611px', top: '13px', height: '15px', fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: 'white', whiteSpace: 'nowrap' }}>
-            Manila, Philippines
-          </span>
-
-          {/* Social Icons - Top Bar */}
-          <div style={{ position: 'absolute', left: '1508px', top: '11px', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Facebook size={18} color="white" />
-          </div>
-          <div style={{ position: 'absolute', left: '1536px', top: '12px', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Instagram size={16} color="white" />
-          </div>
-          <div style={{ position: 'absolute', left: '1562px', top: '13px', width: '14px', height: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Twitter size={14} color="white" />
-          </div>
-
-          {/* Dropdown All - Top Bar */}
-          <div style={{
-            boxSizing: 'border-box',
-            position: 'absolute',
-            width: '101px',
-            height: '25px',
-            left: '1591px',
-            top: '7px',
-            border: '1px solid #FFFFFF',
-            borderRadius: '5px'
-          }} />
-          {/* Dot */}
-          <div style={{ position: 'absolute', width: '4px', height: '4px', left: '1599px', top: '18px', background: '#FFCE70', borderRadius: '50%' }} />
-          {/* Text */}
-          <span style={{ position: 'absolute', width: '61px', height: '12px', left: '1609px', top: '14px', fontFamily: "'Outfit'", fontWeight: 300, fontSize: '12px', lineHeight: '12px', color: 'white' }}>
-            All
-          </span>
-          {/* Dropdown Icon */}
-          <div style={{ position: 'absolute', left: '1670px', top: '11px', width: '17px', height: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ChevronDown size={17} color="white" />
-          </div>
-
-          {/* Header Divider */}
-          <div style={{
-            position: 'absolute',
-            width: '1920px',
-            height: '1px',
-            left: '0px',
-            top: '150px',
-            background: '#D3D3D3'
-          }} />
-
-          {/* Main Header */}
-          <div style={{ position: 'absolute', left: '290px', top: '70px' }}>
-            <Link href="/">
-              <img src={settings.logoUrl} alt="Logo" style={{ width: '179px', height: '50px' }} />
-            </Link>
-          </div>
-
-          <div style={{
-            position: 'absolute',
-            width: '469px',
-            height: '20px',
-            left: 'calc(50% - 469px / 2 - 0.5px)',
-            top: '85px',
-            display: 'flex',
-            gap: '40px',
-            justifyContent: 'center',
-            alignItems: 'center',
-            pointerEvents: 'auto'
-          }}>
-            {[
-              { label: 'Home', href: '/', width: '48px' },
-              { label: 'Buy', href: '/buy', width: '30px' },
-              { label: 'Rent', href: '/rent', width: '37px' },
-              { label: 'Projects', href: '/projects', width: '72px' },
-              { label: 'News', href: '/news', width: '44px' },
-              { label: 'Contact Us', href: '/contact-us', width: '88px' }
-            ].map((item) => {
-              const isActive = (item.label === 'Buy' && mode === 'sale') || (item.label === 'Rent' && mode === 'rent')
-              const bgWidth = item.label === 'Contact Us' ? '120px' : (item.label === 'Projects' ? '90px' : '63px')
-
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="nav-link-item nav-link-hover"
-                  style={{
-                    position: 'relative',
-                    height: '20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontFamily: "'Outfit'",
-                    fontSize: '18px',
-                    fontWeight: 400,
-                    color: '#002143',
-                    textDecoration: 'none',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  {isActive && (
-                    <div style={{
-                      position: 'absolute',
-                      zIndex: -1,
-                      left: '50%',
-                      top: '50%',
-                      transform: 'translate(-50%, -55%)',
-                      width: bgWidth,
-                      height: '36px',
-                      backgroundColor: '#FDF8EF',
-                      borderRadius: '8px'
-                    }} />
-                  )}
-                  {item.label}
-                </Link>
-              )
-            })}
-          </div>
-
-          <div style={{ position: 'absolute', left: '1460px', top: '85px' }}>
-            <Link href="/login" style={{ fontSize: '18px', fontWeight: 400, color: '#002143' }}>Login</Link>
-          </div>
-          <Link href="/registration" style={{
-            position: 'absolute',
-            width: '103px',
-            height: '46px',
-            left: '1520px',
-            top: '72px',
-            background: '#1428AE',
-            borderRadius: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textDecoration: 'none'
-          }}>
-            <span style={{ fontSize: '18px', fontWeight: 500, color: '#FFFFFF' }}>Sign in</span>
-          </Link>
 
           {/* Search Bar Section */}
           <BuySearchBar initialValue={(Array.isArray(searchParams.location) ? searchParams.location[0] : searchParams.location) || ''} />
@@ -1069,6 +896,7 @@ export default async function PublicListingsPage({
         </div>
       </div>
     </div>
+    </>
   )
 }
 

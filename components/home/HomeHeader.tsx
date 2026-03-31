@@ -71,7 +71,7 @@ export default function HomeHeader({
   contactPhone,
   socialLinks,
   logoUrl,
-  navItems = DEFAULT_NAV_ITEMS,
+  navItems = NAV_ITEMS,
   topBarLocationLabel,
 }: HomeHeaderProps) {
   const [scrolled, setScrolled] = useState(false)
