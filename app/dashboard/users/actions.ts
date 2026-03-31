@@ -1,9 +1,12 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { sendAccountReviewNotification } from '@/lib/email/account-review-notifications'
 import {
+  approveManagedUser,
   createManagedUser,
   deleteManagedUser,
+  rejectManagedUser,
   resetManagedUserPassword,
   setManagedUserActive,
   updateManagedUser,
@@ -19,6 +22,11 @@ interface ActionResult<T = undefined> {
 
 function revalidateUsersSurface() {
   revalidatePath('/dashboard/users')
+  revalidatePath('/dashboard/developers')
+}
+
+function appendNotificationWarning(message: string, warning?: string) {
+  return warning ? `${message} ${warning}` : message
 }
 
 export async function createUserAction(input: CreateManagedUserInput): Promise<ActionResult<ManagedUserRecord>> {
@@ -58,6 +66,47 @@ export async function setUserStatusAction(profileId: string, isActive: boolean):
     return { success: true, message: isActive ? 'User activated.' : 'User deactivated.', data }
   } catch (error) {
     return { success: false, message: error instanceof Error ? error.message : 'Unable to update user status.' }
+  }
+}
+
+export async function approveUserAction(profileId: string): Promise<ActionResult<ManagedUserRecord>> {
+  try {
+    const data = await approveManagedUser(profileId)
+    const notification = await sendAccountReviewNotification({
+      email: data.email,
+      fullName: data.full_name ?? data.email,
+      decision: 'approved',
+    })
+
+    revalidateUsersSurface()
+    return {
+      success: true,
+      message: appendNotificationWarning('User approved.', notification.sent ? undefined : notification.message),
+      data,
+    }
+  } catch (error) {
+    return { success: false, message: error instanceof Error ? error.message : 'Unable to approve user.' }
+  }
+}
+
+export async function rejectUserAction(profileId: string, rejectionReason: string): Promise<ActionResult<ManagedUserRecord>> {
+  try {
+    const data = await rejectManagedUser(profileId, rejectionReason)
+    const notification = await sendAccountReviewNotification({
+      email: data.email,
+      fullName: data.full_name ?? data.email,
+      decision: 'rejected',
+      rejectionReason,
+    })
+
+    revalidateUsersSurface()
+    return {
+      success: true,
+      message: appendNotificationWarning('User rejected.', notification.sent ? undefined : notification.message),
+      data,
+    }
+  } catch (error) {
+    return { success: false, message: error instanceof Error ? error.message : 'Unable to reject user.' }
   }
 }
 

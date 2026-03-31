@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const res = await fetch(upstream.toString(), {
       headers: {
         'Accept': 'application/json',
-        'x-api-key': API_KEY,
+        'X-Site-Key': API_KEY,
       },
       next: { revalidate: 300 }, // cache for 5 minutes
     })

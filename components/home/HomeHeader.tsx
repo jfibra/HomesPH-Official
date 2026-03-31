@@ -51,13 +51,13 @@ interface HomeHeaderProps {
   topBarLocationLabel?: string
 }
 
-const DEFAULT_NAV_ITEMS: HomeHeaderNavItem[] = [
-  { label: 'Home', href: '/' },
-  { label: 'Buy', href: '/buy' },
-  { label: 'Rent', href: '/rent' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'News', href: '/news' },
-  { label: 'Contact Us', href: '/contact-us' },
+// Home-specific nav: show company/link actions rather than global site nav
+const NAV_ITEMS: { label: string; href: string }[] = [
+  { label: 'Our Company', href: '/our-company' },
+  { label: 'Mortgage', href: '/mortgage' },
+  { label: 'Legal', href: '/legal' },
+  { label: 'Tourism', href: '/tourism' },
+  { label: 'Restaurant', href: '/restaurant' },
 ]
 
 const LANDING_TOP_BAR_SHELL =

@@ -1,14 +1,17 @@
 'use server'
 
+import {
+  canAccessDashboardAccount,
+  getInactiveAccountMessage,
+} from '@/lib/account-status'
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getDashboardPathForRole } from '@/lib/auth/roles'
-import { getUserProfileWithIsActiveFallback } from '@/lib/auth/profile-query'
+import { getUserProfileWithAccountStateFallback } from '@/lib/auth/profile-query'
 import type { LoginFormState } from '@/lib/auth/types'
 
 const INVALID_CREDENTIALS = 'Invalid email or password.'
 const PROFILE_NOT_FOUND = 'Your account does not have an assigned dashboard role yet.'
-const ACCOUNT_INACTIVE = 'Your account is inactive. Please contact an administrator.'
 const EMAIL_NOT_CONFIRMED = 'Please verify your email before logging in.'
 const TOO_MANY_ATTEMPTS = 'Too many login attempts. Please wait a moment and try again.'
 const PROFILE_LOOKUP_FAILED = 'We could not load your dashboard profile. Please try again.'
@@ -50,11 +53,14 @@ export async function loginAction(_: LoginFormState, formData: FormData): Promis
     return { error: getLoginErrorMessage(userError?.message) }
   }
 
-  const { data: profile, error: profileError } = await getUserProfileWithIsActiveFallback<{ role: string | null }>({
+  const { data: profile, error: profileError } = await getUserProfileWithAccountStateFallback<{
+    role: string | null
+    rejection_reason?: string | null
+  }>({
     supabase,
     userId: user.id,
-    selectWithIsActive: 'role,is_active',
-    selectWithoutIsActive: 'role',
+    selectWithAccountState: 'role,is_active,account_status,rejection_reason',
+    selectWithoutAccountState: 'role,is_active',
   })
 
   if (profileError) {
@@ -62,9 +68,11 @@ export async function loginAction(_: LoginFormState, formData: FormData): Promis
     return { error: PROFILE_LOOKUP_FAILED }
   }
 
-  if (profile && profile.is_active === false) {
+  if (profile && !canAccessDashboardAccount(profile)) {
     await supabase.auth.signOut()
-    return { error: ACCOUNT_INACTIVE }
+    return {
+      error: getInactiveAccountMessage(profile.account_status, profile.is_active, profile.rejection_reason),
+    }
   }
 
   const destination = getDashboardPathForRole(profile?.role)

@@ -148,6 +148,10 @@ const propertyQueryJsonSchema = {
   ],
 } as const
 
+const propertyQuerySuggestionsSchema = z.object({
+  suggestions: z.array(z.string().trim().min(1)).min(1).max(8),
+})
+
 export type AiPropertyMode = z.infer<typeof parsedPropertyQuerySchema>['mode']
 export type ListingSearchMode = 'sale' | 'rent'
 
@@ -657,6 +661,73 @@ function buildParserPrompt(
   )
 }
 
+function buildPropertySuggestionJsonSchema(count: number) {
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      suggestions: {
+        type: 'array',
+        description:
+          'Concise Homes.ph property search suggestions written as search queries, not sentences.',
+        items: { type: 'string' },
+        minItems: count,
+        maxItems: count,
+      },
+    },
+    required: ['suggestions'],
+  } as const
+}
+
+function buildSuggestionInstructions(count: number) {
+  return [
+    'You generate Homes.ph property search suggestions only.',
+    'Return JSON matching the schema exactly.',
+    `Return exactly ${count} suggestions.`,
+    'Suggestions must be concise natural-language search queries, not full sentences.',
+    'Use only the supplied Homes.ph taxonomy for property types, locations, and features.',
+    'Use the supplied page location context by default unless the partial query clearly asks for another location.',
+    'If a partial query is supplied, refine or complete it into highly likely property search intents.',
+    'Prefer specific, high-intent suggestions involving property type, neighborhood, bedroom count, budget, or amenities when grounded in the taxonomy.',
+    'Do not include numbering, bullets, explanations, duplicate suggestions, or markdown.',
+  ].join('\n')
+}
+
+function buildSuggestionPrompt(
+  query: string | null,
+  locationSlug: string | null,
+  taxonomy: SearchTaxonomy,
+  count: number
+) {
+  return JSON.stringify(
+    {
+      partialQuery: query?.trim() || null,
+      fallbackLocationContext: formatLocationLabelFromSlug(locationSlug),
+      suggestionCount: count,
+      availableFilters: {
+        propertyTypes: taxonomy.propertyTypes,
+        cities: taxonomy.cities,
+        provinces: taxonomy.provinces,
+        barangays: taxonomy.barangays,
+        features: taxonomy.features,
+      },
+    },
+    null,
+    2
+  )
+}
+
+function normalizeSuggestedQueries(suggestions: string[], count: number) {
+  return uniqueStrings(
+    suggestions.map((suggestion) =>
+      suggestion
+        .replace(/^['"`]+|['"`]+$/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+    )
+  ).slice(0, count)
+}
+
 function extractOpenAiTextPayload(payload: any) {
   if (typeof payload?.output_text === 'string' && payload.output_text.trim()) {
     return payload.output_text.trim()
@@ -728,6 +799,61 @@ async function parsePropertyQueryWithOpenAI(
   return parsedPropertyQuerySchema.parse(JSON.parse(rawText))
 }
 
+async function suggestPropertyQueriesWithOpenAI(
+  query: string | null,
+  locationSlug: string | null,
+  taxonomy: SearchTaxonomy,
+  count: number
+) {
+  const apiKey = process.env.OPENAI_API_KEY?.trim()
+  if (!apiKey) return null
+
+  const response = await fetch(OPENAI_RESPONSES_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: process.env.OPENAI_PROPERTY_QUERY_MODEL?.trim() || DEFAULT_OPENAI_MODEL,
+      max_output_tokens: MAX_OPENAI_OUTPUT_TOKENS,
+      input: [
+        {
+          role: 'developer',
+          content: buildSuggestionInstructions(count),
+        },
+        {
+          role: 'user',
+          content: buildSuggestionPrompt(query, locationSlug, taxonomy, count),
+        },
+      ],
+      text: {
+        format: {
+          type: 'json_schema',
+          name: 'homesph_property_query_suggestions',
+          strict: true,
+          schema: buildPropertySuggestionJsonSchema(count),
+        },
+      },
+    }),
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`OpenAI property suggestions failed: ${response.status} ${errorText.slice(0, 300)}`)
+  }
+
+  const payload = await response.json()
+  const rawText = extractOpenAiTextPayload(payload)
+
+  if (!rawText) {
+    throw new Error('OpenAI property suggestions returned an empty response.')
+  }
+
+  const parsed = propertyQuerySuggestionsSchema.parse(JSON.parse(rawText))
+  return normalizeSuggestedQueries(parsed.suggestions, count)
+}
+
 async function parsePropertyQueryWithGemini(
   query: string,
   locationSlug: string | null,
@@ -783,6 +909,63 @@ async function parsePropertyQueryWithGemini(
   return parsedPropertyQuerySchema.parse(JSON.parse(rawText))
 }
 
+async function suggestPropertyQueriesWithGemini(
+  query: string | null,
+  locationSlug: string | null,
+  taxonomy: SearchTaxonomy,
+  count: number
+) {
+  const apiKey = process.env.GEMINI_API_KEY?.trim()
+  if (!apiKey) return null
+
+  const model = process.env.GEMINI_PROPERTY_QUERY_MODEL?.trim() || DEFAULT_GEMINI_MODEL
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: `${buildSuggestionInstructions(count)}\n\n${buildSuggestionPrompt(query, locationSlug, taxonomy, count)}`,
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseJsonSchema: buildPropertySuggestionJsonSchema(count),
+        },
+      }),
+    }
+  )
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`Gemini property suggestions failed: ${response.status} ${errorText.slice(0, 300)}`)
+  }
+
+  const payload = await response.json()
+  const rawText =
+    payload?.candidates?.[0]?.content?.parts
+      ?.map((part: { text?: string }) => part.text ?? '')
+      .join('\n')
+      .trim() ?? ''
+
+  if (!rawText) {
+    throw new Error('Gemini property suggestions returned an empty response.')
+  }
+
+  const parsed = propertyQuerySuggestionsSchema.parse(JSON.parse(rawText))
+  return normalizeSuggestedQueries(parsed.suggestions, count)
+}
+
 export async function parseNaturalLanguagePropertyQuery(
   query: string,
   locationSlug?: string | null
@@ -814,6 +997,49 @@ export async function parseNaturalLanguagePropertyQuery(
   }
 
   throw new Error(errors[0] ?? 'No AI provider is configured for property parsing.')
+}
+
+export async function generatePropertyQuerySuggestions(
+  query?: string | null,
+  locationSlug?: string | null,
+  options?: {
+    count?: number
+  }
+) {
+  const suggestionCount = Math.max(1, Math.min(options?.count ?? 4, 8))
+  const trimmedQuery = query?.trim() || null
+  const taxonomy = await getPropertySearchTaxonomy()
+  const errors: string[] = []
+
+  try {
+    const openAiResult = await suggestPropertyQueriesWithOpenAI(
+      trimmedQuery,
+      locationSlug ?? null,
+      taxonomy,
+      suggestionCount
+    )
+    if (openAiResult && openAiResult.length > 0) {
+      return openAiResult
+    }
+  } catch (error) {
+    errors.push(error instanceof Error ? error.message : 'OpenAI property suggestions failed.')
+  }
+
+  try {
+    const geminiResult = await suggestPropertyQueriesWithGemini(
+      trimmedQuery,
+      locationSlug ?? null,
+      taxonomy,
+      suggestionCount
+    )
+    if (geminiResult && geminiResult.length > 0) {
+      return geminiResult
+    }
+  } catch (error) {
+    errors.push(error instanceof Error ? error.message : 'Gemini property suggestions failed.')
+  }
+
+  throw new Error(errors[0] ?? 'No AI provider is configured for property suggestions.')
 }
 
 function parsePropertySearchFilters(searchParams: PropertySearchParamsInput): PropertySearchFilters {

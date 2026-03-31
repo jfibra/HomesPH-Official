@@ -72,11 +72,9 @@ export default function BuySearchBar({ initialValue = '' }: BuySearchBarProps) {
         ref={dropdownRef}
         style={{
           boxSizing: 'border-box',
-          position: 'absolute',
-          width: '685px',
+          position: 'relative',
+          width: '100%',
           height: '55px',
-          left: '296px',
-          top: '176px',
           border: '1px solid #D3D3D3',
           borderRadius: '10px',
           paddingLeft: '38px',

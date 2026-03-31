@@ -20,9 +20,14 @@ export type PublicProject = {
   price_range_min: number | null
   price_range_max: number | null
   main_image_url: string | null
+  video_tour_url: string | null
   is_featured: boolean
+  created_at: string
+  latitude: number | null
+  longitude: number | null
   developers_profiles: { logo_url: string | null; developer_name: string } | null
   project_units: PublicProjectUnit[]
+  project_amenities: { amenities: { name: string } | null }[]
 }
 
 export async function getPublicProjects(): Promise<PublicProject[]> {
@@ -41,7 +46,11 @@ export async function getPublicProjects(): Promise<PublicProject[]> {
       price_range_min,
       price_range_max,
       main_image_url,
+      video_tour_url,
       is_featured,
+      created_at,
+      latitude,
+      longitude,
       developers_profiles (
         logo_url,
         developer_name
@@ -52,6 +61,11 @@ export async function getPublicProjects(): Promise<PublicProject[]> {
         bedrooms,
         bathrooms,
         floor_area_sqm
+      ),
+      project_amenities (
+        amenities (
+          name
+        )
       )
     `)
     .order('is_featured', { ascending: false })
