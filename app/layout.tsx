@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Outfit, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
+import PageTransitionLoader from '@/components/layout/PageTransitionLoader'
 import { getSiteSettings } from '../lib/site-settings'
 import './globals.css'
 import 'leaflet/dist/leaflet.css'
@@ -81,6 +82,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${outfit.variable} font-sans antialiased`} suppressHydrationWarning>
+        <PageTransitionLoader />
         {children}
         <Toaster />
         <Analytics />

@@ -64,7 +64,7 @@ export default function MoreFilters({ initialValues, onSelect }: MoreFiltersProp
   }
 
   return (
-    <div ref={dropdownRef} style={{ position: 'absolute', left: '1425.96px', top: '176px', zIndex: 30 }}>
+    <div ref={dropdownRef} style={{ position: 'relative', zIndex: 30, flexShrink: 0 }}>
       {/* Dropdown Button - Rectangle 11178 */}
       <div 
         onClick={() => setIsOpen(!isOpen)}
