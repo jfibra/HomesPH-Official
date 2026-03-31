@@ -54,7 +54,7 @@ export default function BedsBathsFilter({ initialBeds, initialBaths, onSelect }:
   }
 
   return (
-    <div ref={dropdownRef} style={{ position: 'relative', zIndex: 30, flexShrink: 0 }}>
+    <div ref={dropdownRef} style={{ position: 'absolute', left: '1198.76px', top: '176px', zIndex: 60 }}>
       {/* Dropdown Button - Rectangle 11177 */}
       <div 
         onClick={() => setIsOpen(!isOpen)}

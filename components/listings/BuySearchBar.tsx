@@ -81,7 +81,8 @@ export default function BuySearchBar({ initialValue = '' }: BuySearchBarProps) {
           display: 'flex',
           alignItems: 'center',
           background: '#FFFFFF',
-          zIndex: 20
+          zIndex: 60,
+          pointerEvents: 'auto'
         }}
       >
         <Search

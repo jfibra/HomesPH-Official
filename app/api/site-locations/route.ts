@@ -12,7 +12,7 @@ export async function GET() {
         apikey: SERVICE_ROLE,
         Authorization: `Bearer ${SERVICE_ROLE}`,
         'Content-Type': 'application/json',
-      },
+      } as Record<string, string>,
       next: { revalidate: 300 },
     })
 

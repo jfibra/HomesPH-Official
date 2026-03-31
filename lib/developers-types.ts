@@ -8,7 +8,7 @@ export interface DeveloperProfileRecord {
   website_url: string | null
   description: string | null
   logo_url: string | null
-  is_active: boolean | null
+  is_active?: boolean | null
   created_at: string | null
   updated_at: string | null
 }

@@ -1,14 +1,14 @@
 const REVALIDATE = 300
 
-function getSupabaseFetchHeaders() {
+function getSupabaseFetchHeaders(): Record<string, string> | undefined {
   const SERVICE_ROLE = process.env.NEXT_SUPABASE_SERVICE_ROLE
-  return SERVICE_ROLE
-    ? {
-        apikey: SERVICE_ROLE,
-        Authorization: `Bearer ${SERVICE_ROLE}`,
-        'Content-Type': 'application/json',
-      }
-    : undefined
+  if (!SERVICE_ROLE) return undefined
+
+  return {
+    apikey: SERVICE_ROLE,
+    Authorization: `Bearer ${SERVICE_ROLE}`,
+    'Content-Type': 'application/json',
+  }
 }
 
 export async function getProjectsByProvince(provinceSlug: string, opts?: { limit?: number; featured?: boolean }) {

@@ -63,7 +63,7 @@ export default function PropertyTypeFilter({ initialValue = [], onSelect }: Prop
   const currentTypes = activeTab === 'Residential' ? RESIDENTIAL_TYPES : COMMERCIAL_TYPES
 
   return (
-    <div ref={dropdownRef} style={{ position: 'relative', zIndex: 30, flexShrink: 0 }}>
+    <div ref={dropdownRef} style={{ position: 'absolute', left: '991.67px', top: '176px', zIndex: 60 }}>
       {/* Dropdown Button - Rectangle 11132 */}
       <div
         onClick={() => setIsOpen(!isOpen)}

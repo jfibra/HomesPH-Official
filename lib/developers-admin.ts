@@ -158,14 +158,16 @@ export async function getDevelopers(): Promise<ManagedDeveloperRecord[]> {
   const admin = createAdminSupabaseClient()
   const [{ data, error }, projectsResult] = await Promise.all([
     queryDevelopersProfiles<DeveloperProfileRecord[]>({
-      buildWithActive: () => admin
-        .from('developers_profiles')
-        .select('id,user_profile_id,developer_name,industry,website_url,description,logo_url,is_active,created_at,updated_at')
-        .order('created_at', { ascending: false }) as any,
-      buildWithoutActive: () => admin
-        .from('developers_profiles')
-        .select('id,user_profile_id,developer_name,industry,website_url,description,logo_url,created_at,updated_at')
-        .order('created_at', { ascending: false }) as any,
+      buildWithActive: async () =>
+        await admin
+          .from('developers_profiles')
+          .select('id,user_profile_id,developer_name,industry,website_url,description,logo_url,is_active,created_at,updated_at')
+          .order('created_at', { ascending: false }),
+      buildWithoutActive: async () =>
+        await admin
+          .from('developers_profiles')
+          .select('id,user_profile_id,developer_name,industry,website_url,description,logo_url,created_at,updated_at')
+          .order('created_at', { ascending: false }),
     }),
     admin.from('projects').select('id,developer_id'),
   ])
@@ -197,16 +199,18 @@ export async function getDeveloperById(id: number): Promise<DeveloperDetailBundl
 
   const admin = createAdminSupabaseClient()
   const developerResult = await queryDevelopersProfiles<DeveloperProfileRecord>({
-    buildWithActive: () => admin
-      .from('developers_profiles')
-      .select('id,user_profile_id,developer_name,industry,website_url,description,logo_url,is_active,created_at,updated_at')
-      .eq('id', id)
-      .maybeSingle() as any,
-    buildWithoutActive: () => admin
-      .from('developers_profiles')
-      .select('id,user_profile_id,developer_name,industry,website_url,description,logo_url,created_at,updated_at')
-      .eq('id', id)
-      .maybeSingle() as any,
+    buildWithActive: async () =>
+      await admin
+        .from('developers_profiles')
+        .select('id,user_profile_id,developer_name,industry,website_url,description,logo_url,is_active,created_at,updated_at')
+        .eq('id', id)
+        .maybeSingle(),
+    buildWithoutActive: async () =>
+      await admin
+        .from('developers_profiles')
+        .select('id,user_profile_id,developer_name,industry,website_url,description,logo_url,created_at,updated_at')
+        .eq('id', id)
+        .maybeSingle(),
   })
 
   if (developerResult.error) {
