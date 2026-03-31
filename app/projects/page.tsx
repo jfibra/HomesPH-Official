@@ -4,7 +4,7 @@ import SiteFooter from '@/components/layout/SiteFooter'
 import { getSiteSettings } from '@/lib/site-settings'
 import { getPublicProjects } from '@/lib/projects-public'
 import AdBanner from '@/components/ui/AdBanner'
-import { MapPin, BedDouble, Bath, Heart, Share2, Mail, Phone, MessageCircle, ChevronLeft, ChevronRight, LayoutList, Map, Bell } from 'lucide-react'
+import { MapPin, BedDouble, Bath, Heart, Share2, Mail, Phone, MessageCircle, ChevronLeft, ChevronRight, LayoutList, Map, Bell, SearchX } from 'lucide-react'
 import SearchFilter from '@/components/projects/SearchFilter'
 import SortDropdown from '@/components/projects/SortDropdown'
 import ProjectMapView from '@/components/projects/ProjectMapView'
@@ -19,7 +19,7 @@ const fmtRange = (min?: number | null, max?: number | null) => {
 }
 
 export default async function ProjectsPage(
-  props: { searchParams?: Promise<{ q?: string; location?: string; status?: string; type?: string; beds?: string; contract?: string; view?: string; sort?: string }> }
+  props: { searchParams?: Promise<{ q?: string; location?: string; status?: string; type?: string; beds?: string; baths?: string; priceMin?: string; priceMax?: string; areaMin?: string; areaMax?: string; keywords?: string; agent?: string; tourTypes?: string; contract?: string; view?: string; sort?: string }> }
 ) {
   const sp = (await props.searchParams) ?? {}
   const settings = await getSiteSettings()
@@ -34,24 +34,105 @@ export default async function ProjectsPage(
       p.name.toLowerCase().includes(query) ||
       p.city_municipality?.toLowerCase().includes(query) ||
       p.province?.toLowerCase().includes(query) ||
-      p.project_type?.toLowerCase().includes(query)
+      p.project_type?.toLowerCase().includes(query) ||
+      p.developers_profiles?.developer_name.toLowerCase().includes(query) ||
+      p.project_amenities?.some(pa => pa.amenities?.name.toLowerCase().includes(query))
     )
   }
-  if (sp.location) projects = projects.filter(p => p.province?.toLowerCase().includes(sp.location!.toLowerCase()) || p.city_municipality?.toLowerCase().includes(sp.location!.toLowerCase()))
+
+  // Keywords Filtering
+  if (sp.keywords) {
+    const kw = sp.keywords.toLowerCase().trim()
+    projects = projects.filter(p =>
+      p.name.toLowerCase().includes(kw) ||
+      p.city_municipality?.toLowerCase().includes(kw) ||
+      p.province?.toLowerCase().includes(kw) ||
+      p.project_amenities?.some(pa => pa.amenities?.name.toLowerCase().includes(kw))
+    )
+  }
+
+  // Agent (Developer) Filtering
+  if (sp.agent) {
+    const ag = sp.agent.toLowerCase().trim()
+    projects = projects.filter(p =>
+      p.developers_profiles?.developer_name.toLowerCase().includes(ag)
+    )
+  }
+
+  // Tour Types Filtering
+  if (sp.tourTypes) {
+    const tours = sp.tourTypes.split(',')
+    projects = projects.filter(p => {
+      if (tours.includes('Video Tours') && p.video_tour_url) return true
+      if (tours.includes('360° Tours') && p.video_tour_url) return true // Placeholder
+      return false
+    })
+  }
+
+  if (sp.location) {
+    const loc = sp.location.toLowerCase()
+    projects = projects.filter(p =>
+      p.province?.toLowerCase().includes(loc) ||
+      p.city_municipality?.toLowerCase().includes(loc)
+    )
+  }
   if (sp.status) projects = projects.filter(p => p.status === sp.status)
 
   // Property Type Filtering
   if (sp.type) {
-    projects = projects.filter(p => p.project_type?.toLowerCase().includes(sp.type!.toLowerCase()))
+    const selectedTypes = sp.type.toLowerCase().split(',')
+    projects = projects.filter(p => 
+      p.project_type && selectedTypes.some(t => p.project_type!.toLowerCase().includes(t))
+    )
   }
 
   // Beds Filtering
   if (sp.beds) {
-    const minBeds = parseInt(sp.beds)
+    const selectedBeds = sp.beds.split(',')
     projects = projects.filter(p =>
-      p.project_units?.some(u =>
-        minBeds === 3 ? (u.bedrooms || 0) >= 3 : (u.bedrooms || 0) === minBeds
-      )
+      p.project_units?.some(u => {
+        const beds = u.bedrooms || 0
+        return selectedBeds.some(opt => {
+          if (opt === 'Studio') return beds === 0
+          if (opt === '6+') return beds >= 6
+          const num = parseInt(opt)
+          return beds === num
+        })
+      })
+    )
+  }
+
+  // Baths Filtering
+  if (sp.baths) {
+    const selectedBaths = sp.baths.split(',')
+    projects = projects.filter(p =>
+      p.project_units?.some(u => {
+        const baths = u.bathrooms || 0
+        return selectedBaths.some(opt => {
+          if (opt === '6+') return baths >= 6
+          const num = parseInt(opt)
+          return baths === num
+        })
+      })
+    )
+  }
+
+  // Price Filtering
+  if (sp.priceMin) {
+    const min = parseInt(sp.priceMin)
+    projects = projects.filter(p => (p.price_range_min || 0) >= min)
+  }
+  if (sp.priceMax) {
+    const max = parseInt(sp.priceMax)
+    projects = projects.filter(p => (p.price_range_min || 0) <= max)
+  }
+
+  // Area Filtering
+  if (sp.areaMin || sp.areaMax) {
+    const amin = sp.areaMin ? parseInt(sp.areaMin) : 0
+    const amax = sp.areaMax ? parseInt(sp.areaMax) : Infinity
+    projects = projects.filter(p =>
+      p.project_units?.some(u => (u.floor_area_sqm || 0) >= amin && (u.floor_area_sqm || 0) <= amax)
     )
   }
 
@@ -101,22 +182,18 @@ export default async function ProjectsPage(
         socialLinks={settings.socialLinks}
       />
 
-      {/* â”€â”€ Hero â”€â”€ */}
-      <div className="bg-[#0c1f4a] text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-xs font-bold uppercase tracking-[0.6em] text-amber-400 mb-2">Nationwide Developments</p>
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-3">Property Projects</h1>
-          <p className="text-blue-200 text-sm max-w-xl">
-            Explore {allProjects.length} master-planned communities from the Philippines' top developers.
-          </p>
+      {/* ── Search Bar Section ── */}
+      <div className="bg-white border-b border-gray-100 py-6 w-full relative z-20 overflow-visible min-h-fit">
+        <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 xl:px-24 2xl:pl-[296px] 2xl:pr-[297px]">
+          <SearchFilter />
         </div>
       </div>
 
       <main className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 xl:px-24 2xl:pl-[296px] 2xl:pr-[297px] py-8">
         {(sp.view === 'map' || (Array.isArray(sp.view) && sp.view.includes('map'))) ? (
-          <ProjectMapView 
-            projects={projects} 
-            searchParams={Object.fromEntries(Object.entries(sp).filter(([_, v]) => v !== undefined)) as Record<string, string>} 
+          <ProjectMapView
+            projects={projects}
+            searchParams={Object.fromEntries(Object.entries(sp).filter(([_, v]) => v !== undefined)) as Record<string, string>}
           />
         ) : (
           /* ── Main Content Area (Standard List View) ── */
@@ -148,7 +225,7 @@ export default async function ProjectsPage(
                     {topLocations.map(([loc, count]) => (
                       <Link
                         key={loc}
-                        href={{ query: { ...sp, location: loc } }}
+                        href={getHref({ location: loc })}
                         className={`hover:underline ${sp.location === loc ? 'font-medium underline' : ''}`}
                       >
                         {loc} <span className="text-[#002143] ml-1.5">({count.toLocaleString()})</span>
@@ -156,7 +233,7 @@ export default async function ProjectsPage(
                     ))}
                   </div>
                   <Link
-                    href={{ query: { ...sp, location: undefined } }}
+                    href={getHref({ location: undefined })}
                     className="text-[18px] font-medium text-[#1428ae] hover:underline uppercase tracking-widest shrink-0 font-outfit"
                   >
                     VIEW ALL LOCATIONS
@@ -266,10 +343,20 @@ export default async function ProjectsPage(
               </div>
 
               {projects.length === 0 && (
-                <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center shadow-sm">
-                  <div className="text-6xl mb-4">ðŸ —ï¸ </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">No projects found</h3>
-                  <p className="text-gray-500">Try adjusting your filters.</p>
+                <div className="bg-white rounded-[20px] border border-[#D3D3D3] p-20 flex flex-col items-center text-center shadow-sm max-w-[995px] mx-auto lg:mx-0">
+                  <div className="w-24 h-24 bg-[#F4F4F9] rounded-full flex items-center justify-center mb-8">
+                    <SearchX size={48} className="text-[#8187B0]" />
+                  </div>
+                  <h3 className="text-[28px] font-normal text-[#002143] mb-3 font-outfit">Oops! No properties found</h3>
+                  <p className="text-[18px] font-light text-[#002143]/60 mb-10 max-w-md font-outfit">
+                    We couldn't find any projects matching your current filters. Try adjusting your search criteria or clearing all filters.
+                  </p>
+                  <Link 
+                    href="/projects" 
+                    className="h-[55px] px-10 flex items-center justify-center bg-[#1428AE] text-white rounded-[10px] font-medium text-[18px] hover:bg-[#001392] transition-all shadow-md hover:shadow-lg font-outfit"
+                  >
+                    Clear All Filters
+                  </Link>
                 </div>
               )}
             </div>
