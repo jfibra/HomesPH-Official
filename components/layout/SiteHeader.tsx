@@ -175,14 +175,95 @@ export default function SiteHeader({
               </Link>
             </div>
 
-            {/* Desktop Nav — position to exact spec within a 469px container */}
-            <div className="hidden lg:block absolute left-1/2 -translate-x-1/2 pointer-events-auto" style={{ width: '469px', height: '20px' }}>
-              <div className="relative" style={{ width: '469px', height: '20px' }}>
-                {resolvedNavItems.map((item) => {
-                  const itemPath = item.href.split('?')[0]
-                  const isActive = item.label === 'Home'
-                    ? pathname === itemPath
-                    : (pathname === itemPath || pathname.startsWith(itemPath + '/'))
+            {/* Desktop nav — absolute positioning per Figma */}
+            <div style={{
+              position: 'absolute',
+              width: '469px',
+              height: '20px',
+              left: 'calc(50% - 469px / 2 - 0.5px)',
+              top: '85px',
+              pointerEvents: 'auto'
+            }}>
+              {resolvedNavItems.map((item) => {
+                const itemPath = item.href.split('?')[0]
+                const isActive = itemPath === '/' ? pathname === '/' : pathname.startsWith(itemPath)
+                const positions: Record<string, { left: string; width: string }> = {
+                  'Home': { left: '0px', width: '48px' },
+                  'Buy': { left: '78px', width: '30px' },
+                  'Rent': { left: '138px', width: '37px' },
+                  'Projects': { left: '205px', width: '72px' },
+                  'News': { left: '307px', width: '44px' },
+                  'Contact Us': { left: '381px', width: '110px' }
+                }
+                const pos = positions[item.label] || { left: '0px', width: 'auto' }
+                
+                const bgPositions: Record<string, { left: string; width: string }> = {
+                  'Home': { left: '717.5px', width: '63px' }, // Calculated based on centering
+                  'Buy': { left: '786.5px', width: '63px' },   // 787px is left of bg, centered on Buy (803px)
+                  'Rent': { left: '850px', width: '63px' },
+                  'Projects': { left: '921px', width: '90px' },
+                  'News': { left: '1017px', width: '74px' },
+                  'Contact Us': { left: '1095px', width: '110px' }
+                }
+                const activeBg = bgPositions[item.label] || { left: '0px', width: '0px' }
+                const containerLeft = 725 // origin of our nav div
+                
+                return (
+                  <Link
+                    key={item.href + item.label}
+                    href={item.href}
+                    style={{
+                      position: 'absolute',
+                      left: pos.left,
+                      top: '0px',
+                      width: pos.width,
+                      height: '20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontFamily: "'Outfit'",
+                      fontSize: '18px',
+                      fontWeight: 400,
+                      color: '#002143',
+                      textDecoration: 'none',
+                      whiteSpace: 'nowrap',
+                      transition: 'all 0.2s ease',
+                      zIndex: 1
+                    }}
+                    className={`nav-link-hover ${isActive ? 'active-nav-link' : ''}`}
+                  >
+                    {isActive && (
+                      <div style={{
+                        position: 'absolute',
+                        zIndex: -1,
+                        left: `calc(${activeBg.left}px - ${containerLeft}px)`,
+                        top: '-8px', // 77px - 85px
+                        width: activeBg.width,
+                        height: '36px',
+                        backgroundColor: '#FDF8EF',
+                        borderRadius: '8px',
+                      }} />
+                    )}
+                    <span className="relative z-10">{item.label}</span>
+                    <style jsx>{`
+                      .nav-link-hover:hover::before {
+                        content: '';
+                        position: absolute;
+                        z-index: -1;
+                        left: -16px;
+                        right: -16px;
+                        top: -8px;
+                        bottom: -8px;
+                        background-color: #FDF8EF;
+                        border-radius: 8px;
+                        opacity: 0.5;
+                        transition: opacity 0.2s;
+                      }
+                    `}</style>
+                  </Link>
+                )
+              })}
+            </div>
 
                   // Fixed widths per design
                   const linkWidth = item.label === 'Home' ? 48 : item.label === 'Buy' ? 30 : item.label === 'Rent' ? 37 : item.label === 'Projects' ? 72 : item.label === 'News' ? 44 : 88
