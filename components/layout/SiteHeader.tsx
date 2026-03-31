@@ -126,38 +126,40 @@ export default function SiteHeader({
 
   return (
     <div className="w-full">
-      {/* ── Top contact bar — dark navy ── */}
-      {(contactPhone || contactEmail || socials.facebook || socials.twitter) && (
-        <div className="bg-[#002143] relative z-[1000]">
+      {/* ── Top contact bar — Buy header style ── */}
+      <div className="bg-[#1428AE] relative z-[1000]">
           <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 xl:px-20 2xl:pl-[227px] 2xl:pr-[227px] flex items-center justify-between h-10">
             <div className="flex items-center gap-5">
               {contactPhone && (
-                <a href={`tel:${contactPhone}`} className="flex items-center gap-1.5 text-xs text-blue-100 hover:text-white transition-colors">
+                <a href={`tel:${contactPhone}`} className="flex items-center gap-1.5 text-xs text-white/85 hover:text-white transition-colors">
                   <PhoneSolid size={12} className="shrink-0" />
                   <span>{contactPhone}</span>
                 </a>
               )}
               {contactEmail && (
-                <a href={`mailto:${contactEmail}`} className="hidden sm:flex items-center gap-1.5 text-xs text-blue-100 hover:text-white transition-colors">
+                <a href={`mailto:${contactEmail}`} className="hidden sm:flex items-center gap-1.5 text-xs text-white/85 hover:text-white transition-colors">
                   <MailSolid size={12} className="shrink-0" />
                   <span>{contactEmail}</span>
                 </a>
               )}
+              <span className="hidden md:inline-flex items-center gap-1.5 text-xs text-white/85">
+                <MapPin size={12} className="shrink-0" />
+                <span>Manila, Philippines</span>
+              </span>
             </div>
             <div className="flex items-center gap-4">
               {socials.facebook && (
-                <a href={socials.facebook} target="_blank" rel="noreferrer" aria-label="Facebook" className="text-blue-200 hover:text-white transition-colors">
+                <a href={socials.facebook} target="_blank" rel="noreferrer" aria-label="Facebook" className="text-white/85 hover:text-white transition-colors">
                   <Image src="/socialIcons/fb.png" alt="Facebook" width={14} height={14} />
                 </a>
               )}
-              <a href={socials.twitter || '#'} target={socials.twitter ? '_blank' : undefined} rel={socials.twitter ? 'noreferrer' : undefined} aria-label="X / Twitter" className="text-blue-200 hover:text-white transition-colors">
+              <a href={socials.twitter || '#'} target={socials.twitter ? '_blank' : undefined} rel={socials.twitter ? 'noreferrer' : undefined} aria-label="X / Twitter" className="text-white/85 hover:text-white transition-colors">
                 <Image src="/socialIcons/X.png" alt="X / Twitter" width={14} height={14} />
               </a>
-              <LocationSwitcher variant="dark" />
+              <LocationSwitcher variant="pill" />
             </div>
           </div>
         </div>
-      )}
 
       {/* ── Main header ── */}
       <header className={`sticky top-0 z-40 bg-white transition-all duration-200 ${scrolled ? 'shadow-md' : 'border-b border-gray-100'}`}>
@@ -175,48 +177,34 @@ export default function SiteHeader({
               </Link>
             </div>
 
-            {/* Desktop nav — absolute positioning per Figma */}
+            {/* Desktop nav — flex mapping to match Buy page */}
             <div style={{
               position: 'absolute',
               width: '469px',
               height: '20px',
               left: 'calc(50% - 469px / 2 - 0.5px)',
-              top: '85px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              display: 'flex',
+              gap: '40px',
+              justifyContent: 'center',
+              alignItems: 'center',
               pointerEvents: 'auto'
             }}>
-              {resolvedNavItems.map((item) => {
+              {(resolvedNavItems || []).map((item) => {
                 const itemPath = item.href.split('?')[0]
-                const isActive = itemPath === '/' ? pathname === '/' : pathname.startsWith(itemPath)
-                const positions: Record<string, { left: string; width: string }> = {
-                  'Home': { left: '0px', width: '48px' },
-                  'Buy': { left: '78px', width: '30px' },
-                  'Rent': { left: '138px', width: '37px' },
-                  'Projects': { left: '205px', width: '72px' },
-                  'News': { left: '307px', width: '44px' },
-                  'Contact Us': { left: '381px', width: '110px' }
-                }
-                const pos = positions[item.label] || { left: '0px', width: 'auto' }
-                
-                const bgPositions: Record<string, { left: string; width: string }> = {
-                  'Home': { left: '717.5px', width: '63px' }, // Calculated based on centering
-                  'Buy': { left: '786.5px', width: '63px' },   // 787px is left of bg, centered on Buy (803px)
-                  'Rent': { left: '850px', width: '63px' },
-                  'Projects': { left: '921px', width: '90px' },
-                  'News': { left: '1017px', width: '74px' },
-                  'Contact Us': { left: '1095px', width: '110px' }
-                }
-                const activeBg = bgPositions[item.label] || { left: '0px', width: '0px' }
-                const containerLeft = 725 // origin of our nav div
-                
+                const isActive = item.label === 'Home'
+                  ? pathname === itemPath
+                  : pathname.startsWith(itemPath)
+                const bgWidth = item.label === 'Contact Us' ? '120px' : (item.label === 'Projects' ? '90px' : '63px')
+
                 return (
                   <Link
                     key={item.href + item.label}
                     href={item.href}
+                    className="nav-link-item nav-link-hover"
                     style={{
-                      position: 'absolute',
-                      left: pos.left,
-                      top: '0px',
-                      width: pos.width,
+                      position: 'relative',
                       height: '20px',
                       display: 'flex',
                       alignItems: 'center',
@@ -226,91 +214,40 @@ export default function SiteHeader({
                       fontWeight: 400,
                       color: '#002143',
                       textDecoration: 'none',
-                      whiteSpace: 'nowrap',
-                      transition: 'all 0.2s ease',
-                      zIndex: 1
+                      whiteSpace: 'nowrap'
                     }}
-                    className={`nav-link-hover ${isActive ? 'active-nav-link' : ''}`}
                   >
                     {isActive && (
                       <div style={{
                         position: 'absolute',
                         zIndex: -1,
-                        left: `calc(${activeBg.left}px - ${containerLeft}px)`,
-                        top: '-8px', // 77px - 85px
-                        width: activeBg.width,
+                        left: '50%',
+                        top: '50%',
+                        transform: 'translate(-50%, -55%)',
+                        width: bgWidth,
                         height: '36px',
                         backgroundColor: '#FDF8EF',
-                        borderRadius: '8px',
+                        borderRadius: '8px'
                       }} />
                     )}
-                    <span className="relative z-10">{item.label}</span>
+                    {item.label}
                     <style jsx>{`
-                      .nav-link-hover:hover::before {
+                      .nav-link-item:hover::before {
                         content: '';
                         position: absolute;
                         z-index: -1;
-                        left: -16px;
-                        right: -16px;
+                        left: -12px;
+                        right: -12px;
                         top: -8px;
                         bottom: -8px;
                         background-color: #FDF8EF;
                         border-radius: 8px;
-                        opacity: 0.5;
-                        transition: opacity 0.2s;
+                        opacity: 0.6;
                       }
                     `}</style>
                   </Link>
                 )
               })}
-            </div>
-
-                  // Fixed widths per design
-                  const linkWidth = item.label === 'Home' ? 48 : item.label === 'Buy' ? 30 : item.label === 'Rent' ? 37 : item.label === 'Projects' ? 72 : item.label === 'News' ? 44 : 88
-                  // Left offsets within the 469px container (design spec)
-                  const leftOffsetMap: Record<string, number> = { Home: 0, Buy: 78, Rent: 138, Projects: 205, News: 307, 'Contact Us': 381 }
-                  const left = leftOffsetMap[item.label] ?? 381 // default to last if unknown
-                  const bgWidth = item.label === 'Projects' ? 90 : item.label === 'Contact Us' ? 120 : 63
-
-                  return (
-                    <Link
-                      key={item.href + item.label}
-                      href={item.href}
-                      style={{
-                        position: 'absolute',
-                        left,
-                        width: linkWidth,
-                        height: 20,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontFamily: "'Outfit'",
-                        fontSize: 18,
-                        fontWeight: 400,
-                        color: '#002143',
-                        textDecoration: 'none',
-                        whiteSpace: 'nowrap'
-                      }}
-                      className={`nav-link-item ${isActive ? 'active' : ''}`}
-                    >
-                      {isActive && (
-                        <div style={{
-                          position: 'absolute',
-                          zIndex: -1,
-                          left: '50%',
-                          top: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          width: bgWidth,
-                          height: 36,
-                          backgroundColor: '#FDF8EF',
-                          borderRadius: 8,
-                        }} />
-                      )}
-                      <span className="relative z-10">{item.label}</span>
-                    </Link>
-                  )
-                })}
-              </div>
             </div>
 
             {/* Auth Buttons */}
