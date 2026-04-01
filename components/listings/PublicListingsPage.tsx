@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import SiteHeader from '@/components/layout/SiteHeader'
 import SiteFooter from '@/components/layout/SiteFooter'
+import SiteHeader from '@/components/layout/SiteHeader'
 import {
   type ListingSearchMode,
   type PropertySearchParamsInput,
@@ -34,10 +34,15 @@ import FilterDropdown from './FilterDropdown'
 import PropertyTypeFilter from './PropertyTypeFilter'
 import BedsBathsFilter from './BedsBathsFilter'
 import MoreFilters from './MoreFilters'
+import type { RentPHProperty } from './RentPHListingsGrid'
 
 interface PublicListingsPageProps {
   mode: ListingSearchMode
   searchParams: PropertySearchParamsInput
+  rentPHListings?: RentPHProperty[]
+  rentPHTotal?: number
+  rentPHPage?: number
+  rentPHLastPage?: number
 }
 
 function formatPrice(value: number | null) {
@@ -50,6 +55,10 @@ function formatPrice(value: number | null) {
 export default async function PublicListingsPage({
   mode,
   searchParams,
+  rentPHListings,
+  rentPHTotal = 0,
+  rentPHPage = 1,
+  rentPHLastPage = 1,
 }: PublicListingsPageProps) {
   const settings = await getSiteSettings()
   const { listings, propertyTypeChips, selectedProject } = await searchPublicListings(
@@ -60,12 +69,23 @@ export default async function PublicListingsPage({
   const isSale = mode === 'sale'
 
   return (
+    <>
+    <div style={{ position: 'relative', zIndex: 50 }}>
+      <SiteHeader
+        logoUrl={settings.logoUrl}
+        contactEmail={settings.contactEmail}
+        contactPhone={settings.contactPhone}
+        socialLinks={settings.socialLinks}
+      />
+    </div>
     <div style={{
       position: 'relative',
       width: '100%',
+      minHeight: '3239px',
       background: '#FFFFFF',
       fontFamily: "'Outfit', sans-serif",
-      overflowX: 'hidden'
+      overflowX: 'hidden',
+      marginTop: '-150px'
     }}>
       <style dangerouslySetInnerHTML={{
         __html: `
@@ -80,30 +100,24 @@ export default async function PublicListingsPage({
           box-shadow: 0px 20px 40px rgba(0, 33, 67, 0.12);
           z-index: 50 !important;
         }
-        .nav-link-item {
-          position: relative;
-          transition: all 0.2s ease;
-        }
-        .nav-link-item:hover::before {
-          content: '';
-          position: absolute;
-          z-index: -1;
-          left: -12px;
-          right: -12px;
-          top: -8px;
-          bottom: -8px;
-          background-color: #FDF8EF;
-          border-radius: 8px;
-          opacity: 0.6;
-        }
       `}} />
 
-      <SiteHeader
-        logoUrl={settings.logoUrl}
-        contactEmail={settings.contactEmail}
-        contactPhone={settings.contactPhone}
-        socialLinks={settings.socialLinks}
-      />
+      {/* Footer Wrapper - Center across 100% (Full Width) */}
+      <div style={{
+        position: 'absolute',
+        width: '100%',
+        left: '0px',
+        bottom: '0px',
+        zIndex: 5
+      }}>
+        <SiteFooter
+          logoUrl={settings.logoUrl}
+          contactEmail={settings.contactEmail}
+          contactPhone={settings.contactPhone}
+          socialLinks={settings.socialLinks}
+          brandName={settings.siteTitle}
+        />
+      </div>
 
       {/* Centered 1920px Content Frame */}
       <div style={{
@@ -881,14 +895,8 @@ export default async function PublicListingsPage({
 
         </div>
       </div>
-
-      <SiteFooter
-        logoUrl={settings.logoUrl}
-        contactEmail={settings.contactEmail}
-        contactPhone={settings.contactPhone}
-        socialLinks={settings.socialLinks}
-        brandName={settings.siteTitle}
-      />
     </div>
+    </>
   )
 }
+

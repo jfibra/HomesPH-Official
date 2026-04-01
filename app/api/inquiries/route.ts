@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
         Authorization: `Bearer ${SERVICE_ROLE}`,
         'Content-Type': 'application/json',
         Prefer: 'return=minimal',
-      },
+      } as Record<string, string>,
       body: JSON.stringify(payload),
     })
 

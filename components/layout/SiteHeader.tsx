@@ -126,54 +126,58 @@ export default function SiteHeader({
 
   return (
     <div className="w-full">
-      {/* ── Top contact bar — dark navy ── */}
-      {(contactPhone || contactEmail || socials.facebook || socials.twitter) && (
-        <div className="bg-[#0c1f4a]">
+      {/* ── Top contact bar — Buy header style ── */}
+      <div className="bg-[#1428AE] relative z-[1000]">
           <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 xl:px-20 2xl:pl-[227px] 2xl:pr-[227px] flex items-center justify-between h-10">
             <div className="flex items-center gap-5">
               {contactPhone && (
-                <a href={`tel:${contactPhone}`} className="flex items-center gap-1.5 text-xs text-blue-100 hover:text-white transition-colors">
+                <a href={`tel:${contactPhone}`} className="flex items-center gap-1.5 text-xs text-white/85 hover:text-white transition-colors">
                   <PhoneSolid size={12} className="shrink-0" />
                   <span>{contactPhone}</span>
                 </a>
               )}
               {contactEmail && (
-                <a href={`mailto:${contactEmail}`} className="hidden sm:flex items-center gap-1.5 text-xs text-blue-100 hover:text-white transition-colors">
+                <a href={`mailto:${contactEmail}`} className="hidden sm:flex items-center gap-1.5 text-xs text-white/85 hover:text-white transition-colors">
                   <MailSolid size={12} className="shrink-0" />
                   <span>{contactEmail}</span>
                 </a>
               )}
+              <span className="hidden md:inline-flex items-center gap-1.5 text-xs text-white/85">
+                <MapPin size={12} className="shrink-0" />
+                <span>Manila, Philippines</span>
+              </span>
             </div>
             <div className="flex items-center gap-4">
               {socials.facebook && (
-                <a href={socials.facebook} target="_blank" rel="noreferrer" aria-label="Facebook" className="text-blue-200 hover:text-white transition-colors">
+                <a href={socials.facebook} target="_blank" rel="noreferrer" aria-label="Facebook" className="text-white/85 hover:text-white transition-colors">
                   <Image src="/socialIcons/fb.png" alt="Facebook" width={14} height={14} />
                 </a>
               )}
-              <a href={socials.twitter || '#'} target={socials.twitter ? '_blank' : undefined} rel={socials.twitter ? 'noreferrer' : undefined} aria-label="X / Twitter" className="text-blue-200 hover:text-white transition-colors">
+              <a href={socials.twitter || '#'} target={socials.twitter ? '_blank' : undefined} rel={socials.twitter ? 'noreferrer' : undefined} aria-label="X / Twitter" className="text-white/85 hover:text-white transition-colors">
                 <Image src="/socialIcons/X.png" alt="X / Twitter" width={14} height={14} />
               </a>
-              <LocationSwitcher variant="dark" />
+              <LocationSwitcher variant="pill" />
             </div>
           </div>
         </div>
-      )}
 
       {/* ── Main header ── */}
       <header className={`sticky top-0 z-40 bg-white transition-all duration-200 ${scrolled ? 'shadow-md' : 'border-b border-gray-100'}`}>
-        <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 xl:px-24 2xl:pl-[296px] 2xl:pr-[296px]">
-          <div className="flex items-center h-24 gap-8">
+        <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 xl:px-24 2xl:pl-[290px] 2xl:pr-[290px]">
+          <div className="flex items-center h-[110px] relative">
 
             {/* Logo */}
-            <Link href={logoHref} className="shrink-0 group" onClick={handleLogoClick}>
-              {logoUrl ? (
-                <img src={logoUrl} alt={logoText} className="h-12 w-auto drop-shadow-md transition-transform group-hover:scale-105" />
-              ) : (
-                <span className="text-2xl font-bold text-gray-900 drop-shadow-sm">{logoText}</span>
-              )}
-            </Link>
+            <div className="flex-shrink-0">
+              <Link href={logoHref} className="shrink-0 group block" onClick={handleLogoClick}>
+                {logoUrl ? (
+                  <img src={logoUrl} alt={logoText} style={{ width: '179px', height: '50px' }} className="drop-shadow-sm transition-transform group-hover:scale-105" />
+                ) : (
+                  <span className="text-2xl font-bold text-gray-900 drop-shadow-sm">{logoText}</span>
+                )}
+              </Link>
+            </div>
 
-            {/* Desktop nav — absolute positioning per Figma */}
+            {/* Desktop nav — flex mapping to match Buy page */}
             <div style={{
               position: 'absolute',
               width: '469px',
@@ -181,38 +185,26 @@ export default function SiteHeader({
               left: 'calc(50% - 469px / 2 - 0.5px)',
               top: '50%',
               transform: 'translateY(-50%)',
+              display: 'flex',
+              gap: '40px',
+              justifyContent: 'center',
+              alignItems: 'center',
               pointerEvents: 'auto'
             }}>
-              {resolvedNavItems.map((item) => {
+              {(resolvedNavItems || []).map((item) => {
                 const itemPath = item.href.split('?')[0]
-                const isActive = itemPath === '/' ? pathname === '/' : pathname.startsWith(itemPath)
-                const positions: Record<string, { left: string; width: string }> = {
-                  'Home': { left: '0px', width: '48px' },
-                  'Buy': { left: '78px', width: '30px' },
-                  'Rent': { left: '138px', width: '37px' },
-                  'Projects': { left: '205px', width: '72px' },
-                  'News': { left: '307px', width: '44px' },
-                  'Contact Us': { left: '381px', width: '88px' }
-                }
-                const pos = positions[item.label] || { left: '0px', width: 'auto' }
-                const activeBgWidths: Record<string, string> = {
-                  'Home': '63px',
-                  'Buy': '63px',
-                  'Rent': '63px',
-                  'Projects': '90px',
-                  'News': '74px',
-                  'Contact Us': '110px',
-                }
-                
+                const isActive = item.label === 'Home'
+                  ? pathname === itemPath
+                  : pathname.startsWith(itemPath)
+                const bgWidth = item.label === 'Contact Us' ? '120px' : (item.label === 'Projects' ? '90px' : '63px')
+
                 return (
                   <Link
                     key={item.href + item.label}
                     href={item.href}
+                    className="nav-link-item nav-link-hover"
                     style={{
-                      position: 'absolute',
-                      left: pos.left,
-                      top: '0px',
-                      width: pos.width,
+                      position: 'relative',
                       height: '20px',
                       display: 'flex',
                       alignItems: 'center',
@@ -222,11 +214,8 @@ export default function SiteHeader({
                       fontWeight: 400,
                       color: '#002143',
                       textDecoration: 'none',
-                      whiteSpace: 'nowrap',
-                      transition: 'all 0.2s ease',
-                      zIndex: 1
+                      whiteSpace: 'nowrap'
                     }}
-                    className={`nav-link-hover ${isActive ? 'active-nav-link' : ''}`}
                   >
                     {isActive && (
                       <div style={{
@@ -234,27 +223,26 @@ export default function SiteHeader({
                         zIndex: -1,
                         left: '50%',
                         top: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: activeBgWidths[item.label] ?? '63px',
+                        transform: 'translate(-50%, -55%)',
+                        width: bgWidth,
                         height: '36px',
                         backgroundColor: '#FDF8EF',
-                        borderRadius: '8px',
+                        borderRadius: '8px'
                       }} />
                     )}
-                    <span className="relative z-10">{item.label}</span>
+                    {item.label}
                     <style jsx>{`
-                      .nav-link-hover:hover::before {
+                      .nav-link-item:hover::before {
                         content: '';
                         position: absolute;
                         z-index: -1;
-                        left: -16px;
-                        right: -16px;
+                        left: -12px;
+                        right: -12px;
                         top: -8px;
                         bottom: -8px;
                         background-color: #FDF8EF;
                         border-radius: 8px;
-                        opacity: 0.5;
-                        transition: opacity 0.2s;
+                        opacity: 0.6;
                       }
                     `}</style>
                   </Link>
@@ -262,18 +250,26 @@ export default function SiteHeader({
               })}
             </div>
 
-            <div className="hidden md:flex items-center gap-2 lg:gap-6 shrink-0 ml-auto">
-              <button className="text-slate-600 hover:text-[#0c1f4a] transition-colors p-2 rounded-lg hover:bg-slate-100">
-                <Search size={22} />
-              </button>
-              <Link href="/login" className="px-3 md:px-4 lg:px-6 py-2.5 md:py-2 lg:py-3 text-xs md:text-sm lg:text-base font-bold text-[#0c1f4a] rounded-lg md:rounded-xl border border-[#0c1f4a]/10 hover:border-[#0c1f4a]/30 hover:bg-slate-50 transition-all duration-150 whitespace-nowrap">
+            {/* Auth Buttons */}
+            <div className="ml-auto hidden md:flex items-center gap-[16px]">
+              <Link href="/login" style={{ fontSize: '18px', fontWeight: 400, color: '#002143', textDecoration: 'none' }}>
                 Login
               </Link>
               <button
                 onClick={() => setShowRegisterModal(true)}
-                className="px-3 md:px-4 lg:px-6 py-2.5 md:py-2 lg:py-3 text-xs md:text-sm lg:text-base font-bold text-white bg-[#0c1f4a] rounded-lg md:rounded-xl shadow-lg hover:shadow-[#0c1f4a]/20 hover:bg-[#f59e0b] hover:text-[#0c1f4a] transition-all duration-150 whitespace-nowrap"
+                style={{
+                  width: '103px',
+                  height: '46px',
+                  background: '#1428AE',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
               >
-                Register
+                <span style={{ fontSize: '18px', fontWeight: 500, color: '#FFFFFF' }}>Sign in</span>
               </button>
             </div>
 
@@ -281,10 +277,11 @@ export default function SiteHeader({
             <button
               aria-label="Open menu"
               onClick={() => setOpen(true)}
-              className="md:hidden ml-auto p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+              className="lg:hidden ml-auto p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
             >
-              <Menu size={22} />
+              <Menu size={24} />
             </button>
+
           </div>
         </div>
       </header>
@@ -414,3 +411,4 @@ export default function SiteHeader({
     </div>
   )
 }
+ 

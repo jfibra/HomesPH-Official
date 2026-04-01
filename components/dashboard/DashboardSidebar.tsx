@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { ChevronLeft, ChevronRight, LogOut, Building } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getSidebarByRoleWithPermissions, ROLE_META } from '@/lib/dashboard-permissions'
 import { useDashboardUser } from './DashboardUserProvider'
@@ -48,12 +49,22 @@ export default function DashboardSidebar({ collapsed, onToggle }: Props) {
       </button>
 
       {/* Logo */}
-      <div className={cn(
-        'flex items-center h-16 px-4 border-b border-white/[0.06] shrink-0',
-        collapsed ? 'justify-center' : 'gap-3',
-      )}>
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#1428ae] shrink-0">
-          <Building size={16} className="text-white" />
+      <Link
+        href="/"
+        className={cn(
+          'flex items-center h-16 px-4 border-b border-white/[0.06] shrink-0 hover:opacity-85 transition-opacity',
+          collapsed ? 'justify-center' : 'gap-3',
+        )}
+      >
+        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/10 shrink-0 p-0.5">
+          <Image
+            src="https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/homesph/logo.png"
+            alt="HomesPH"
+            width={32}
+            height={32}
+            className="object-contain"
+            unoptimized
+          />
         </div>
         <span className={cn(
           'font-black text-white text-lg tracking-tight transition-all duration-200 whitespace-nowrap',
@@ -61,7 +72,7 @@ export default function DashboardSidebar({ collapsed, onToggle }: Props) {
         )}>
           HomesPH
         </span>
-      </div>
+      </Link>
 
       {/* Role badge */}
       {!collapsed && meta && (
