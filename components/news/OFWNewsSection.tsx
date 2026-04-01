@@ -1,7 +1,6 @@
 'use client'
 
 import { NewsCarousel } from './NewsCarousel'
-import { MOCK_OFW_NEWS } from '@/lib/mock-data'
 
 interface Article {
   id: number | string
@@ -21,11 +20,8 @@ interface OFWNewsSectionProps {
   articles: Article[]
 }
 
-// No local dummy; use central mock dataset in mock-data.ts
-
 export function OFWNewsSection({ articles }: OFWNewsSectionProps) {
-  // Filter to get articles relevant to OFWs (Overseas Filipino Workers)
-  const ofwArticles = articles
+  const displayArticles = articles
     .filter(
       article =>
         article.tags?.includes('OFW') ||
@@ -34,21 +30,15 @@ export function OFWNewsSection({ articles }: OFWNewsSectionProps) {
     )
     .slice(0, 13)
 
-  // Prefer page data when there are enough items; otherwise top up with centralized mock data
-  const mergeAndDedupe = (primary: Article[], fallback: Article[]) => {
-    const map = new Map<string, Article>()
-    for (const item of [...primary, ...fallback]) {
-      const key = String(item.id)
-      if (!map.has(key)) map.set(key, item)
-    }
-    return Array.from(map.values())
-  }
-
-  const hydratedList = ofwArticles.length >= 9 ? ofwArticles : mergeAndDedupe(ofwArticles, MOCK_OFW_NEWS as unknown as Article[])
-  const displayArticles = hydratedList.slice(0, 13)
-
   if (displayArticles.length === 0) {
-    return null
+    return (
+      <section className="py-6 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-[120px] 2xl:px-[230px]">
+        <h2 className="text-[20px] sm:text-[24px] md:text-[28px] lg:text-[32px] font-semibold tracking-[-0.045em] text-[#002143]" style={{ fontFamily: 'Outfit' }}>
+          OFW News Update
+        </h2>
+        <p className="mt-4 text-gray-500">Currently No Article Found</p>
+      </section>
+    )
   }
 
   return (

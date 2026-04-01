@@ -28,13 +28,18 @@ function getImage(article: Article) {
   return article.image_url ?? article.image ?? ''
 }
 
-function formatDate(dateString: string) {
-  const date = new Date(dateString)
-  const month = date.toLocaleDateString('en-US', { month: 'long' })
-  const day = date.getDate()
-  const year = date.getFullYear()
-  const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
-  return `${month} ${day}, ${year} | ${time}`
+// Format date on server (pass as is, don't recalculate)
+function formatDateStatic(dateString: string) {
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return dateString
+    const month = date.toLocaleDateString('en-US', { month: 'long' })
+    const day = date.getDate()
+    const year = date.getFullYear()
+    return `${month} ${day}, ${year}`
+  } catch {
+    return dateString
+  }
 }
 
 export function NewsCarousel({
@@ -166,7 +171,7 @@ export function NewsCarousel({
                       </span>
                       {article.published_at && (
                         <span className="text-[11px] font-medium text-white drop-shadow-md text-right" style={{ fontFamily: 'Outfit' }}>
-                          {formatDate(article.published_at)}
+                          {formatDateStatic(article.published_at)}
                         </span>
                       )}
                     </div>

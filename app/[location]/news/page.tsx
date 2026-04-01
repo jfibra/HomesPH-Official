@@ -4,9 +4,9 @@ import SiteHeader from '@/components/layout/SiteHeader'
 import SiteFooter from '@/components/layout/SiteFooter'
 import { getSiteSettings } from '@/lib/site-settings'
 import { SELECTED_LOCATION_COOKIE } from '@/lib/selected-location'
-import { MOCK_NEWS } from '@/lib/mock-data'
 import AdBanner from '@/components/ui/AdBanner'
 import { formatLocationForNews } from '@/lib/news-navigation'
+import { getArticles as getArticlesFromAPI } from '@/lib/hybrid-articles'
 import { RealEstateNewsSection } from '@/components/news/RealEstateNewsSection'
 import { LocationNewsGrid } from '@/components/news/LocationNewsGrid'
 import { CityNavigation } from '@/components/news/CityNavigation'
@@ -426,17 +426,48 @@ function RightColumn({ leadRest }: { leadRest: Article[] }) {
 }
 
 async function fetchArticleCollection(location?: string, page = 1, limit = 40): Promise<ArticleCollection> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-  const url = new URL('/api/articles', baseUrl)
-  url.searchParams.set('page', String(page))
-  url.searchParams.set('limit', String(limit))
-  if (location && location !== 'All') url.searchParams.set('location', location)
-
-  const res = await fetch(url.toString(), { next: { revalidate: 300 } })
-  if (!res.ok) throw new Error('API error')
-
-  const data = await res.json()
-  return extractArticleCollection(data)
+  try {
+    const result = await getArticlesFromAPI({
+      city_slug: location && location !== 'All' ? location : undefined,
+      per_page: limit,
+      page,
+    })
+    const articles = result.data.data.map(article => ({
+      id: article.id,
+      title: article.title,
+      slug: article.slug,
+      summary: article.summary,
+      excerpt: article.summary,
+      description: article.description,
+      category: article.category,
+      image_url: article.image,
+      image: article.image,
+      author: article.author,
+      published_at: article.published_at,
+      read_time: undefined,
+      tags: article.topics,
+      topics: article.topics,
+      location: article.location || article.city_name,
+      city: article.city_name || null,
+      is_live: true,
+      views_count: article.views_count,
+    })) as Article[]
+    return {
+      articles,
+      total: result.data.total,
+      currentPage: result.data.current_page,
+      lastPage: result.data.last_page,
+      perPage: result.data.per_page,
+    }
+  } catch {
+    return {
+      articles: [],
+      total: 0,
+      currentPage: 1,
+      lastPage: 1,
+      perPage: 0,
+    }
+  }
 }
 
 async function getArticles(location?: string): Promise<ArticleCollection> {
@@ -458,11 +489,11 @@ async function getArticles(location?: string): Promise<ArticleCollection> {
     }
   } catch {
     return {
-      articles: MOCK_NEWS as Article[],
-      total: (MOCK_NEWS as Article[]).length,
+      articles: [],
+      total: 0,
       currentPage: 1,
       lastPage: 1,
-      perPage: (MOCK_NEWS as Article[]).length,
+      perPage: 0,
     }
   }
 }
@@ -479,18 +510,30 @@ export default async function NewsPage({
   const savedLocation = cookieLocation ? decodeURIComponent(cookieLocation) : undefined
   const focusedLocation = manualLocation ?? savedLocation
 
-  const [settings, allFeed, focusedFeed] = await Promise.all([
+  // Format location name for display (e.g., "cebu" -> "Cebu")
+  const locationDisplayName = (focusedLocation ?? routeLocation ?? '')
+    .split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+
+  // Fetch city-specific articles using city_slug
+  const [settings, cityFeed, allFeed] = await Promise.all([
     getSiteSettings(),
-    getArticles(),
-    focusedLocation ? getArticles(focusedLocation) : Promise.resolve({ articles: [], total: 0, currentPage: 1, lastPage: 1, perPage: 0 }),
+    focusedLocation
+      ? fetchArticleCollection(focusedLocation, 1, 100)
+      : Promise.resolve({ articles: [], total: 0, currentPage: 1, lastPage: 1, perPage: 0 }),
+    fetchArticleCollection(undefined, 1, 100),
   ])
 
-  const allArticles = dedupeArticles([...focusedFeed.articles, ...allFeed.articles, ...(MOCK_NEWS as Article[])].map(normalizeArticle)).sort(sortByNewest)
-  const matchedFocusedArticles = focusedLocation
-    ? dedupeArticles([...focusedFeed.articles.map(normalizeArticle), ...allArticles.filter(article => matchesLocation(article, focusedLocation))]).sort(sortByNewest)
-    : []
-  const effectiveFocusedLocation = focusedLocation && matchedFocusedArticles.length > 0 ? focusedLocation : undefined
-  const leadFeed = effectiveFocusedLocation ? matchedFocusedArticles : allArticles
+  // City-specific articles: prefer API city_slug results, then client-side matching
+  const cityArticles = dedupeArticles(
+    [...cityFeed.articles, ...allFeed.articles.filter(a => matchesLocation(a, focusedLocation ?? routeLocation))]
+      .map(normalizeArticle)
+  ).sort(sortByNewest)
+
+  // All articles for fallback sections (carousels etc.)
+  const allArticles = dedupeArticles([...cityFeed.articles, ...allFeed.articles].map(normalizeArticle)).sort(sortByNewest)
+
+  // Use city articles as the primary feed
+  const leadFeed = cityArticles.length > 0 ? cityArticles : allArticles
 
   const [leadStory, ...leadRest] = leadFeed
   const localLatest = leadRest.slice(0, 5)
@@ -502,7 +545,7 @@ export default async function NewsPage({
     .slice(0, 6)
 
   const provinceGroups = groupArticles(allArticles, article => article.location ?? article.city)
-    .filter(group => group.key !== effectiveFocusedLocation)
+    .filter(group => group.key !== focusedLocation)
     .sort((a, b) => b.items.length - a.items.length || a.key.localeCompare(b.key))
     .slice(0, 8)
 
@@ -555,10 +598,13 @@ export default async function NewsPage({
 
       <main className="w-full">
         <div className="mx-auto w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-[120px] 2xl:px-[230px] py-8">
-        {allArticles.length === 0 ? (
+        {cityArticles.length === 0 ? (
           <div className="py-28 text-center text-gray-400">
-            <p className="text-2xl font-extrabold text-gray-700">No articles found</p>
-            <p className="mt-2">Try another location or check back after the next cache refresh.</p>
+            <p className="text-2xl font-extrabold text-gray-700">No Articles Found in This City</p>
+            <p className="mt-2 text-gray-500">There are currently no news articles available for <span className="font-semibold text-gray-700">{locationDisplayName}</span>.</p>
+            <Link href="/news" className="mt-6 inline-block px-6 py-3 rounded-xl bg-[#1428ae] text-white text-sm font-semibold hover:bg-[#0c1f4a] transition-colors">
+              Browse All News
+            </Link>
           </div>
         ) : (
           <>
@@ -584,12 +630,12 @@ export default async function NewsPage({
           <RealEstateNewsSection articles={allArticles} />
           
           {/* City Navigation */}
-          <CityNavigation currentLocation={effectiveFocusedLocation || ''} />
+          <CityNavigation currentLocation={focusedLocation || ''} />
 
           {/* Location-specific Real Estate Grid */}
-          {effectiveFocusedLocation && (
+          {focusedLocation && (
             <LocationNewsGrid
-              key={effectiveFocusedLocation}
+              key={focusedLocation}
               articles={allArticles.filter(
                 a =>
                   (a.category &&
@@ -600,10 +646,10 @@ export default async function NewsPage({
                       'Investment',
                       'Sustainability',
                     ].includes(a.category)) &&
-                  (a.location?.toLowerCase().includes(effectiveFocusedLocation.toLowerCase()) ||
-                    a.city?.toLowerCase().includes(effectiveFocusedLocation.toLowerCase()))
+                  (a.location?.toLowerCase().includes(focusedLocation.toLowerCase()) ||
+                    a.city?.toLowerCase().includes(focusedLocation.toLowerCase()))
               ) as unknown as any[]}
-              title={`${effectiveFocusedLocation} Real Estate Latest`}
+              title={`${locationDisplayName} Real Estate Latest`}
             />
           )}
         </div>

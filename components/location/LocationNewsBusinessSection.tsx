@@ -13,7 +13,6 @@ import {
   CarouselItem,
   type CarouselApi,
 } from '@/components/ui/carousel'
-import { MOCK_NEWS } from '@/lib/mock-data'
 import { buildNewsHref } from '@/lib/news-navigation'
 import {
   LOCATION_EDITORIAL_BREAKOUT_CLASS,
@@ -25,9 +24,21 @@ import {
 interface LocationNewsBusinessSectionProps {
   locationName: string
   locationSlug: string
+  articles?: NewsArticle[]
 }
 
-type NewsArticle = (typeof MOCK_NEWS)[number]
+interface NewsArticle {
+  id: number | string
+  title: string
+  slug?: string
+  image_url?: string
+  excerpt?: string
+  content?: string
+  category?: string
+  author?: string
+  published_at: string
+  tags?: string[]
+}
 
 interface BusinessFeature {
   description: string
@@ -74,11 +85,14 @@ function formatNewsDate(value: string) {
   return NEWS_DATE_FORMATTER.format(new Date(value))
 }
 
-function buildNewsArticles(locationName: string, locationSlug: string) {
+function buildNewsArticles(locationName: string, locationSlug: string, externalArticles?: NewsArticle[]) {
+  const source = externalArticles ?? []
+  if (source.length === 0) return []
+
   const normalizedLocationName = locationName.toLowerCase()
   const normalizedLocationSlug = locationSlug.replace(/-/g, ' ').toLowerCase()
 
-  const matchingArticles = MOCK_NEWS.filter((article) => {
+  const matchingArticles = source.filter((article) => {
     const haystack = [
       article.title,
       article.excerpt,
@@ -98,7 +112,7 @@ function buildNewsArticles(locationName: string, locationSlug: string) {
 
   const articles = [
     ...matchingArticles,
-    ...MOCK_NEWS.filter(
+    ...source.filter(
       (article) =>
         !matchingArticles.some(
           (matchingArticle) => matchingArticle.id === article.id
@@ -235,8 +249,9 @@ function BusinessFeatureCard({
 export default function LocationNewsBusinessSection({
   locationName,
   locationSlug,
+  articles: externalArticles,
 }: LocationNewsBusinessSectionProps) {
-  const articles = buildNewsArticles(locationName, locationSlug)
+  const articles = buildNewsArticles(locationName, locationSlug, externalArticles)
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(articles.length > 1)

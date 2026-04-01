@@ -1,7 +1,6 @@
 'use client'
 
 import { NewsCarousel } from './NewsCarousel'
-import { MOCK_REAL_ESTATE_NEWS } from '@/lib/mock-data'
 
 interface Article {
   id: number | string
@@ -20,39 +19,33 @@ interface RealEstateNewsSectionProps {
   articles: Article[]
 }
 
-// No local dummy; use centralized mock dataset in mock-data.ts
+const REAL_ESTATE_CATEGORIES = [
+  'real estate',
+  'market trends',
+  'new developments',
+  'regional update',
+  'investment',
+  'sustainability',
+]
 
 export function RealEstateNewsSection({ articles }: RealEstateNewsSectionProps) {
-  // Filter to get the most relevant real estate articles
-  const realEstateArticles = articles
+  const displayArticles = articles
     .filter(
       article =>
         article.category &&
-        [
-          'Market Trends',
-          'New Developments',
-          'Regional Update',
-          'Investment',
-          'Sustainability',
-        ].includes(article.category)
+        REAL_ESTATE_CATEGORIES.includes(article.category.toLowerCase())
     )
     .slice(0, 13)
 
-  // Prefer page data when there are enough items; otherwise top up with centralized mock data
-  const mergeAndDedupe = (primary: Article[], fallback: Article[]) => {
-    const map = new Map<string, Article>()
-    for (const item of [...primary, ...fallback]) {
-      const key = String(item.id)
-      if (!map.has(key)) map.set(key, item)
-    }
-    return Array.from(map.values())
-  }
-
-  const hydratedList = realEstateArticles.length >= 9 ? realEstateArticles : mergeAndDedupe(realEstateArticles, MOCK_REAL_ESTATE_NEWS as unknown as Article[])
-  const displayArticles = hydratedList.slice(0, 13)
-
   if (displayArticles.length === 0) {
-    return null
+    return (
+      <section className="py-6 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-[120px] 2xl:px-[230px]">
+        <h2 className="text-[20px] sm:text-[24px] md:text-[28px] lg:text-[32px] font-semibold tracking-[-0.045em] text-[#002143]" style={{ fontFamily: 'Outfit' }}>
+          Real Estate Latest News
+        </h2>
+        <p className="mt-4 text-gray-500">Currently No Article Found</p>
+      </section>
+    )
   }
 
   return (

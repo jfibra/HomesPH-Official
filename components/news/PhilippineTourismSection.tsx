@@ -1,21 +1,24 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
-import { MOCK_TOURISM } from '@/lib/mock-data'
+import Link from 'next/link'
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
 
-interface TourismDestination {
+interface Article {
   id: number | string
-  name: string
-  location: string
-  description: string
-  type: string
+  title: string
+  slug: string
   image_url?: string
+  image?: string
+  category?: string
+  location?: string
   published_at?: string
+  excerpt?: string
+  summary?: string
 }
 
 interface PhilippineTourismSectionProps {
-  destinations?: TourismDestination[]
+  articles: Article[]
 }
 
 function formatDate(dateString: string) {
@@ -27,10 +30,12 @@ function formatDate(dateString: string) {
   return `${month} ${day}, ${year} | ${time}`
 }
 
-// No local dummy; use centralized MOCK_TOURISM dataset
+function getImage(article: Article) {
+  return article.image_url ?? article.image ?? ''
+}
 
 export function PhilippineTourismSection({
-  destinations,
+  articles,
 }: PhilippineTourismSectionProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -59,9 +64,14 @@ export function PhilippineTourismSection({
     return () => window.removeEventListener('resize', updateCardDimensions)
   }, [])
 
-  // Use dummy data if no destinations provided and limit to 13
-  const allDestinations = destinations && destinations.length > 0 ? destinations : (MOCK_TOURISM as unknown as TourismDestination[])
-  const displayDestinations = allDestinations.slice(0, 13)
+  // Filter tourism articles and limit to 13
+  const displayArticles = articles
+    .filter(
+      article =>
+        article.category &&
+        article.category.toLowerCase().includes('tourism')
+    )
+    .slice(0, 13)
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
@@ -85,8 +95,15 @@ export function PhilippineTourismSection({
     }
   }
 
-  if (displayDestinations.length === 0) {
-    return null
+  if (displayArticles.length === 0) {
+    return (
+      <section className="py-6 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-[120px] 2xl:px-[230px] bg-gray-50">
+        <h2 className="text-[20px] sm:text-[24px] md:text-[28px] lg:text-[32px] font-semibold tracking-[-0.045em] text-[#002143]" style={{ fontFamily: 'Outfit' }}>
+          Philippine Tourism
+        </h2>
+        <p className="mt-4 text-gray-500">Currently No Article Found</p>
+      </section>
+    )
   }
 
   return (
@@ -129,16 +146,17 @@ export function PhilippineTourismSection({
           className="flex gap-2 sm:gap-3 md:gap-4 overflow-hidden pb-2"
           style={{ scrollBehavior: 'smooth' }}
         >
-          {displayDestinations.map(destination => (
-            <div
-              key={destination.id}
+          {displayArticles.map(article => (
+            <Link
+              key={article.id}
+              href={`/news/${article.slug}`}
               className="group flex shrink-0 w-[220px] sm:w-[250px] md:w-[280px] flex-col overflow-hidden rounded-[12px] border border-[#e4ecf8] bg-white shadow-[0_14px_30px_rgba(15,39,78,0.06)] transition-[transform,box-shadow,border-color] duration-320 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:border-[#d8e2f1] hover:shadow-[0_22px_44px_rgba(15,39,78,0.08)] cursor-pointer"
             >
               <div className="relative h-[180px] overflow-hidden bg-[#e9eff8]">
-                {destination.image_url ? (
+                {getImage(article) ? (
                   <img
-                    src={destination.image_url}
-                    alt={destination.name}
+                    src={getImage(article)}
+                    alt={article.title}
                     loading="lazy"
                     decoding="async"
                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-[560ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
@@ -153,9 +171,9 @@ export function PhilippineTourismSection({
                     <span className="inline-flex items-center rounded-full bg-blue-600 px-2.5 py-1 text-[12px] font-bold uppercase tracking-wider text-white" style={{ fontFamily: 'Outfit' }}>
                       News
                     </span>
-                    {destination.published_at && (
+                    {article.published_at && (
                       <span className="text-[11px] font-medium text-white drop-shadow-md text-right" style={{ fontFamily: 'Outfit' }}>
-                        {formatDate(destination.published_at)}
+                        {formatDate(article.published_at)}
                       </span>
                     )}
                   </div>
@@ -164,7 +182,7 @@ export function PhilippineTourismSection({
 
               <div className="flex flex-1 flex-col px-[14px] pb-[14px] pt-[12px]">
                 <h3 className="line-clamp-2 text-[16px] font-medium leading-[1.3] text-[#002143] transition-colors duration-300 group-hover:text-[#1428ae]" style={{ fontFamily: 'Outfit' }}>
-                  {destination.name}
+                  {article.title}
                 </h3>
 
                 <span className="mt-auto inline-flex items-center gap-[6px] pt-[10px] text-[12px] font-normal text-[#1428ae]" style={{ fontFamily: 'Outfit' }}>
@@ -172,7 +190,7 @@ export function PhilippineTourismSection({
                   <ArrowRight size={12} strokeWidth={2.2} />
                 </span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
