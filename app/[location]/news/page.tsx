@@ -8,8 +8,7 @@ import AdBanner from '@/components/ui/AdBanner'
 import { formatLocationForNews } from '@/lib/news-navigation'
 import { getArticles as getArticlesFromAPI } from '@/lib/hybrid-articles'
 import { RealEstateNewsSection } from '@/components/news/RealEstateNewsSection'
-import { LocationNewsGrid } from '@/components/news/LocationNewsGrid'
-import { CityNavigation } from '@/components/news/CityNavigation'
+import { CityNewsExplorer } from '@/components/news/CityNewsExplorer'
 
 interface Article {
   id: number | string
@@ -629,29 +628,11 @@ export default async function NewsPage({
           {/* Real Estate Latest News - Global Carousel */}
           <RealEstateNewsSection articles={allArticles} />
           
-          {/* City Navigation */}
-          <CityNavigation currentLocation={focusedLocation || ''} />
-
-          {/* Location-specific Real Estate Grid */}
-          {focusedLocation && (
-            <LocationNewsGrid
-              key={focusedLocation}
-              articles={allArticles.filter(
-                a =>
-                  (a.category &&
-                    [
-                      'Market Trends',
-                      'New Developments',
-                      'Regional Update',
-                      'Investment',
-                      'Sustainability',
-                    ].includes(a.category)) &&
-                  (a.location?.toLowerCase().includes(focusedLocation.toLowerCase()) ||
-                    a.city?.toLowerCase().includes(focusedLocation.toLowerCase()))
-              ) as unknown as any[]}
-              title={`${locationDisplayName} Real Estate Latest`}
-            />
-          )}
+          {/* City Navigation + Location-specific Real Estate Grid */}
+          <CityNewsExplorer
+            allArticles={allArticles}
+            currentLocation={focusedLocation || routeLocation}
+          />
         </div>
 
         {/* Continue with more content inside main padding */}
