@@ -345,14 +345,14 @@ export default function LocationNewsBusinessSection({
                 accent="Real Estate Business"
               />
               <p className="mt-[10px] max-w-[820px] text-[15px] leading-[1.5] tracking-[-0.02em] text-[#41597f] sm:text-[16px]">
-                Join thousands of successful brokers who trust Homes.ph to
+                Join thousands of successful franchises who trust Homes.ph to
                 manage their listings, teams, and grow their business online.
               </p>
             </div>
 
             <div className="mt-[18px] flex w-full sm:absolute sm:right-0 sm:top-[4px] sm:mt-0 sm:w-auto">
               <Link
-                href="/registration/broker"
+                href="/registration/franchise"
                 className="inline-flex h-[48px] w-full items-center justify-center rounded-[14px] border border-[#2140d8] bg-white px-[22px] text-[16px] font-semibold tracking-[-0.02em] text-[#2140d8] transition-[transform,border-color,background-color,color] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:border-[#1733bd] hover:bg-[#2140d8] hover:text-white sm:w-auto"
               >
                 Join Now

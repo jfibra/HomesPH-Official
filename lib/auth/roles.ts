@@ -1,7 +1,7 @@
 export const DB_ROLE_TO_ROUTE_SEGMENT = {
   super_admin: 'super-admin',
   admin: 'admin',
-  broker: 'broker',
+  franchise: 'franchise',
   salesperson: 'salesperson',
   buyer: 'buyer',
   ambassador: 'ambassador',

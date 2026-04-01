@@ -8,7 +8,7 @@ import {
 import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
-type RegistrationRole = 'broker' | 'developer' | 'salesperson'
+type RegistrationRole = 'developer' | 'salesperson' | 'ambassador' | 'franchise'
 
 interface BaseRegistrationInput {
   role: RegistrationRole
@@ -17,10 +17,16 @@ interface BaseRegistrationInput {
   email: string
   phone: string
   password: string
+  affiliateCode?: string | null
 }
 
-interface BrokerRegistrationInput extends BaseRegistrationInput {
-  role: 'broker' | 'salesperson'
+interface FranchiseRegistrationInput extends BaseRegistrationInput {
+  role: 'franchise'
+  prcNumber?: string | null
+}
+
+interface SalespersonRegistrationInput extends BaseRegistrationInput {
+  role: 'salesperson'
   prcNumber?: string | null
 }
 
@@ -29,7 +35,15 @@ interface DeveloperRegistrationInput extends BaseRegistrationInput {
   companyName: string
 }
 
-export type RegisterAccountInput = BrokerRegistrationInput | DeveloperRegistrationInput
+interface AmbassadorRegistrationInput extends BaseRegistrationInput {
+  role: 'ambassador'
+}
+
+export type RegisterAccountInput = 
+  | DeveloperRegistrationInput 
+  | AmbassadorRegistrationInput 
+  | FranchiseRegistrationInput
+  | SalespersonRegistrationInput
 
 export interface RegisterAccountResult {
   success: boolean
@@ -172,7 +186,7 @@ export async function registerAccountAction(input: RegisterAccountInput): Promis
   const fullName = buildFullName(fname, lname)
 
   let licensedPrcNumber: string | null = null
-  if (input.role === 'broker' || input.role === 'salesperson') {
+  if (input.role === 'franchise' || input.role === 'salesperson') {
     licensedPrcNumber = trimToNull(input.prcNumber)
   }
 
@@ -212,6 +226,20 @@ export async function registerAccountAction(input: RegisterAccountInput): Promis
     }
   }
 
+  let referredById: string | null = null
+  if (input.affiliateCode) {
+    const { data: refCode } = await admin
+      .from('referral_codes')
+      .select('user_profile_id')
+      .eq('code', input.affiliateCode.toUpperCase())
+      .eq('is_active', true)
+      .maybeSingle()
+    
+    if (refCode) {
+      referredById = refCode.user_profile_id
+    }
+  }
+
   try {
     const { data: profile, error: profileError } = await admin
       .from('user_profiles')
@@ -222,6 +250,7 @@ export async function registerAccountAction(input: RegisterAccountInput): Promis
         full_name: fullName,
         role: input.role,
         prc_number: licensedPrcNumber,
+        referred_by: referredById,
         is_active: false,
         account_status: ACCOUNT_STATUS_PENDING_APPROVAL,
         reviewed_at: null,

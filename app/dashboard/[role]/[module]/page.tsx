@@ -162,7 +162,7 @@ export default async function DashboardRoleModulePage({ params }: RoleModulePage
     )
   }
 
-  if (navItem.moduleKey === 'leads' && ['broker', 'salesperson', 'agent', 'developer'].includes(role)) {
+  if (navItem.moduleKey === 'leads' && ['franchise', 'salesperson', 'agent', 'developer'].includes(role)) {
     const canCreate = canPerformDashboardAction(role, 'leads', 'create', user.dashboardPermissions)
     const canEdit = canPerformDashboardAction(role, 'leads', 'edit', user.dashboardPermissions)
     const canDelete = canPerformDashboardAction(role, 'leads', 'delete', user.dashboardPermissions)

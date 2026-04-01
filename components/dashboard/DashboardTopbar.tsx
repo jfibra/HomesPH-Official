@@ -29,7 +29,7 @@ const NOTIFICATIONS = [
   { id: 1, title: 'New inquiry received',    desc: 'A buyer inquired about Marina Bay Residences', time: '2m ago',  unread: true  },
   { id: 2, title: 'Lead converted',          desc: 'Santos family successfully closed their deal',  time: '1h ago',  unread: true  },
   { id: 3, title: 'Project listing approved', desc: 'Azure Sky Cebu has been approved & published', time: '3h ago',  unread: false },
-  { id: 4, title: 'New salesperson joined',  desc: 'Maria Cruz joined your broker team',            time: '1d ago',  unread: false },
+  { id: 4, title: 'New salesperson joined',  desc: 'Maria Cruz joined your franchise team',            time: '1d ago',  unread: false },
 ]
 
 function Breadcrumb() {

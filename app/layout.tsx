@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'real estate',
       'property',
       'homes',
-      'brokers',
+      'franchises',
       'agents',
       'buyers',
       'Philippines',

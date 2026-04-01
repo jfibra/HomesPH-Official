@@ -155,7 +155,7 @@ function getDefinition(moduleKey: DashboardModuleKey, label: string): ModuleDefi
       tableTitle: 'Team Members', columns: [{ key: 'member', label: 'Member' }, { key: 'leads', label: 'Leads' }, statusColumn], rows: [{ member: 'Ana Garcia', leads: 24, status: 'Active' }, { member: 'Marco Reyes', leads: 18, status: 'Active' }], activity: baseActivity('Team assignment changed'),
     },
     salespersons: {
-      title: label, description: 'View and coordinate the salespersons under your broker scope.', createLabel: 'Add Salesperson',
+      title: label, description: 'View and coordinate the salespersons under your franchise scope.', createLabel: 'Add Salesperson',
       metrics: [{ title: 'Salespersons', value: 5, tone: 'blue' }, { title: 'Quota Hit', value: 3, tone: 'emerald' }, { title: 'At Risk', value: 2, tone: 'amber' }],
       chart: { title: 'Salesperson Conversions', subtitle: 'Closed deals by team member', data: [{ name: 'Ana', value: 12 }, { name: 'Marco', value: 8 }, { name: 'Rosa', value: 14 }, { name: 'Ben', value: 9 }, { name: 'Luis', value: 6 }], color: '#7c3aed', type: 'bar' },
       tableTitle: 'Salespersons', columns: [{ key: 'salesperson', label: 'Salesperson' }, { key: 'conversions', label: 'Conversions' }, statusColumn], rows: [{ salesperson: 'Ana Garcia', conversions: 12, status: 'Active' }, { salesperson: 'Ben Cruz', conversions: 9, status: 'Active' }], activity: baseActivity('Salesperson quota refreshed'),

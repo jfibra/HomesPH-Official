@@ -535,7 +535,7 @@ export default async function PublicListingsPage({
             const image = listing.property_listing_galleries[0]?.image_url || listing.projects?.main_image_url
 
             // Check if this slot should have a broker badge (based on Figma CSS indices 3 and 5)
-            const hasBrokerBadge = index === 2 || index === 4 || index === 5
+            const hasFranchiseBadge = index === 2 || index === 4 || index === 5
 
             return (
               <Link
@@ -605,8 +605,8 @@ export default async function PublicListingsPage({
                     <Share2 size={28.15} color="white" fill="none" style={{ filter: 'drop-shadow(0px 0px 4px rgba(0,0,0,0.3))' }} />
                   </div>
 
-                  {/* Broker Badge Section - OVER the image bottom-left */}
-                  {hasBrokerBadge && (
+                  {/* Franchise Badge Section - OVER the image bottom-left */}
+                  {hasFranchiseBadge && (
                     <div style={{ position: 'absolute', left: '14px', top: '247px', zIndex: 20 }}>
                       <div style={{
                         width: '101.54px',
@@ -619,7 +619,7 @@ export default async function PublicListingsPage({
                         alignItems: 'center',
                         paddingLeft: '21px'
                       }}>
-                        <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#FFFFFF' }}>TopBroker</span>
+                        <span style={{ fontFamily: "'Outfit'", fontWeight: 300, fontSize: '15px', lineHeight: '15px', color: '#FFFFFF' }}>TopFranchise</span>
                       </div>
                       {/* profile group */}
                       <div style={{
@@ -647,7 +647,7 @@ export default async function PublicListingsPage({
                           {listing.user_profiles?.profile_image_url ? (
                             <img
                               src={listing.user_profiles.profile_image_url}
-                              alt="Broker"
+                              alt="Franchise"
                               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                           ) : (

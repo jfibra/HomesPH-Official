@@ -218,7 +218,7 @@ export default function LoginForm({
           <p className="text-sm text-gray-500">
             Don&rsquo;t have an account?{' '}
             <Link
-              href="/registration/broker"
+              href="/registration/franchise"
               className="text-[#0c1f4a] font-bold hover:text-[#f59e0b] transition-colors"
             >
               Create an account

@@ -76,7 +76,7 @@ export default function ProfileContactTab({
     <Card className="border-slate-200 shadow-sm">
       <CardHeader>
         <CardTitle>Contact Information</CardTitle>
-        <CardDescription>Manage the primary channels buyers, brokers, and admins use to contact you.</CardDescription>
+        <CardDescription>Manage the primary channels buyers, franchises, and admins use to contact you.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

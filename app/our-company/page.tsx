@@ -47,7 +47,7 @@ export default async function OurCompanyPage() {
               </h1>
               <p className="text-lg text-slate-700 md:text-xl">
                 We are a newly launched multimedia property platform with a bold goal — to revolutionize the Philippine real estate industry.
-                Our aim is to become one of the country’s most trusted property portals by delivering real value for buyers, sellers, brokers,
+                Our aim is to become one of the country’s most trusted property portals by delivering real value for buyers, sellers, franchises,
                 developers, and investors.
               </p>
             </div>

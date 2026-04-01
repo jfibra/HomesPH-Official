@@ -71,7 +71,7 @@ export default function LocationHeroNav({
           Login
         </Link>
         <Link
-          href="/registration/broker"
+          href="/registration/franchise"
           className="inline-flex h-[40px] items-center justify-center rounded-[10px] bg-[#2140d8] px-[20px] text-[14px] font-semibold leading-none tracking-[-0.02em] text-white transition hover:bg-[#1b35b8]"
         >
           Sign in
@@ -140,7 +140,7 @@ export default function LocationHeroNav({
               Login
             </Link>
             <Link
-              href="/registration/broker"
+              href="/registration/franchise"
               onClick={() => setOpen(false)}
               className="inline-flex min-h-[46px] items-center justify-center rounded-[12px] bg-[#2140d8] px-4 py-3 text-[15px] font-semibold text-white transition hover:bg-[#1b35b8]"
             >

@@ -16,9 +16,9 @@ import type {
   LeadUserOptionRecord,
 } from '@/lib/leads-types'
 
-const ALLOWED_ROLES = new Set(['super_admin', 'admin', 'broker', 'salesperson', 'agent', 'developer'])
+const ALLOWED_ROLES = new Set(['super_admin', 'admin', 'franchise', 'salesperson', 'agent', 'developer'])
 const LEAD_STATUSES = new Set<LeadStatus>(['new', 'contacted', 'qualified', 'proposal_sent', 'negotiation', 'closed_won', 'closed_lost'])
-const AGENT_ROLES = new Set(['super_admin', 'admin', 'broker', 'salesperson', 'agent'])
+const AGENT_ROLES = new Set(['super_admin', 'admin', 'franchise', 'salesperson', 'agent'])
 
 function trimToNull(value: string | null | undefined) {
   const trimmed = value?.trim()
@@ -96,7 +96,7 @@ async function getScopedLeadRows(user: Awaited<ReturnType<typeof requireLeadsAcc
   const admin = createAdminSupabaseClient()
   let query = admin.from('leads').select('*').order('created_at', { ascending: false })
 
-  if (['broker', 'salesperson', 'agent'].includes(user.role)) {
+  if (['franchise', 'salesperson', 'agent'].includes(user.role)) {
     query = query.eq('assigned_to', user.profileId)
   }
 
@@ -215,7 +215,7 @@ export async function getLeadAgents(): Promise<LeadUserOptionRecord[]> {
   const currentUser = await requireLeadsAccess()
   const users = (await getSupportMaps()).users.filter((user) => AGENT_ROLES.has(user.role ?? ''))
 
-  if (['broker', 'salesperson', 'agent'].includes(currentUser.role)) {
+  if (['franchise', 'salesperson', 'agent'].includes(currentUser.role)) {
     return users.filter((user) => user.id === currentUser.profileId)
   }
 
@@ -278,7 +278,7 @@ export async function createLead(input: LeadInput) {
 
   const admin = createAdminSupabaseClient()
   const payload = sanitizeLeadInput(input)
-  const finalPayload = ['broker', 'salesperson', 'agent'].includes(currentUser.role)
+  const finalPayload = ['franchise', 'salesperson', 'agent'].includes(currentUser.role)
     ? { ...payload, assigned_to: currentUser.profileId }
     : payload
 
@@ -304,7 +304,7 @@ export async function updateLead(id: number, input: LeadInput) {
 
   const admin = createAdminSupabaseClient()
   const payload = sanitizeLeadInput(input)
-  const finalPayload = ['broker', 'salesperson', 'agent'].includes(currentUser.role)
+  const finalPayload = ['franchise', 'salesperson', 'agent'].includes(currentUser.role)
     ? { ...payload, assigned_to: currentUser.profileId }
     : payload
   const { error } = await admin.from('leads').update(finalPayload).eq('id', id)

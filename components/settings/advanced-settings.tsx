@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 
 const TOGGLES = [
   { key: 'maintenance_mode', label: 'Maintenance Mode', description: 'Temporarily hide public pages while maintenance is active.', icon: Shield },
-  { key: 'registration_enabled', label: 'Registration Enabled', description: 'Allow new broker, developer, and buyer registrations.', icon: UserRoundPlus },
+  { key: 'registration_enabled', label: 'Registration Enabled', description: 'Allow new franchise, developer, and buyer registrations.', icon: UserRoundPlus },
   { key: 'email_notifications', label: 'Email Notifications', description: 'Send system email notifications for key admin events.', icon: Bell },
 ] as const
 

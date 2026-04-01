@@ -34,7 +34,7 @@ const RESOURCE_LINKS = [
   { label: 'FAQs', href: '/mortgage#faq' },
   { label: 'Search Properties', href: '/search' },
   { label: 'Login', href: '/login' },
-  { label: 'Register', href: '/registration/broker' },
+  { label: 'Register', href: '/registration/franchise' },
 ]
 
 const LEGAL_LINKS = [

@@ -23,15 +23,15 @@ const ROLES = [
     accent: '#0c1f4a',
   },
   {
-    key: 'broker',
-    href: '/registration/broker',
+    key: 'franchise',
+    href: '/registration/franchise',
     icon: BadgeCheck,
-    title: 'RERA Broker',
+    title: 'Franchise Partner',
     description:
-      'Register as a licensed PRC-accredited real estate broker and connect with motivated buyers and sellers nationwide.',
-    badge: 'For Brokers',
+      'Start your own real estate agency branch with our proven database and marketing systems.',
+    badge: 'For Agencies',
     badgeColor: 'bg-amber-50 text-amber-700',
-    cta: 'Register as Broker',
+    cta: 'Register as Franchise',
     accent: '#f59e0b',
   },
 ]

@@ -20,7 +20,7 @@ export interface NavGroup {
 export const ROLE_META: Record<string, { label: string; badge: string }> = {
   'super-admin':  { label: 'Super Admin',   badge: 'bg-violet-500' },
   'admin':        { label: 'Admin',         badge: 'bg-blue-500'   },
-  'broker':       { label: 'Broker',        badge: 'bg-amber-500'  },
+  'franchise':    { label: 'Franchise',     badge: 'bg-amber-500'  },
   'salesperson':  { label: 'Salesperson',   badge: 'bg-emerald-500'},
   'buyer':        { label: 'Buyer',         badge: 'bg-cyan-500'   },
   'ambassador':   { label: 'Ambassador',    badge: 'bg-pink-500'   },
@@ -35,6 +35,7 @@ export const NAV_CONFIG: Record<string, NavGroup[]> = {
       title: 'User Management',
       items: [
         { label: 'Users', href: '/dashboard/users', icon: Users },
+        { label: 'Applications', href: '/dashboard/admin/ambassadors', icon: ClipboardList },
       ],
     },
     {
@@ -92,6 +93,7 @@ export const NAV_CONFIG: Record<string, NavGroup[]> = {
       title: 'User Management',
       items: [
         { label: 'Users', href: '/dashboard/users', icon: Users },
+        { label: 'Applications', href: '/dashboard/admin/ambassadors', icon: ClipboardList },
       ],
     },
     {
@@ -143,16 +145,16 @@ export const NAV_CONFIG: Record<string, NavGroup[]> = {
     },
   ],
 
-  'broker': [
-    { items: [{ label: 'Dashboard', href: '/dashboard/broker', icon: LayoutDashboard }] },
+  'franchise': [
+    { items: [{ label: 'Dashboard', href: '/dashboard/franchise', icon: LayoutDashboard }] },
     {
       title: 'Sales',
       items: [
-        { label: 'My Team',  href: '/dashboard/broker/team',     icon: Users      },
-        { label: 'Leads',    href: '/dashboard/broker/leads',    icon: UserPlus   },
-        { label: 'Projects', href: '/dashboard/broker/projects', icon: FolderOpen },
-        { label: 'Listings', href: '/dashboard/broker/listings', icon: Home       },
-        { label: 'Reports',  href: '/dashboard/broker/reports',  icon: BarChart3  },
+        { label: 'My Team',  href: '/dashboard/franchise/team',     icon: Users      },
+        { label: 'Leads',    href: '/dashboard/franchise/leads',    icon: UserPlus   },
+        { label: 'Projects', href: '/dashboard/franchise/projects', icon: FolderOpen },
+        { label: 'Listings', href: '/dashboard/franchise/listings', icon: Home       },
+        { label: 'Reports',  href: '/dashboard/franchise/reports',  icon: BarChart3  },
         { label: 'Profile',  href: '/dashboard/profile',         icon: Users      },
       ],
     },
@@ -193,10 +195,17 @@ export const NAV_CONFIG: Record<string, NavGroup[]> = {
       title: 'Referrals',
       items: [
         { label: 'My Referrals',   href: '/dashboard/ambassador/referrals',   icon: UserPlus   },
-        { label: 'Referral Links', href: '/dashboard/ambassador/links',       icon: Link2      },
+        { label: 'Links & Codes',  href: '/dashboard/ambassador/links',       icon: Link2      },
+        { label: 'Marketing Tools',href: '/dashboard/ambassador/marketing',   icon: Image      },
         { label: 'Projects',       href: '/dashboard/ambassador/projects',    icon: FolderOpen },
         { label: 'Performance',    href: '/dashboard/ambassador/performance', icon: BarChart3  },
+      ],
+    },
+    {
+      title: 'Account',
+      items: [
         { label: 'Profile',        href: '/dashboard/profile',                icon: Users      },
+        { label: 'Settings',       href: '/dashboard/ambassador/settings',    icon: Settings   },
       ],
     },
   ],

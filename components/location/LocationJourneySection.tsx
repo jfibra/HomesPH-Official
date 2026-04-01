@@ -37,12 +37,12 @@ function buildJourneySteps(locationName: string, locationSlug: string): JourneyS
         'https://rwhtwbbpnhkevhocdmma.supabase.co/storage/v1/object/public/homesph/browse.png',
     },
     {
-      title: 'Connect with Brokers',
+      title: 'Connect with Franchises',
       description:
-        'Get matched with verified, professional brokers who understand your needs and can guide you through every step of the process.',
-      ctaLabel: 'Find Brokers',
+        'Get matched with verified, professional franchises who understand your needs and can guide you through every step of the process.',
+      ctaLabel: 'Find Franchises',
       ctaHref: '/developers',
-      imageAlt: 'Connect with brokers',
+      imageAlt: 'Connect with franchises',
       imageClassName: 'object-[48%_50%]',
       imageWrapperClassName: 'rounded-r-[16px] sm:rounded-r-[18px]',
       imageSrc:

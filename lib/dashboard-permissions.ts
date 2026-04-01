@@ -78,7 +78,7 @@ interface RoleDashboardConfig {
 export const ROLE_META: Record<string, { label: string; badge: string }> = {
   'super-admin': { label: 'Super Admin', badge: 'bg-violet-500' },
   admin: { label: 'Admin', badge: 'bg-blue-500' },
-  broker: { label: 'Broker', badge: 'bg-amber-500' },
+  franchise: { label: 'Franchise', badge: 'bg-amber-500' },
   salesperson: { label: 'Salesperson', badge: 'bg-emerald-500' },
   buyer: { label: 'Buyer', badge: 'bg-cyan-500' },
   ambassador: { label: 'Ambassador', badge: 'bg-pink-500' },
@@ -122,13 +122,13 @@ const ROLE_DASHBOARD_CONFIG: Record<string, RoleDashboardConfig> = {
       users: 'manage', developers: 'manage', projects: 'manage', listings: 'manage', leads: 'manage', inquiries: 'manage', amenities: 'manage', 'property-types': 'manage', locations: 'manage', media: 'manage', reports: 'manage', 'activity-logs': 'manage', settings: 'manage',
     },
   },
-  broker: {
-    ...ROLE_META.broker,
+  franchise: {
+    ...ROLE_META.franchise,
     navGroups: [
-      { items: [{ label: 'Dashboard', href: '/dashboard/broker', icon: LayoutDashboard }] },
-      { title: 'Team', items: [{ label: 'My Team', href: '/dashboard/broker/team', icon: Users, moduleKey: 'team' }, { label: 'Salespersons', href: '/dashboard/broker/salespersons', icon: Users, moduleKey: 'salespersons' }] },
-      { title: 'Inventory', items: [{ label: 'Projects', href: '/dashboard/broker/projects', icon: FolderOpen, moduleKey: 'projects' }, { label: 'Listings', href: '/dashboard/broker/listings', icon: Home, moduleKey: 'listings' }] },
-      { title: 'Sales', items: [{ label: 'Leads', href: '/dashboard/broker/leads', icon: Target, moduleKey: 'leads' }, { label: 'Inquiries', href: '/dashboard/broker/inquiries', icon: MessageSquare, moduleKey: 'inquiries' }, { label: 'Reports', href: '/dashboard/broker/reports', icon: BarChart3, moduleKey: 'reports' }] },
+      { items: [{ label: 'Dashboard', href: '/dashboard/franchise', icon: LayoutDashboard }] },
+      { title: 'Team', items: [{ label: 'My Team', href: '/dashboard/franchise/team', icon: Users, moduleKey: 'team' }, { label: 'Salespersons', href: '/dashboard/franchise/salespersons', icon: Users, moduleKey: 'salespersons' }] },
+      { title: 'Inventory', items: [{ label: 'Projects', href: '/dashboard/franchise/projects', icon: FolderOpen, moduleKey: 'projects' }, { label: 'Listings', href: '/dashboard/franchise/listings', icon: Home, moduleKey: 'listings' }] },
+      { title: 'Sales', items: [{ label: 'Leads', href: '/dashboard/franchise/leads', icon: Target, moduleKey: 'leads' }, { label: 'Inquiries', href: '/dashboard/franchise/inquiries', icon: MessageSquare, moduleKey: 'inquiries' }, { label: 'Reports', href: '/dashboard/franchise/reports', icon: BarChart3, moduleKey: 'reports' }] },
       { title: 'Account', items: [{ label: 'Profile', href: '/dashboard/profile', icon: Users }] },
     ],
     permissions: { team: 'manage', salespersons: 'manage', projects: 'view', listings: 'view', leads: 'manage', inquiries: 'manage', reports: 'view' },
@@ -167,9 +167,8 @@ const ROLE_DASHBOARD_CONFIG: Record<string, RoleDashboardConfig> = {
     ...ROLE_META.ambassador,
     navGroups: [
       { items: [{ label: 'Dashboard', href: '/dashboard/ambassador', icon: LayoutDashboard }] },
-      { title: 'Marketplace', items: [{ label: 'Projects', href: '/dashboard/ambassador/projects', icon: FolderOpen, moduleKey: 'projects' }, { label: 'Listings', href: '/dashboard/ambassador/listings', icon: Home, moduleKey: 'listings' }] },
-      { title: 'Referrals', items: [{ label: 'Referral Leads', href: '/dashboard/ambassador/referral-leads', icon: UserPlus, moduleKey: 'referral-leads' }, { label: 'My Referrals', href: '/dashboard/ambassador/referrals', icon: Link2, moduleKey: 'referrals' }, { label: 'Reports', href: '/dashboard/ambassador/reports', icon: BarChart3, moduleKey: 'reports' }] },
-      { title: 'Account', items: [{ label: 'Profile', href: '/dashboard/profile', icon: Users }] },
+      { title: 'Referrals', items: [{ label: 'Referral Leads', href: '/dashboard/ambassador/referral-leads', icon: UserPlus, moduleKey: 'referral-leads' }, { label: 'My Referrals', href: '/dashboard/ambassador/referrals', icon: Link2, moduleKey: 'referrals' }, { label: 'Links & Codes', href: '/dashboard/ambassador/links', icon: Link2 }, { label: 'Marketing Tools', href: '/dashboard/ambassador/marketing', icon: Image }, { label: 'Reports', href: '/dashboard/ambassador/reports', icon: BarChart3, moduleKey: 'reports' }] },
+      { title: 'Account', items: [{ label: 'Profile', href: '/dashboard/profile', icon: Users }, { label: 'Settings', href: '/dashboard/ambassador/settings', icon: Settings }] },
     ],
     permissions: { projects: 'view', listings: 'view', 'referral-leads': 'manage-own', referrals: 'manage-own', reports: 'view' },
   },

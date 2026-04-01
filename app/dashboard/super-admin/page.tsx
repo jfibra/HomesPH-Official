@@ -20,16 +20,16 @@ const listingsData = [
 ]
 
 const USERS = [
-  { name: 'Maria Santos',   email: 'maria@example.com',  role: 'Broker',      status: 'Active',   joined: 'Jan 14, 2026' },
+  { name: 'Maria Santos',   email: 'maria@example.com',  role: 'Franchise',   status: 'Active',   joined: 'Jan 14, 2026' },
   { name: 'Juan dela Cruz', email: 'juan@example.com',   role: 'Salesperson', status: 'Active',   joined: 'Jan 20, 2026' },
   { name: 'Ana Reyes',      email: 'ana@example.com',    role: 'Buyer',       status: 'Pending',  joined: 'Feb 2, 2026'  },
   { name: 'Carlos Lim',     email: 'carlos@example.com', role: 'Developer',   status: 'Active',   joined: 'Feb 5, 2026'  },
   { name: 'Rosa Tan',       email: 'rosa@example.com',   role: 'Ambassador',  status: 'Inactive', joined: 'Feb 9, 2026'  },
-  { name: 'Ben Uy',         email: 'ben@example.com',    role: 'Broker',      status: 'Active',   joined: 'Feb 11, 2026' },
+  { name: 'Ben Uy',         email: 'ben@example.com',    role: 'Franchise',   status: 'Active',   joined: 'Feb 11, 2026' },
 ]
 
 const ACTIVITY_ITEMS = [
-  { id: 1, icon: UserPlus,     iconColor: 'text-[#1428ae]',    iconBg: 'bg-blue-50',    title: 'New user registered',       description: 'Maria Santos joined as Broker',                 time: '2m ago'  },
+  { id: 1, icon: UserPlus,     iconColor: 'text-[#1428ae]',    iconBg: 'bg-blue-50',    title: 'New user registered',       description: 'Maria Santos joined as Franchise',                 time: '2m ago'  },
   { id: 2, icon: FolderOpen,   iconColor: 'text-violet-600',  iconBg: 'bg-violet-50',  title: 'New project submitted',     description: 'Azure Sky Cebu submitted by Megaworld',         time: '18m ago' },
   { id: 3, icon: MessageSquare,iconColor: 'text-amber-600',   iconBg: 'bg-amber-50',   title: 'Inquiry closed',            description: 'Santos family inquiry has been resolved',       time: '1h ago'  },
   { id: 4, icon: Building2,    iconColor: 'text-emerald-600', iconBg: 'bg-emerald-50', title: 'Developer approved',        description: 'SMDC Corporation has been verified',           time: '3h ago'  },

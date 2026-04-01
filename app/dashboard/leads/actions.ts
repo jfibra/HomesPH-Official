@@ -12,7 +12,7 @@ interface ActionResult<T = undefined> {
 
 function revalidateLeadSurfaces() {
   revalidatePath('/dashboard/leads')
-  revalidatePath('/dashboard/broker/leads')
+  revalidatePath('/dashboard/franchise/leads')
   revalidatePath('/dashboard/salesperson/leads')
   revalidatePath('/dashboard/agent/leads')
   revalidatePath('/dashboard/developer/leads')

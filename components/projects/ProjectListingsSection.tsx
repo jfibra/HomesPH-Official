@@ -254,7 +254,7 @@ export default function ProjectListingsSection({ project, projectListings, saleL
               />
               <div className="absolute top-3 left-3">
                 <div className="h-[32px] bg-gradient-to-r from-[#2D43D8] to-[#081148] text-white px-4 rounded-r-[10px] flex items-center text-[15px] font-light font-outfit">
-                  TopBroker
+                  TopFranchise
                 </div>
               </div>
               <button className="absolute top-3 right-3 bg-white/30 backdrop-blur-md p-2 rounded-full border border-white/20 hover:bg-white transition-colors group/heart">

@@ -130,7 +130,7 @@ const SECTIONS = [
         heading: 'Seller\'s Costs',
         body: [
           'Capital Gains Tax (CGT): 6% of the gross selling price or zonal value, whichever is higher.',
-          'Broker\'s commission: typically 3%–5% of the sale price.',
+          'Franchise\'s commission: typically 3%–5% of the sale price.',
           'Real Property Tax (RPT) clearance fees.',
           'Creditable Withholding Tax (CWT): 1.5%–6% if seller is a real estate dealer.',
         ],
@@ -300,7 +300,7 @@ export default async function LegalPage() {
               <p className="text-xs text-amber-700 leading-relaxed">
                 The information provided in this legal guide is for general informational and educational purposes only. 
                 It does not constitute legal advice and should not be relied upon as a substitute for advice from a licensed Philippine attorney.
-                Consult a qualified real estate lawyer or accredited broker before entering into any property transaction.
+                Consult a qualified real estate lawyer or accredited franchise/professional before entering into any property transaction.
                 Laws and regulations may change; always verify current information with relevant government agencies.
               </p>
             </div>
