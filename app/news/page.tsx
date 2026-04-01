@@ -5,7 +5,7 @@ import SiteHeader from '@/components/layout/SiteHeader'
 import SiteFooter from '@/components/layout/SiteFooter'
 import { getSiteSettings } from '@/lib/site-settings'
 import { SELECTED_LOCATION_COOKIE } from '@/lib/selected-location'
-import { MOCK_NEWS } from '@/lib/mock-data'
+import { getArticles as getArticlesFromAPI } from '@/lib/hybrid-articles'
 import AdBanner from '@/components/ui/AdBanner'
 import { GENERAL_NAV_ITEMS } from '@/lib/general-nav'
 import { buildNewsHref } from '@/lib/news-navigation'
@@ -32,14 +32,6 @@ interface Article {
   city?: string | null
   is_live?: boolean
   views_count?: number
-}
-
-interface ArticleCollection {
-  articles: Article[]
-  total: number
-  currentPage: number
-  lastPage: number
-  perPage: number
 }
 
 const LOCATION_KEYWORDS = [
@@ -163,38 +155,6 @@ function groupArticles(articles: Article[], getKey: (article: Article) => string
     groups.set(key, list)
   }
   return [...groups.entries()].map(([key, items]) => ({ key, items: items.sort(sortByNewest) }))
-}
-
-function extractArticleCollection(payload: unknown): ArticleCollection {
-  if (Array.isArray(payload)) {
-    return {
-      articles: payload as Article[],
-      total: payload.length,
-      currentPage: 1,
-      lastPage: 1,
-      perPage: payload.length,
-    }
-  }
-
-  const source = (payload ?? {}) as Record<string, unknown>
-  const nested = source.data && !Array.isArray(source.data) ? (source.data as Record<string, unknown>) : undefined
-  const articles = Array.isArray(source.data)
-    ? (source.data as Article[])
-    : Array.isArray(source.articles)
-      ? (source.articles as Article[])
-      : Array.isArray(nested?.data)
-        ? (nested.data as Article[])
-        : []
-
-  const metaSource = nested && Array.isArray(nested.data) ? nested : source
-
-  return {
-    articles,
-    total: Number(metaSource.total ?? articles.length),
-    currentPage: Number(metaSource.current_page ?? 1),
-    lastPage: Number(metaSource.last_page ?? 1),
-    perPage: Number(metaSource.per_page ?? (articles.length || 1)),
-  }
 }
 
 function StoryImage({ article, className }: { article: Article; className: string }) {
@@ -430,45 +390,42 @@ function RightColumn({ leadRest }: { leadRest: Article[] }) {
   )
 }
 
-async function fetchArticleCollection(location?: string, page = 1, limit = 40): Promise<ArticleCollection> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-  const url = new URL('/api/articles', baseUrl)
-  url.searchParams.set('page', String(page))
-  url.searchParams.set('limit', String(limit))
-  if (location && location !== 'All') url.searchParams.set('location', location)
-
-  const res = await fetch(url.toString(), { next: { revalidate: 300 } })
-  if (!res.ok) throw new Error('API error')
-
-  const data = await res.json()
-  return extractArticleCollection(data)
-}
-
-async function getArticles(location?: string): Promise<ArticleCollection> {
+async function getArticles(location?: string): Promise<Article[]> {
   try {
-    const firstPage = await fetchArticleCollection(location, 1, 40)
-    if (firstPage.lastPage <= 1) return firstPage
-
-    const remainingPages = await Promise.all(
-      Array.from({ length: Math.min(firstPage.lastPage, 12) - 1 }, (_, index) =>
-        fetchArticleCollection(location, index + 2, firstPage.perPage || 40)
-      )
-    )
-
-    return {
-      ...firstPage,
-      articles: [firstPage, ...remainingPages].flatMap(page => page.articles),
-      total: Math.max(firstPage.total, [firstPage, ...remainingPages].reduce((count, page) => count + page.articles.length, 0)),
-      lastPage: Math.max(firstPage.lastPage, ...remainingPages.map(page => page.lastPage)),
-    }
-  } catch {
-    return {
-      articles: MOCK_NEWS as Article[],
-      total: (MOCK_NEWS as Article[]).length,
-      currentPage: 1,
-      lastPage: 1,
-      perPage: (MOCK_NEWS as Article[]).length,
-    }
+    console.log('[NewsPage] Fetching articles for location:', location || 'all')
+    // Fetch from real API - no fallback to mock data
+    const result = await getArticlesFromAPI({
+      city_slug: location && location !== 'All' ? location : undefined,
+      per_page: 100,  // Get more articles for various sections
+      page: 1,
+    })
+    
+    console.log('[NewsPage] Got', result.data.data.length, 'articles from API')
+    
+    // Map API response to Article interface
+    return result.data.data.map(article => ({
+      id: article.id,
+      title: article.title,
+      slug: article.slug,
+      summary: article.summary,
+      excerpt: article.summary,
+      description: article.description,
+      category: article.category,
+      image_url: article.image,
+      image: article.image,
+      author: article.author,
+      published_at: article.published_at,
+      read_time: undefined,
+      tags: article.topics,
+      topics: article.topics,
+      location: article.location || article.city_name,
+      city: article.city_name || null,
+      is_live: true,
+      views_count: article.views_count,
+    })) as Article[]
+  } catch (error) {
+    console.error('[NewsPage] Failed to fetch articles:', error)
+    throw new Error('Failed to load news articles. Please check that the HomesPhNews API is properly configured with a valid API key.')
   }
 }
 
@@ -490,12 +447,12 @@ export default async function NewsPage({
   const [settings, allFeed, focusedFeed] = await Promise.all([
     getSiteSettings(),
     getArticles(),
-    focusedLocation ? getArticles(focusedLocation) : Promise.resolve({ articles: [], total: 0, currentPage: 1, lastPage: 1, perPage: 0 }),
+    focusedLocation ? getArticles(focusedLocation) : Promise.resolve([]),
   ])
 
-  const allArticles = dedupeArticles([...focusedFeed.articles, ...allFeed.articles, ...(MOCK_NEWS as Article[])].map(normalizeArticle)).sort(sortByNewest)
+  const allArticles = dedupeArticles([...focusedFeed, ...allFeed].map(normalizeArticle)).sort(sortByNewest)
   const matchedFocusedArticles = focusedLocation
-    ? dedupeArticles([...focusedFeed.articles.map(normalizeArticle), ...allArticles.filter(article => matchesLocation(article, focusedLocation))]).sort(sortByNewest)
+    ? dedupeArticles([...focusedFeed.map(normalizeArticle), ...allArticles.filter(article => matchesLocation(article, focusedLocation))]).sort(sortByNewest)
     : []
   const effectiveFocusedLocation = focusedLocation && matchedFocusedArticles.length > 0 ? focusedLocation : undefined
   const leadFeed = effectiveFocusedLocation ? matchedFocusedArticles : allArticles
@@ -593,7 +550,7 @@ export default async function NewsPage({
         <div className="mt-6 space-y-[40px]">
           <RealEstateNewsSection articles={allArticles} />
           <OFWNewsSection articles={allArticles} />
-          <PhilippineTourismSection />
+          <PhilippineTourismSection articles={allArticles} />
         </div>
 
         {/* Continue with more content inside main padding */}

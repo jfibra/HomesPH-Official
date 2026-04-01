@@ -125,7 +125,7 @@ export default function SiteHeader({
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full" suppressHydrationWarning>
       {/* ── Top contact bar — Buy header style ── */}
       <div className="bg-[#1428AE] relative z-[1000]">
           <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 xl:px-20 2xl:pl-[227px] 2xl:pr-[227px] flex items-center justify-between h-10">

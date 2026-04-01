@@ -36,8 +36,7 @@ function formatDateStatic(dateString: string) {
     const month = date.toLocaleDateString('en-US', { month: 'long' })
     const day = date.getDate()
     const year = date.getFullYear()
-    const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
-    return `${month} ${day}, ${year} | ${time}`
+    return `${month} ${day}, ${year}`
   } catch {
     return dateString
   }

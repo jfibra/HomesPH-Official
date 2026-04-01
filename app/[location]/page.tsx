@@ -7,6 +7,7 @@ import LocationNewsBusinessSection from '../../components/location/LocationNewsB
 import SiteFooter from '../../components/layout/SiteFooter'
 import { MOCK_PROJECTS } from '../../lib/mock-data'
 import { getSiteSettings } from '../../lib/site-settings'
+import { getArticles as getArticlesFromAPI } from '../../lib/hybrid-articles'
 
 interface LocationPageParams {
   location?: string
@@ -61,6 +62,38 @@ export default async function LocationPage({ params }: LocationPageProps) {
 
   const heroImage = locationProjects[0]?.main_image_url ?? null
 
+  // Fetch real news articles for the carousel
+  let newsArticles: Array<{
+    id: number | string
+    title: string
+    slug?: string
+    image_url?: string
+    excerpt?: string
+    category?: string
+    author?: string
+    published_at: string
+    tags?: string[]
+  }> = []
+  try {
+    const result = await getArticlesFromAPI({
+      per_page: 20,
+      page: 1,
+    })
+    newsArticles = result.data.data.map(article => ({
+      id: article.id,
+      title: article.title,
+      slug: article.slug,
+      image_url: article.image,
+      excerpt: article.summary ?? article.description,
+      category: article.category,
+      author: article.author,
+      published_at: article.published_at,
+      tags: article.topics ?? [],
+    }))
+  } catch (error) {
+    console.error('[LocationPage] Failed to fetch news articles:', error)
+  }
+
   const heroQuickLinks = [
     { label: 'Buy', href: `/buy?location=${locationSlug}` },
     { label: 'Rent', href: `/rent?location=${locationSlug}` },
@@ -83,6 +116,7 @@ export default async function LocationPage({ params }: LocationPageProps) {
       <LocationNewsBusinessSection
         locationName={locationName}
         locationSlug={locationSlug}
+        articles={newsArticles}
       />
 
       <SiteFooter
